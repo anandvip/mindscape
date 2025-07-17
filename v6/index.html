@@ -1238,47 +1238,70 @@
                         }));
                     }
 
+                    // Track pattern mappings (old ID/text -> new ID)
+                    const patternMapping = new Map();
+                    
                     // Merge patterns (avoid duplicates by text)
                     patterns.forEach(pattern => {
-                        if (!appData.patterns.some(p => p.text.toLowerCase() === pattern.text.toLowerCase())) {
-                            appData.patterns.push({
+                        const existingPattern = appData.patterns.find(p => 
+                            p.text.toLowerCase() === pattern.text.toLowerCase()
+                        );
+                        
+                        if (existingPattern) {
+                            // Pattern already exists, map to existing ID
+                            patternMapping.set(pattern.id, existingPattern.id);
+                            patternMapping.set(pattern.text, existingPattern.id);
+                        } else {
+                            // Create new pattern with new ID
+                            const newPattern = {
                                 ...pattern,
-                                id: Date.now() + Math.random() // Ensure unique ID
-                            });
+                                id: Date.now() + Math.random()
+                            };
+                            appData.patterns.push(newPattern);
+                            patternMapping.set(pattern.id, newPattern.id);
+                            patternMapping.set(pattern.text, newPattern.id);
                         }
                     });
 
-                    // Map pattern texts to IDs for encounters
+                    // Process encounters with proper pattern mapping
+                    let importedEncounters = 0;
                     encounters.forEach(encounter => {
-                        if (encounter.patternText) {
-                            const matchingPattern = appData.patterns.find(p => 
-                                p.text.toLowerCase() === encounter.patternText.toLowerCase()
-                            );
-                            if (matchingPattern) {
-                                encounter.patternId = matchingPattern.id;
-                            }
-                        }
-                        
                         // Ensure encounter has notes field
                         if (!encounter.notes) encounter.notes = '';
                         
-                        // Avoid duplicate encounters by timestamp and pattern
-                        if (!appData.encounters.some(e => 
-                            e.timestamp === encounter.timestamp && e.patternId === encounter.patternId
+                        // Map pattern ID correctly
+                        let correctPatternId = encounter.patternId;
+                        
+                        // If we have patternText, use that for mapping
+                        if (encounter.patternText) {
+                            correctPatternId = patternMapping.get(encounter.patternText);
+                        }
+                        // If no patternText but we have original patternId, try to map it
+                        else if (encounter.patternId && patternMapping.has(encounter.patternId)) {
+                            correctPatternId = patternMapping.get(encounter.patternId);
+                        }
+                        
+                        // Only add if we have a valid pattern ID and it's not a duplicate
+                        if (correctPatternId && !appData.encounters.some(e => 
+                            e.timestamp === encounter.timestamp && e.patternId === correctPatternId
                         )) {
                             appData.encounters.push({
                                 ...encounter,
-                                id: Date.now() + Math.random() // Ensure unique ID
+                                id: Date.now() + Math.random(),
+                                patternId: correctPatternId
                             });
+                            importedEncounters++;
                         }
                     });
 
                     // Merge reflections (avoid duplicates by date and content)
+                    let importedReflections = 0;
                     reflections.forEach(reflection => {
                         if (!appData.reflections.some(r => 
                             r.date === reflection.date && r.content === reflection.content
                         )) {
                             appData.reflections.push(reflection);
+                            importedReflections++;
                         }
                     });
 
@@ -1290,7 +1313,7 @@
                     renderRecentLogs();
                     renderAnalytics();
                     
-                    alert(`Import successful! Added ${patterns.length} patterns, ${encounters.length} encounters, and ${reflections.length} reflections.`);
+                    alert(`Import successful! Added ${patterns.length} patterns, ${importedEncounters} encounters, and ${importedReflections} reflections.`);
                     
                     // Clear file input
                     fileInput.value = '';
