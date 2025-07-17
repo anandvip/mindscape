@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindscape Pattern Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+            font-size: 1.8rem;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .setup-section, .tracking-section, .report-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .setup-section h2, .tracking-section h2, .report-section h2 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .input-group {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .input-group input, .input-group select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .counter-button {
+            width: 100%;
+            height: 120px;
+            font-size: 2rem;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(72, 187, 120, 0.3);
+            margin: 20px 0;
+        }
+
+        .counter-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(72, 187, 120, 0.4);
+        }
+
+        .counter-button:active {
+            transform: translateY(0);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .log-entry {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #4a5568;
+            border-left: 4px solid #667eea;
+        }
+
+        .report-section {
+            display: none;
+        }
+
+        .report-section.active {
+            display: block;
+        }
+
+        .reflection-area {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            margin-top: 15px;
+        }
+
+        .reflection-area:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .timestamp {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 800px;
+                padding: 30px;
+            }
+            
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .tracking-section {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧠 Mindscape Pattern Tracker</h1>
+            <p>Observe the recurring patterns of your thoughts and encounters</p>
+            <div class="timestamp" id="currentTime"></div>
+        </header>
+
+        <main class="main-content">
+            <section class="setup-section">
+                <h2>Setup Your Tracking</h2>
+                <div class="input-group">
+                    <label for="thoughtInput">What thought or person would you like to track?</label>
+                    <input type="text" id="thoughtInput" placeholder="e.g., 'John from work' or 'anxiety about project'">
+                </div>
+                <div class="input-group">
+                    <label for="trackingPeriod">Tracking Period</label>
+                    <select id="trackingPeriod">
+                        <option value="daily">Today</option>
+                        <option value="weekly">This Week</option>
+                        <option value="custom">Custom Period</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="startTracking()">Start Tracking</button>
+            </section>
+
+            <section class="tracking-section hidden" id="trackingSection">
+                <h2 id="trackingTitle">Tracking: [Not Set]</h2>
+                
+                <button class="counter-button" onclick="logEncounter()">
+                    <div>TAP TO LOG</div>
+                    <div style="font-size: 1rem; margin-top: 10px;">Encounter Detected</div>
+                </button>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="todayCount">0</div>
+                        <div class="stat-label">Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalCount">0</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgPerDay">0</div>
+                        <div class="stat-label">Avg/Day</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="lastEncounter">Never</div>
+                        <div class="stat-label">Last Seen</div>
+                    </div>
+                </div>
+
+                <div id="recentLogs">
+                    <h3 style="color: #4a5568; margin: 20px 0 10px 0;">Recent Encounters</h3>
+                    <div id="logContainer"></div>
+                </div>
+
+                <button class="btn btn-primary" onclick="checkReportAvailability()" style="width: 100%; margin-top: 20px;">
+                    Generate Daily Report
+                </button>
+            </section>
+
+            <section class="report-section" id="reportSection">
+                <h2>Daily Reflection Report</h2>
+                <div id="reportContent"></div>
+                <h3 style="color: #4a5568; margin: 20px 0 10px 0;">Your Reflection Notes</h3>
+                <textarea class="reflection-area" id="reflectionNotes" placeholder="What patterns do you notice? How did these encounters make you feel? What insights can you gain from today's observations?"></textarea>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <button class="btn btn-primary" onclick="saveReflection()">Save Reflection</button>
+                    <button class="btn btn-primary" onclick="exportData()">Export Data</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // In-memory storage (replace with localStorage in real implementation)
+        let trackingData = {
+            subject: '',
+            startDate: '',
+            period: 'daily',
+            encounters: [],
+            reflections: []
+        };
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString();
+        }
+
+        function startTracking() {
+            const subject = document.getElementById('thoughtInput').value.trim();
+            const period = document.getElementById('trackingPeriod').value;
+
+            if (!subject) {
+                alert('Please enter a thought or person to track');
+                return;
+            }
+
+            trackingData.subject = subject;
+            trackingData.period = period;
+            trackingData.startDate = new Date().toISOString().split('T')[0];
+            trackingData.encounters = [];
+
+            document.getElementById('trackingTitle').textContent = `Tracking: ${subject}`;
+            document.querySelector('.setup-section').classList.add('hidden');
+            document.getElementById('trackingSection').classList.remove('hidden');
+
+            updateStats();
+        }
+
+        function logEncounter() {
+            const now = new Date();
+            const encounter = {
+                timestamp: now.toISOString(),
+                date: now.toISOString().split('T')[0],
+                time: now.toLocaleTimeString()
+            };
+
+            trackingData.encounters.push(encounter);
+            updateStats();
+            updateRecentLogs();
+
+            // Visual feedback
+            const button = document.querySelector('.counter-button');
+            button.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                button.style.transform = 'scale(1)';
+            }, 150);
+        }
+
+        function updateStats() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayEncounters = trackingData.encounters.filter(e => e.date === today);
+            const totalEncounters = trackingData.encounters.length;
+            
+            const startDate = new Date(trackingData.startDate);
+            const currentDate = new Date();
+            const daysSinceStart = Math.max(1, Math.ceil((currentDate - startDate) / (1000 * 60 * 60 * 24)));
+            const avgPerDay = (totalEncounters / daysSinceStart).toFixed(1);
+
+            const lastEncounter = trackingData.encounters.length > 0 
+                ? trackingData.encounters[trackingData.encounters.length - 1].time
+                : 'Never';
+
+            document.getElementById('todayCount').textContent = todayEncounters.length;
+            document.getElementById('totalCount').textContent = totalEncounters;
+            document.getElementById('avgPerDay').textContent = avgPerDay;
+            document.getElementById('lastEncounter').textContent = lastEncounter;
+        }
+
+        function updateRecentLogs() {
+            const container = document.getElementById('logContainer');
+            const recentEncounters = trackingData.encounters.slice(-5).reverse();
+
+            container.innerHTML = recentEncounters.map(encounter => `
+                <div class="log-entry">
+                    <strong>${encounter.time}</strong> - Encounter logged
+                    <div class="timestamp">${new Date(encounter.timestamp).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        function checkReportAvailability() {
+            const now = new Date();
+            const currentHour = now.getHours();
+
+            if (currentHour >= 19) { // After 7 PM
+                generateReport();
+            } else {
+                const timeUntil7PM = 19 - currentHour;
+                alert(`Daily reports are available after 7:00 PM. Check back in ${timeUntil7PM} hours.`);
+            }
+        }
+
+        function generateReport() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayEncounters = trackingData.encounters.filter(e => e.date === today);
+            
+            let reportHTML = `
+                <div class="stat-card" style="margin-bottom: 20px;">
+                    <h3 style="color: #4a5568;">Today's Summary for: ${trackingData.subject}</h3>
+                    <div class="stat-number">${todayEncounters.length}</div>
+                    <div class="stat-label">Total Encounters Today</div>
+                </div>
+            `;
+
+            if (todayEncounters.length > 0) {
+                reportHTML += '<h4 style="color: #4a5568; margin: 15px 0 10px 0;">Timeline of Encounters:</h4>';
+                todayEncounters.forEach(encounter => {
+                    reportHTML += `
+                        <div class="log-entry">
+                            ${encounter.time} - Encounter detected
+                        </div>
+                    `;
+                });
+
+                // Pattern analysis
+                const hours = todayEncounters.map(e => new Date(e.timestamp).getHours());
+                const mostActiveHour = hours.reduce((a, b, i, arr) => 
+                    arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b
+                );
+
+                reportHTML += `
+                    <div class="stat-card" style="margin-top: 20px;">
+                        <div class="stat-label">Most Active Hour</div>
+                        <div class="stat-number">${mostActiveHour}:00</div>
+                    </div>
+                `;
+            }
+
+            document.getElementById('reportContent').innerHTML = reportHTML;
+            document.getElementById('reportSection').classList.add('active');
+        }
+
+        function saveReflection() {
+            const reflection = document.getElementById('reflectionNotes').value;
+            const today = new Date().toISOString().split('T')[0];
+            
+            trackingData.reflections.push({
+                date: today,
+                content: reflection,
+                timestamp: new Date().toISOString()
+            });
+
+            alert('Reflection saved successfully!');
+        }
+
+        function exportData() {
+            const exportData = {
+                ...trackingData,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `mindscape-tracking-${trackingData.subject.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize
+        updateTime();
+        setInterval(updateTime, 1000);
+    </script>
+</body>
+</html>
