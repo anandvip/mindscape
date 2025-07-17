@@ -13,94 +13,102 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
             min-height: 100vh;
-            color: #333;
+            color: #e2e8f0;
         }
 
         .container {
             max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 15px;
             min-height: 100vh;
             display: grid;
-            grid-template-rows: auto 1fr auto;
-            gap: 20px;
+            grid-template-rows: auto 1fr;
+            gap: 15px;
         }
 
         .header {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(45, 55, 72, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
+            border-radius: 12px;
             padding: 20px;
             text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.1);
         }
 
         .header h1 {
-            color: #4a5568;
-            margin-bottom: 10px;
-            font-size: 1.8rem;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+            font-size: 1.6rem;
         }
 
         .header p {
+            color: #a0aec0;
+            font-size: 0.85rem;
+        }
+
+        .timestamp {
+            font-size: 0.75rem;
             color: #718096;
-            font-size: 0.9rem;
+            margin-top: 8px;
         }
 
         .main-content {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 20px;
+            gap: 15px;
         }
 
-        .setup-section, .tracking-section, .report-section {
-            background: rgba(255, 255, 255, 0.95);
+        .section {
+            background: rgba(45, 55, 72, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(226, 232, 240, 0.1);
         }
 
-        .setup-section h2, .tracking-section h2, .report-section h2 {
-            color: #4a5568;
+        .section h2 {
+            color: #e2e8f0;
             margin-bottom: 15px;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
-        .input-group {
+        .add-pattern-form {
             display: grid;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
-        .input-group label {
-            font-weight: 600;
-            color: #4a5568;
-        }
-
-        .input-group input, .input-group select {
+        .add-pattern-form input {
             padding: 12px;
-            border: 2px solid #e2e8f0;
+            border: 1px solid rgba(226, 232, 240, 0.2);
             border-radius: 8px;
             font-size: 1rem;
-            transition: all 0.3s ease;
+            background: rgba(74, 85, 104, 0.8);
+            color: #e2e8f0;
         }
 
-        .input-group input:focus, .input-group select:focus {
+        .add-pattern-form input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .add-pattern-form input::placeholder {
+            color: #a0aec0;
         }
 
         .btn {
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -111,123 +119,411 @@
         }
 
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
-        .counter-button {
-            width: 100%;
-            height: 120px;
-            font-size: 2rem;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 32px rgba(72, 187, 120, 0.3);
-            margin: 20px 0;
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
         }
 
-        .counter-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 40px rgba(72, 187, 120, 0.4);
-        }
-
-        .counter-button:active {
-            transform: translateY(0);
-        }
-
-        .stats-grid {
+        .patterns-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: 1fr;
             gap: 15px;
-            margin: 20px 0;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-            padding: 15px;
+        .pattern-card {
+            background: rgba(74, 85, 104, 0.6);
             border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            padding: 15px;
+            border: 1px solid rgba(226, 232, 240, 0.1);
         }
 
-        .stat-number {
-            font-size: 1.8rem;
+        .pattern-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .pattern-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .pattern-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .stat-mini {
+            text-align: center;
+            background: rgba(45, 55, 72, 0.8);
+            padding: 8px 4px;
+            border-radius: 6px;
+        }
+
+        .stat-mini-number {
+            font-size: 1.2rem;
             font-weight: bold;
             color: #667eea;
         }
 
-        .stat-label {
-            font-size: 0.8rem;
-            color: #718096;
-            margin-top: 5px;
+        .stat-mini-label {
+            font-size: 0.7rem;
+            color: #a0aec0;
+        }
+
+        .log-button {
+            width: 100%;
+            height: 60px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .log-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .log-button:active {
+            transform: translateY(0);
+        }
+
+        .context-tags {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .context-tag {
+            padding: 4px 8px;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 15px;
+            font-size: 0.7rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(74, 85, 104, 0.4);
+            color: #a0aec0;
+        }
+
+        .context-tag:hover {
+            border-color: #667eea;
+            color: #e2e8f0;
+        }
+
+        .context-tag.active {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            color: #e2e8f0;
+        }
+
+        .emotion-tags {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+
+        .emotion-tag {
+            padding: 6px 4px;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(74, 85, 104, 0.4);
+            color: #a0aec0;
+        }
+
+        .emotion-tag:hover {
+            border-color: #667eea;
+            color: #e2e8f0;
+        }
+
+        .emotion-tag.active {
+            border-color: #667eea;
+            color: #e2e8f0;
+        }
+
+        .emotion-tag.neutral.active {
+            background: rgba(160, 174, 192, 0.3);
+        }
+
+        .emotion-tag.triggered.active {
+            background: rgba(245, 101, 101, 0.3);
+        }
+
+        .emotion-tag.curious.active {
+            background: rgba(72, 187, 120, 0.3);
+        }
+
+        .emotion-tag.resistant.active {
+            background: rgba(237, 137, 54, 0.3);
+        }
+
+        .recent-logs {
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .log-entry {
-            background: #f8f9fa;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: #4a5568;
-            border-left: 4px solid #667eea;
+            background: rgba(74, 85, 104, 0.4);
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            border-left: 3px solid #667eea;
         }
 
-        .report-section {
+        .log-entry-header {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .log-entry-meta {
+            font-size: 0.7rem;
+            color: #a0aec0;
+            margin-top: 4px;
+        }
+
+        .emotion-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+            display: inline-block;
+        }
+
+        .emotion-indicator.neutral {
+            background: #a0aec0;
+        }
+
+        .emotion-indicator.triggered {
+            background: #f56565;
+        }
+
+        .emotion-indicator.curious {
+            background: #48bb78;
+        }
+
+        .emotion-indicator.resistant {
+            background: #ed8936;
+        }
+
+        .analytics-section {
             display: none;
         }
 
-        .report-section.active {
+        .analytics-section.active {
             display: block;
         }
 
-        .reflection-area {
-            width: 100%;
-            min-height: 120px;
-            padding: 15px;
-            border: 2px solid #e2e8f0;
+        .insights-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .insight-card {
+            background: rgba(74, 85, 104, 0.6);
             border-radius: 8px;
-            font-family: inherit;
+            padding: 15px;
+            border: 1px solid rgba(226, 232, 240, 0.1);
+        }
+
+        .insight-title {
             font-size: 1rem;
-            resize: vertical;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 8px;
+        }
+
+        .insight-content {
+            font-size: 0.9rem;
+            color: #a0aec0;
+            line-height: 1.4;
+        }
+
+        .export-btn {
+            background: linear-gradient(135deg, #805ad5 0%, #553c9a 100%);
+            color: white;
+            width: 100%;
             margin-top: 15px;
         }
 
-        .reflection-area:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #a0aec0;
         }
 
-        .hidden {
-            display: none;
+        .empty-state h3 {
+            color: #e2e8f0;
+            margin-bottom: 10px;
         }
 
-        .timestamp {
-            font-size: 0.8rem;
-            color: #718096;
+        .info-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(102, 126, 234, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-icon:hover {
+            background: rgba(102, 126, 234, 1);
+            transform: scale(1.1);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: rgba(45, 55, 72, 0.98);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal h2 {
+            color: #e2e8f0;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+
+        .modal h3 {
+            color: #667eea;
+            margin: 20px 0 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .modal p {
+            color: #a0aec0;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .modal ul {
+            color: #a0aec0;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal li {
+            margin-bottom: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #a0aec0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: #e2e8f0;
+        }
+
+        .highlight {
+            background: rgba(102, 126, 234, 0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #e2e8f0;
         }
 
         @media (min-width: 768px) {
             .container {
-                max-width: 800px;
-                padding: 30px;
+                max-width: 900px;
+                padding: 20px;
             }
             
             .main-content {
                 grid-template-columns: 1fr 1fr;
             }
             
-            .tracking-section {
-                grid-column: 1 / -1;
+            .patterns-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .context-tags {
+                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
             }
         }
 
         @media (min-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
+            .patterns-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+            
+            .insights-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
     </style>
@@ -236,236 +532,417 @@
     <div class="container">
         <header class="header">
             <h1>🧠 Mindscape Pattern Tracker</h1>
-            <p>Observe the recurring patterns of your thoughts and encounters</p>
+            <p>Witness your thoughts, understand your patterns, transform your awareness</p>
             <div class="timestamp" id="currentTime"></div>
         </header>
 
         <main class="main-content">
-            <section class="setup-section">
-                <h2>Setup Your Tracking</h2>
-                <div class="input-group">
-                    <label for="thoughtInput">What thought or person would you like to track?</label>
-                    <input type="text" id="thoughtInput" placeholder="e.g., 'John from work' or 'anxiety about project'">
+            <section class="section">
+                <h2>Add New Pattern</h2>
+                <div class="add-pattern-form">
+                    <input type="text" id="patternInput" placeholder="What thought or person would you like to track?">
+                    <button class="btn btn-primary" onclick="addPattern()">Start Tracking</button>
                 </div>
-                <div class="input-group">
-                    <label for="trackingPeriod">Tracking Period</label>
-                    <select id="trackingPeriod">
-                        <option value="daily">Today</option>
-                        <option value="weekly">This Week</option>
-                        <option value="custom">Custom Period</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary" onclick="startTracking()">Start Tracking</button>
             </section>
 
-            <section class="tracking-section hidden" id="trackingSection">
-                <h2 id="trackingTitle">Tracking: [Not Set]</h2>
+            <section class="section" id="patternsSection">
+                <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 15px; margin-bottom: 15px;">
+                    <h2>Active Patterns</h2>
+                    <button class="btn btn-small btn-primary" onclick="toggleAnalytics()">Analytics</button>
+                </div>
                 
-                <button class="counter-button" onclick="logEncounter()">
-                    <div>TAP TO LOG</div>
-                    <div style="font-size: 1rem; margin-top: 10px;">Encounter Detected</div>
-                </button>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-number" id="todayCount">0</div>
-                        <div class="stat-label">Today</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="totalCount">0</div>
-                        <div class="stat-label">Total</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="avgPerDay">0</div>
-                        <div class="stat-label">Avg/Day</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="lastEncounter">Never</div>
-                        <div class="stat-label">Last Seen</div>
+                <div id="patternsContainer" class="patterns-grid">
+                    <div class="empty-state">
+                        <h3>No patterns yet</h3>
+                        <p>Add your first thought pattern to begin tracking</p>
                     </div>
                 </div>
-
-                <div id="recentLogs">
-                    <h3 style="color: #4a5568; margin: 20px 0 10px 0;">Recent Encounters</h3>
-                    <div id="logContainer"></div>
-                </div>
-
-                <button class="btn btn-primary" onclick="checkReportAvailability()" style="width: 100%; margin-top: 20px;">
-                    Generate Daily Report
-                </button>
             </section>
 
-            <section class="report-section" id="reportSection">
-                <h2>Daily Reflection Report</h2>
-                <div id="reportContent"></div>
-                <h3 style="color: #4a5568; margin: 20px 0 10px 0;">Your Reflection Notes</h3>
-                <textarea class="reflection-area" id="reflectionNotes" placeholder="What patterns do you notice? How did these encounters make you feel? What insights can you gain from today's observations?"></textarea>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
-                    <button class="btn btn-primary" onclick="saveReflection()">Save Reflection</button>
-                    <button class="btn btn-primary" onclick="exportData()">Export Data</button>
+            <section class="section" id="recentSection">
+                <h2>Recent Encounters</h2>
+                <div id="recentLogs" class="recent-logs">
+                    <div class="empty-state">
+                        <h3>No encounters logged yet</h3>
+                        <p>Start logging when thoughts cross your awareness</p>
+                    </div>
                 </div>
+            </section>
+
+            <section class="section analytics-section" id="analyticsSection">
+                <h2>Pattern Analytics</h2>
+                <div id="analyticsContainer" class="insights-grid">
+                    <div class="empty-state">
+                        <h3>Not enough data yet</h3>
+                        <p>Analytics will appear after you've logged some encounters</p>
+                    </div>
+                </div>
+                <button class="btn export-btn" onclick="exportData()">Export All Data</button>
             </section>
         </main>
     </div>
 
+    <!-- Info Icon -->
+    <div class="info-icon" onclick="showModal()">i</div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="hideModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="hideModal()">×</button>
+            <h2>🧠 Your Journey to Self-Awareness</h2>
+            
+            <h3>🎯 Purpose</h3>
+            <p>This tool helps you develop <span class="highlight">metacognitive awareness</span> - the ability to observe your thoughts without being consumed by them. It's designed for anyone committed to personal transformation and building new patterns of awareness.</p>
+
+            <h3>🔍 How It Works</h3>
+            <p>Think of yourself as a <span class="highlight">witness</span> to your own mental landscape:</p>
+            <ul>
+                <li><strong>Add Patterns:</strong> Identify 3-5 recurring thoughts, people, or emotions you want to observe</li>
+                <li><strong>Log Encounters:</strong> Whenever a pattern crosses your awareness, tap to log it immediately</li>
+                <li><strong>Tag Context:</strong> Note where/when it happens (Work, Home, Commute, etc.)</li>
+                <li><strong>Track Emotions:</strong> Is it neutral observation or emotionally charged?</li>
+            </ul>
+
+            <h3>🌟 What You'll Discover</h3>
+            <p>Through consistent practice, you'll uncover:</p>
+            <ul>
+                <li><strong>Pattern Recognition:</strong> When and why certain thoughts dominate your mind</li>
+                <li><strong>Emotional Triggers:</strong> Which thoughts hook you vs. slide by neutrally</li>
+                <li><strong>Context Awareness:</strong> Environmental factors that amplify mental patterns</li>
+                <li><strong>Shadow Work:</strong> Unconscious patterns that influence your behavior</li>
+            </ul>
+
+            <h3>🚀 Your Transformation Journey</h3>
+            <p>As you build this practice:</p>
+            <ul>
+                <li><strong>Week 1-2:</strong> Establish baseline patterns and logging habits</li>
+                <li><strong>Week 3-4:</strong> Notice emotional patterns and triggers</li>
+                <li><strong>Month 2+:</strong> Develop conscious choice over reactive patterns</li>
+                <li><strong>Long-term:</strong> Cultivate witness consciousness and inner freedom</li>
+            </ul>
+
+            <p><strong>Remember:</strong> The goal isn't to eliminate thoughts, but to <span class="highlight">observe them without being controlled by them</span>. Each log entry is a moment of awakening to your inner landscape.</p>
+
+            <p style="text-align: center; margin-top: 25px; color: #667eea; font-style: italic;">
+                "Between stimulus and response there is a space. In that space is our power to choose our response. In our response lies our growth and our freedom." - Viktor Frankl
+            </p>
+        </div>
+    </div>
+
     <script>
-        // In-memory storage (replace with localStorage in real implementation)
-        let trackingData = {
-            subject: '',
-            startDate: '',
-            period: 'daily',
+        // Data structure for patterns and encounters
+        let appData = {
+            patterns: [],
             encounters: [],
-            reflections: []
+            version: '2.0'
         };
+
+        const contextOptions = ['Work', 'Home', 'Commute', 'Social', 'Content', 'Alone'];
+        const emotionOptions = [
+            { key: 'neutral', label: 'Neutral' },
+            { key: 'triggered', label: 'Triggered' },
+            { key: 'curious', label: 'Curious' },
+            { key: 'resistant', label: 'Resistant' }
+        ];
+
+        // Initialize app
+        function init() {
+            loadData();
+            updateTime();
+            setInterval(updateTime, 1000);
+            renderPatterns();
+            renderRecentLogs();
+            renderAnalytics();
+        }
 
         function updateTime() {
             const now = new Date();
             document.getElementById('currentTime').textContent = now.toLocaleString();
         }
 
-        function startTracking() {
-            const subject = document.getElementById('thoughtInput').value.trim();
-            const period = document.getElementById('trackingPeriod').value;
+        function loadData() {
+            const stored = localStorage.getItem('mindscape-data');
+            if (stored) {
+                try {
+                    appData = JSON.parse(stored);
+                    if (!appData.patterns) appData.patterns = [];
+                    if (!appData.encounters) appData.encounters = [];
+                } catch (e) {
+                    console.error('Error loading data:', e);
+                }
+            }
+        }
 
-            if (!subject) {
+        function saveData() {
+            localStorage.setItem('mindscape-data', JSON.stringify(appData));
+        }
+
+        function addPattern() {
+            const input = document.getElementById('patternInput');
+            const patternText = input.value.trim();
+            
+            if (!patternText) {
                 alert('Please enter a thought or person to track');
                 return;
             }
 
-            trackingData.subject = subject;
-            trackingData.period = period;
-            trackingData.startDate = new Date().toISOString().split('T')[0];
-            trackingData.encounters = [];
+            if (appData.patterns.some(p => p.text.toLowerCase() === patternText.toLowerCase())) {
+                alert('This pattern is already being tracked');
+                return;
+            }
 
-            document.getElementById('trackingTitle').textContent = `Tracking: ${subject}`;
-            document.querySelector('.setup-section').classList.add('hidden');
-            document.getElementById('trackingSection').classList.remove('hidden');
-
-            updateStats();
-        }
-
-        function logEncounter() {
-            const now = new Date();
-            const encounter = {
-                timestamp: now.toISOString(),
-                date: now.toISOString().split('T')[0],
-                time: now.toLocaleTimeString()
+            const pattern = {
+                id: Date.now(),
+                text: patternText,
+                createdAt: new Date().toISOString(),
+                active: true
             };
 
-            trackingData.encounters.push(encounter);
-            updateStats();
-            updateRecentLogs();
-
-            // Visual feedback
-            const button = document.querySelector('.counter-button');
-            button.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                button.style.transform = 'scale(1)';
-            }, 150);
+            appData.patterns.push(pattern);
+            saveData();
+            input.value = '';
+            renderPatterns();
         }
 
-        function updateStats() {
-            const today = new Date().toISOString().split('T')[0];
-            const todayEncounters = trackingData.encounters.filter(e => e.date === today);
-            const totalEncounters = trackingData.encounters.length;
+        function logEncounter(patternId, context = '', emotion = 'neutral') {
+            const encounter = {
+                id: Date.now(),
+                patternId: patternId,
+                timestamp: new Date().toISOString(),
+                context: context,
+                emotion: emotion
+            };
+
+            appData.encounters.push(encounter);
+            saveData();
+            renderPatterns();
+            renderRecentLogs();
+            renderAnalytics();
+        }
+
+        function deletePattern(patternId) {
+            if (confirm('Are you sure you want to delete this pattern and all its encounters?')) {
+                appData.patterns = appData.patterns.filter(p => p.id !== patternId);
+                appData.encounters = appData.encounters.filter(e => e.patternId !== patternId);
+                saveData();
+                renderPatterns();
+                renderRecentLogs();
+                renderAnalytics();
+            }
+        }
+
+        function renderPatterns() {
+            const container = document.getElementById('patternsContainer');
             
-            const startDate = new Date(trackingData.startDate);
-            const currentDate = new Date();
-            const daysSinceStart = Math.max(1, Math.ceil((currentDate - startDate) / (1000 * 60 * 60 * 24)));
-            const avgPerDay = (totalEncounters / daysSinceStart).toFixed(1);
+            if (appData.patterns.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No patterns yet</h3>
+                        <p>Add your first thought pattern to begin tracking</p>
+                    </div>
+                `;
+                return;
+            }
 
-            const lastEncounter = trackingData.encounters.length > 0 
-                ? trackingData.encounters[trackingData.encounters.length - 1].time
-                : 'Never';
+            container.innerHTML = appData.patterns.map(pattern => {
+                const encounters = appData.encounters.filter(e => e.patternId === pattern.id);
+                const today = new Date().toISOString().split('T')[0];
+                const todayEncounters = encounters.filter(e => e.timestamp.split('T')[0] === today);
+                const lastEncounter = encounters.length > 0 ? encounters[encounters.length - 1] : null;
 
-            document.getElementById('todayCount').textContent = todayEncounters.length;
-            document.getElementById('totalCount').textContent = totalEncounters;
-            document.getElementById('avgPerDay').textContent = avgPerDay;
-            document.getElementById('lastEncounter').textContent = lastEncounter;
+                return `
+                    <div class="pattern-card">
+                        <div class="pattern-header">
+                            <div class="pattern-title">${pattern.text}</div>
+                            <button class="btn btn-small" onclick="deletePattern(${pattern.id})" style="background: rgba(245, 101, 101, 0.2); color: #f56565;">×</button>
+                        </div>
+                        
+                        <div class="pattern-stats">
+                            <div class="stat-mini">
+                                <div class="stat-mini-number">${todayEncounters.length}</div>
+                                <div class="stat-mini-label">Today</div>
+                            </div>
+                            <div class="stat-mini">
+                                <div class="stat-mini-number">${encounters.length}</div>
+                                <div class="stat-mini-label">Total</div>
+                            </div>
+                            <div class="stat-mini">
+                                <div class="stat-mini-number">${lastEncounter ? new Date(lastEncounter.timestamp).toLocaleTimeString().slice(0, 5) : 'Never'}</div>
+                                <div class="stat-mini-label">Last</div>
+                            </div>
+                        </div>
+
+                        <button class="log-button" onclick="quickLog(${pattern.id})">
+                            TAP TO LOG
+                        </button>
+
+                        <div class="context-tags">
+                            ${contextOptions.map(ctx => `
+                                <div class="context-tag" onclick="selectContext(${pattern.id}, '${ctx}')">${ctx}</div>
+                            `).join('')}
+                        </div>
+
+                        <div class="emotion-tags">
+                            ${emotionOptions.map(emo => `
+                                <div class="emotion-tag ${emo.key}" onclick="selectEmotion(${pattern.id}, '${emo.key}')">${emo.label}</div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function updateRecentLogs() {
-            const container = document.getElementById('logContainer');
-            const recentEncounters = trackingData.encounters.slice(-5).reverse();
+        function quickLog(patternId) {
+            logEncounter(patternId);
+            
+            // Visual feedback
+            const buttons = document.querySelectorAll('.log-button');
+            buttons.forEach(button => {
+                if (button.onclick.toString().includes(patternId)) {
+                    button.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        button.style.transform = 'scale(1)';
+                    }, 150);
+                }
+            });
+        }
+
+        function selectContext(patternId, context) {
+            logEncounter(patternId, context);
+        }
+
+        function selectEmotion(patternId, emotion) {
+            logEncounter(patternId, '', emotion);
+        }
+
+        function renderRecentLogs() {
+            const container = document.getElementById('recentLogs');
+            const recentEncounters = appData.encounters
+                .slice(-20)
+                .reverse()
+                .map(encounter => {
+                    const pattern = appData.patterns.find(p => p.id === encounter.patternId);
+                    return { ...encounter, patternText: pattern ? pattern.text : 'Unknown Pattern' };
+                });
+
+            if (recentEncounters.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No encounters logged yet</h3>
+                        <p>Start logging when thoughts cross your awareness</p>
+                    </div>
+                `;
+                return;
+            }
 
             container.innerHTML = recentEncounters.map(encounter => `
                 <div class="log-entry">
-                    <strong>${encounter.time}</strong> - Encounter logged
-                    <div class="timestamp">${new Date(encounter.timestamp).toLocaleDateString()}</div>
+                    <div class="log-entry-header">
+                        <div>
+                            <span class="emotion-indicator ${encounter.emotion}"></span>
+                            <strong>${encounter.patternText}</strong>
+                        </div>
+                        <div style="font-size: 0.7rem; color: #a0aec0;">
+                            ${new Date(encounter.timestamp).toLocaleTimeString().slice(0, 5)}
+                        </div>
+                    </div>
+                    <div class="log-entry-meta">
+                        ${encounter.context ? `Context: ${encounter.context} • ` : ''}
+                        Emotion: ${encounter.emotion}
+                    </div>
                 </div>
             `).join('');
         }
 
-        function checkReportAvailability() {
-            const now = new Date();
-            const currentHour = now.getHours();
-
-            if (currentHour >= 19) { // After 7 PM
-                generateReport();
-            } else {
-                const timeUntil7PM = 19 - currentHour;
-                alert(`Daily reports are available after 7:00 PM. Check back in ${timeUntil7PM} hours.`);
-            }
-        }
-
-        function generateReport() {
-            const today = new Date().toISOString().split('T')[0];
-            const todayEncounters = trackingData.encounters.filter(e => e.date === today);
+        function renderAnalytics() {
+            const container = document.getElementById('analyticsContainer');
             
-            let reportHTML = `
-                <div class="stat-card" style="margin-bottom: 20px;">
-                    <h3 style="color: #4a5568;">Today's Summary for: ${trackingData.subject}</h3>
-                    <div class="stat-number">${todayEncounters.length}</div>
-                    <div class="stat-label">Total Encounters Today</div>
-                </div>
-            `;
-
-            if (todayEncounters.length > 0) {
-                reportHTML += '<h4 style="color: #4a5568; margin: 15px 0 10px 0;">Timeline of Encounters:</h4>';
-                todayEncounters.forEach(encounter => {
-                    reportHTML += `
-                        <div class="log-entry">
-                            ${encounter.time} - Encounter detected
-                        </div>
-                    `;
-                });
-
-                // Pattern analysis
-                const hours = todayEncounters.map(e => new Date(e.timestamp).getHours());
-                const mostActiveHour = hours.reduce((a, b, i, arr) => 
-                    arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b
-                );
-
-                reportHTML += `
-                    <div class="stat-card" style="margin-top: 20px;">
-                        <div class="stat-label">Most Active Hour</div>
-                        <div class="stat-number">${mostActiveHour}:00</div>
+            if (appData.encounters.length < 5) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Not enough data yet</h3>
+                        <p>Analytics will appear after you've logged some encounters</p>
                     </div>
                 `;
+                return;
             }
 
-            document.getElementById('reportContent').innerHTML = reportHTML;
-            document.getElementById('reportSection').classList.add('active');
+            const insights = generateInsights();
+            container.innerHTML = insights.map(insight => `
+                <div class="insight-card">
+                    <div class="insight-title">${insight.title}</div>
+                    <div class="insight-content">${insight.content}</div>
+                </div>
+            `).join('');
         }
 
-        function saveReflection() {
-            const reflection = document.getElementById('reflectionNotes').value;
+        function generateInsights() {
+            const insights = [];
             const today = new Date().toISOString().split('T')[0];
             
-            trackingData.reflections.push({
-                date: today,
-                content: reflection,
-                timestamp: new Date().toISOString()
+            // Most active pattern
+            const patternCounts = {};
+            appData.encounters.forEach(e => {
+                patternCounts[e.patternId] = (patternCounts[e.patternId] || 0) + 1;
+            });
+            
+            const mostActivePatternId = Object.keys(patternCounts).reduce((a, b) => 
+                patternCounts[a] > patternCounts[b] ? a : b
+            );
+            const mostActivePattern = appData.patterns.find(p => p.id == mostActivePatternId);
+            
+            if (mostActivePattern) {
+                insights.push({
+                    title: 'Most Active Pattern',
+                    content: `"${mostActivePattern.text}" with ${patternCounts[mostActivePatternId]} encounters. This pattern dominates your mental landscape.`
+                });
+            }
+
+            // Emotional patterns
+            const emotionCounts = {};
+            appData.encounters.forEach(e => {
+                emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
+            });
+            
+            const totalEmotional = appData.encounters.length - (emotionCounts.neutral || 0);
+            const emotionalRatio = ((totalEmotional / appData.encounters.length) * 100).toFixed(1);
+            
+            insights.push({
+                title: 'Emotional Engagement',
+                content: `${emotionalRatio}% of your encounters trigger emotional responses. This shows your level of reactive vs. observational awareness.`
             });
 
-            alert('Reflection saved successfully!');
+            // Time patterns
+            const hourCounts = {};
+            appData.encounters.forEach(e => {
+                const hour = new Date(e.timestamp).getHours();
+                hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+            });
+            
+            const peakHour = Object.keys(hourCounts).reduce((a, b) => 
+                hourCounts[a] > hourCounts[b] ? a : b
+            );
+            
+            insights.push({
+                title: 'Peak Mental Activity',
+                content: `${peakHour}:00 is your most active hour for pattern encounters. Consider what conditions or contexts make your mind most active at this time.`
+            });
+
+            return insights;
+        }
+
+        function toggleAnalytics() {
+            const section = document.getElementById('analyticsSection');
+            section.classList.toggle('active');
+            renderAnalytics();
         }
 
         function exportData() {
             const exportData = {
-                ...trackingData,
+                ...appData,
                 exportDate: new Date().toISOString(),
-                version: '1.0'
+                totalPatterns: appData.patterns.length,
+                totalEncounters: appData.encounters.length
             };
 
             const dataStr = JSON.stringify(exportData, null, 2);
@@ -474,15 +951,29 @@
             
             const link = document.createElement('a');
             link.href = url;
-            link.download = `mindscape-tracking-${trackingData.subject.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `mindscape-patterns-${new Date().toISOString().split('T')[0]}.json`;
             link.click();
             
             URL.revokeObjectURL(url);
         }
 
-        // Initialize
-        updateTime();
-        setInterval(updateTime, 1000);
+        function showModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function hideModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Event listeners
+        document.getElementById('patternInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPattern();
+            }
+        });
+
+        // Initialize app
+        init();
     </script>
 </body>
 </html>
