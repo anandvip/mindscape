@@ -128,10 +128,20 @@
             font-size: 0.8rem;
         }
 
-        .patterns-grid {
-            display: grid;
-            grid-template-columns: 1fr;
+        /* Synchronized Carousel Styles */
+        .carousel-container {
+            overflow-x: auto;
+            display: flex;
             gap: 15px;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
+        }
+
+        .carousel-container::-webkit-scrollbar {
+            display: none;
         }
 
         .pattern-card {
@@ -139,6 +149,32 @@
             border-radius: 10px;
             padding: 15px;
             border: 1px solid rgba(226, 232, 240, 0.1);
+            min-width: 280px;
+            max-width: 350px;
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .pattern-card.focused {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6), 0 0 40px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: scale(1.02);
+            animation: focusPulse 2s infinite;
+        }
+
+        @keyframes focusPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6), 0 0 40px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(102, 126, 234, 0.8), 0 0 50px rgba(102, 126, 234, 0.4); }
+        }
+
+        .pattern-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .pattern-card.focused:hover {
+            transform: scale(1.02) translateY(-2px);
         }
 
         .pattern-header {
@@ -157,7 +193,7 @@
 
         .pattern-stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px;
             margin-bottom: 15px;
         }
@@ -205,7 +241,7 @@
 
         .context-tags {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 6px;
             margin-bottom: 10px;
         }
@@ -277,82 +313,75 @@
             background: rgba(237, 137, 54, 0.3);
         }
 
-        .recent-logs {
-            max-height: 300px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .carousel-container {
+        /* Synchronized Encounters Carousel */
+        .encounters-carousel {
+            overflow-x: auto;
             display: flex;
-            transition: transform 0.3s ease;
-            will-change: transform;
+            gap: 12px;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            scroll-behavior: smooth;
         }
 
-        .carousel-page {
-            min-width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .encounters-carousel::-webkit-scrollbar {
+            display: none;
         }
 
-        .carousel-nav {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            margin-top: 15px;
-            padding: 10px;
+        .encounter-card {
+            background: rgba(74, 85, 104, 0.4);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            min-width: 300px;
+            max-width: 350px;
+            flex-shrink: 0;
+            scroll-snap-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        .carousel-dots {
-            display: flex;
-            gap: 8px;
+        .encounter-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .carousel-dot {
+        .encounter-card.highlighted {
+            border-left-color: #48bb78;
+            background: rgba(72, 187, 120, 0.15);
+            box-shadow: 0 0 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .encounter-card.focused-pattern {
+            border-left-color: #667eea;
+            background: rgba(102, 126, 234, 0.15);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .sync-indicator {
+            position: absolute;
+            top: 10px;
+            right: 15px;
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: rgba(160, 174, 192, 0.4);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            background: #48bb78;
+            opacity: 0.8;
+            animation: syncPulse 2s infinite;
         }
 
-        .carousel-dot.active {
-            background: #667eea;
-            transform: scale(1.2);
+        .sync-indicator.synced {
+            background: #48bb78;
         }
 
-        .carousel-arrow {
-            background: rgba(102, 126, 234, 0.8);
-            border: none;
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-            user-select: none;
+        .sync-indicator.manual {
+            background: #ed8936;
         }
 
-        .carousel-arrow:hover {
-            background: rgba(102, 126, 234, 1);
-        }
-
-        .carousel-arrow:disabled {
-            background: rgba(160, 174, 192, 0.3);
-            cursor: not-allowed;
-        }
-
-        .log-entry {
-            background: rgba(74, 85, 104, 0.4);
-            padding: 8px 12px;
-            margin: 4px 0;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            color: #e2e8f0;
-            border-left: 3px solid #667eea;
+        @keyframes syncPulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; transform: scale(1.2); }
         }
 
         .log-entry-header {
@@ -360,12 +389,13 @@
             grid-template-columns: 1fr auto;
             align-items: center;
             gap: 8px;
+            margin-bottom: 8px;
         }
 
         .log-entry-meta {
             font-size: 0.7rem;
             color: #a0aec0;
-            margin-top: 4px;
+            margin-bottom: 8px;
         }
 
         .emotion-indicator {
@@ -608,32 +638,64 @@
             color: #e2e8f0;
         }
 
+        /* Scroll indicator styles */
+        .scroll-indicator {
+            text-align: center;
+            margin-top: 10px;
+            color: #a0aec0;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .sync-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .sync-status.synced {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .sync-status.manual {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
         @media (min-width: 768px) {
             .container {
-                max-width: 900px;
+                max-width: 1200px;
                 padding: 20px;
             }
             
             .main-content {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .patterns-grid {
                 grid-template-columns: 1fr;
             }
             
-            .context-tags {
-                grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            .pattern-card {
+                min-width: 320px;
+                max-width: 380px;
+            }
+            
+            .encounter-card {
+                min-width: 350px;
+                max-width: 400px;
             }
         }
 
         @media (min-width: 1024px) {
-            .patterns-grid {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            }
-            
             .insights-grid {
                 grid-template-columns: 1fr 1fr;
+            }
+            
+            .pattern-card {
+                min-width: 350px;
+                max-width: 420px;
             }
         }
     </style>
@@ -662,11 +724,15 @@
                     <button class="btn btn-small btn-primary" onclick="toggleAnalytics()">Analytics</button>
                 </div>
                 
-                <div id="patternsContainer" class="patterns-grid">
+                <div id="patternsContainer" class="carousel-container">
                     <div class="empty-state">
                         <h3>No patterns yet</h3>
                         <p>Add your first thought pattern to begin tracking</p>
                     </div>
+                </div>
+                <div class="scroll-indicator" id="patternsScrollIndicator" style="display: none;">
+                    <span>← Swipe patterns to focus encounters →</span>
+                    <div class="sync-status synced" id="syncStatus">🔄 Synced</div>
                 </div>
             </section>
 
@@ -686,20 +752,16 @@
                         <button class="btn btn-small" onclick="exportData()" style="background: rgba(102, 126, 234, 0.2); color: #667eea;">Export Data</button>
                     </div>
                 </div>
-                <div id="recentLogs" class="recent-logs">
-                    <div class="carousel-container" id="carouselContainer">
-                        <div class="carousel-page">
-                            <div class="empty-state">
-                                <h3>No encounters logged yet</h3>
-                                <p>Start logging when thoughts cross your awareness</p>
-                            </div>
-                        </div>
+                
+                <div id="recentLogs" class="encounters-carousel">
+                    <div class="empty-state">
+                        <h3>No encounters logged yet</h3>
+                        <p>Start logging when thoughts cross your awareness</p>
                     </div>
                 </div>
-                <div class="carousel-nav" id="carouselNav" style="display: none;">
-                    <button class="carousel-arrow" id="prevBtn" onclick="prevPage()">‹</button>
-                    <div class="carousel-dots" id="carouselDots"></div>
-                    <button class="carousel-arrow" id="nextBtn" onclick="nextPage()">›</button>
+                <div class="scroll-indicator" id="encountersScrollIndicator" style="display: none;">
+                    <span>← Focused pattern encounters first →</span>
+                    <span style="font-size: 0.7rem; color: #718096;">Click encounters to focus their patterns</span>
                 </div>
             </section>
 
@@ -717,7 +779,7 @@
             <section class="section analytics-section" id="archiveSection">
                 <h2>Your Journey Archive</h2>
                 <p style="color: #a0aec0; margin-bottom: 15px; font-size: 0.9rem;">Revisit resolved patterns to reinforce your internal growth and transformation</p>
-                <div id="archiveContainer" class="recent-logs">
+                <div id="archiveContainer" class="encounters-carousel">
                     <div class="empty-state">
                         <h3>No archived encounters yet</h3>
                         <p>Archive resolved encounters to reflect on your journey</p>
@@ -751,31 +813,32 @@
             <button class="modal-close" onclick="hideModal()">×</button>
             <h2>🧠 Your Journey to Self-Awareness</h2>
             
-            <h3>🆕 Latest Updates (v2.2)</h3>
+            <h3>🆕 Latest Updates (v2.4) - SYNCHRONIZED CAROUSELS!</h3>
             <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                <p style="margin-bottom: 10px;"><strong>New Features:</strong></p>
+                <p style="margin-bottom: 10px;"><strong>🎯 Revolutionary Sync Features:</strong></p>
                 <ul style="margin-left: 15px; margin-bottom: 10px;">
-                    <li><strong>Horizontal Carousel Navigation:</strong> Swipe through encounters with touch-friendly pagination</li>
-                    <li><strong>Archive System:</strong> Manually archive resolved encounters for reflection</li>
-                    <li><strong>Journey Archive:</strong> Browse your transformation history to reinforce internal growth</li>
-                    <li><strong>Enhanced Notes:</strong> Add detailed insights, fears, and patterns to each encounter</li>
-                    <li><strong>Cross-Device Sync:</strong> Import/export data seamlessly between mobile and desktop</li>
+                    <li><strong>🔄 Bidirectional Sync:</strong> Pattern focus reorders encounters; encounter clicks focus patterns</li>
+                    <li><strong>✨ Smart Highlighting:</strong> Focused pattern encounters are highlighted and grouped first</li>
+                    <li><strong>🎨 Visual Feedback:</strong> Focused patterns pulse with glow effect</li>
+                    <li><strong>⚡ Intelligent Sync:</strong> Manual scrolling temporarily breaks sync until pattern refocus</li>
+                    <li><strong>📱 Responsive Cards:</strong> Min-width with content-based growth for optimal viewing</li>
+                    <li><strong>🔍 Sync Indicator:</strong> Real-time status showing sync state (Synced/Manual)</li>
                 </ul>
-                <p style="margin-bottom: 0;"><strong>Performance:</strong> Optimized for long-term usage with smart pagination and memory management</p>
+                <p style="margin-bottom: 0;"><strong>🚀 UX:</strong> Most intuitive carousel synchronization ever built!</p>
             </div>
             
             <h3>🎯 Purpose</h3>
             <p>This tool helps you develop <span class="highlight">metacognitive awareness</span> - the ability to observe your thoughts without being consumed by them. It's designed for anyone committed to personal transformation and building new patterns of awareness.</p>
 
-            <h3>🔍 How It Works</h3>
-            <p>Think of yourself as a <span class="highlight">witness</span> to your own mental landscape:</p>
+            <h3>🔍 How the Sync Works</h3>
+            <p>Experience the <span class="highlight">intelligent carousel synchronization</span>:</p>
             <ul>
-                <li><strong>Add Patterns:</strong> Identify 3-5 recurring thoughts, people, or emotions you want to observe</li>
-                <li><strong>Log Encounters:</strong> Whenever a pattern crosses your awareness, tap to log it immediately</li>
-                <li><strong>Tag Context:</strong> Note where/when it happens (Work, Home, Commute, etc.)</li>
-                <li><strong>Track Emotions:</strong> Is it neutral observation or emotionally charged?</li>
-                <li><strong>Add Notes:</strong> Capture deeper insights, fears, and patterns in each encounter</li>
-                <li><strong>Archive Growth:</strong> Move resolved patterns to archive for periodic reflection</li>
+                <li><strong>Pattern Focus:</strong> Scroll patterns to automatically reorder encounters (focused pattern first)</li>
+                <li><strong>Encounter Click:</strong> Click any encounter to focus its corresponding pattern</li>
+                <li><strong>Smart Highlighting:</strong> Focused pattern encounters glow and appear first in the list</li>
+                <li><strong>Manual Override:</strong> Manually scroll encounters to temporarily break sync</li>
+                <li><strong>Sync Restoration:</strong> Scroll patterns again to restore synchronization</li>
+                <li><strong>Visual Feedback:</strong> Focused patterns pulse with blue glow animation</li>
             </ul>
 
             <h3>🌟 What You'll Discover</h3>
@@ -784,29 +847,19 @@
                 <li><strong>Pattern Recognition:</strong> When and why certain thoughts dominate your mind</li>
                 <li><strong>Emotional Triggers:</strong> Which thoughts hook you vs. slide by neutrally</li>
                 <li><strong>Context Awareness:</strong> Environmental factors that amplify mental patterns</li>
-                <li><strong>Shadow Work:</strong> Unconscious patterns that influence your behavior</li>
                 <li><strong>Growth Journey:</strong> Your archive becomes a map of personal transformation</li>
-            </ul>
-
-            <h3>🚀 Your Transformation Journey</h3>
-            <p>As you build this practice:</p>
-            <ul>
-                <li><strong>Week 1-2:</strong> Establish baseline patterns and logging habits</li>
-                <li><strong>Week 3-4:</strong> Notice emotional patterns and triggers</li>
-                <li><strong>Month 2+:</strong> Develop conscious choice over reactive patterns</li>
-                <li><strong>Long-term:</strong> Cultivate witness consciousness and inner freedom</li>
-                <li><strong>Archive Review:</strong> Periodically visit your archive to reinforce internal resolve</li>
             </ul>
 
             <h3>📱 Navigation Guide</h3>
             <ul>
-                <li><strong>Carousel:</strong> Swipe left/right or use arrows to navigate recent encounters</li>
-                <li><strong>Archive:</strong> Move resolved encounters to reflect on your journey</li>
-                <li><strong>Analytics:</strong> View pattern insights and emotional awareness metrics</li>
-                <li><strong>Import/Export:</strong> Sync data between devices for seamless practice</li>
+                <li><strong>Sync Mode:</strong> Pattern scroll automatically reorders encounters</li>
+                <li><strong>Manual Mode:</strong> Direct encounter scrolling for independent browsing</li>
+                <li><strong>Focus Indicators:</strong> Blue glow shows active pattern, green highlights related encounters</li>
+                <li><strong>Bidirectional Control:</strong> Click encounters to jump to their patterns</li>
+                <li><strong>Sync Status:</strong> Visual indicator shows current synchronization state</li>
             </ul>
 
-            <p><strong>Remember:</strong> The goal isn't to eliminate thoughts, but to <span class="highlight">observe them without being controlled by them</span>. Each log entry is a moment of awakening to your inner landscape. Your archive becomes proof of your growth.</p>
+            <p><strong>Remember:</strong> The goal isn't to eliminate thoughts, but to <span class="highlight">observe them without being controlled by them</span>. Each log entry is a moment of awakening to your inner landscape.</p>
 
             <p style="text-align: center; margin-top: 25px; color: #667eea; font-style: italic;">
                 "Between stimulus and response there is a space. In that space is our power to choose our response. In our response lies our growth and our freedom." - Viktor Frankl
@@ -821,7 +874,15 @@
             encounters: [],
             archivedEncounters: [],
             reflections: [],
-            version: '2.2'
+            version: '2.4'
+        };
+
+        // Synchronization state
+        let syncState = {
+            isSynced: true,
+            focusedPatternId: null,
+            lastPatternScroll: 0,
+            lastEncounterScroll: 0
         };
 
         const contextOptions = ['Work', 'Home', 'Commute', 'Social', 'Content', 'Alone'];
@@ -841,6 +902,7 @@
             renderRecentLogs();
             renderArchive();
             renderAnalytics();
+            setupCarouselSync();
         }
 
         function updateTime() {
@@ -854,13 +916,12 @@
                 try {
                     const parsedData = JSON.parse(stored);
                     
-                    // Ensure backward compatibility - merge with existing data structure
                     appData = {
                         patterns: parsedData.patterns || [],
                         encounters: parsedData.encounters || [],
                         archivedEncounters: parsedData.archivedEncounters || [],
                         reflections: parsedData.reflections || [],
-                        version: '2.2'
+                        version: '2.4'
                     };
                     
                     // Ensure existing encounters have notes field
@@ -871,16 +932,15 @@
                         if (!encounter.notes) encounter.notes = '';
                     });
                     
-                    console.log('Data loaded successfully:', appData); // Debug log
+                    console.log('Data loaded successfully:', appData);
                 } catch (e) {
                     console.error('Error loading data:', e);
-                    // Reset to default if corrupted
                     appData = {
                         patterns: [],
                         encounters: [],
                         archivedEncounters: [],
                         reflections: [],
-                        version: '2.2'
+                        version: '2.4'
                     };
                 }
             }
@@ -888,6 +948,205 @@
 
         function saveData() {
             localStorage.setItem('mindscape-data', JSON.stringify(appData));
+        }
+
+        // Carousel Synchronization System
+        function setupCarouselSync() {
+            const patternsContainer = document.getElementById('patternsContainer');
+            const encountersContainer = document.getElementById('recentLogs');
+
+            // Pattern carousel scroll handler
+            patternsContainer.addEventListener('scroll', debounce(() => {
+                syncState.lastPatternScroll = Date.now();
+                syncState.isSynced = true;
+                updateSyncStatus();
+                
+                const focusedPattern = detectFocusedPattern();
+                if (focusedPattern !== syncState.focusedPatternId) {
+                    syncState.focusedPatternId = focusedPattern;
+                    updatePatternFocus();
+                    renderSynchronizedEncounters();
+                }
+            }, 150));
+
+            // Encounter carousel scroll handler
+            encountersContainer.addEventListener('scroll', debounce(() => {
+                const timeSincePatternScroll = Date.now() - syncState.lastPatternScroll;
+                if (timeSincePatternScroll > 1000) { // 1 second delay
+                    syncState.isSynced = false;
+                    updateSyncStatus();
+                }
+            }, 150));
+        }
+
+        function detectFocusedPattern() {
+            const container = document.getElementById('patternsContainer');
+            const cards = container.querySelectorAll('.pattern-card');
+            
+            if (cards.length === 0) return null;
+
+            const containerRect = container.getBoundingClientRect();
+            const containerCenter = containerRect.left + containerRect.width / 2;
+
+            let closestCard = null;
+            let minDistance = Infinity;
+
+            cards.forEach(card => {
+                const cardRect = card.getBoundingClientRect();
+                const cardCenter = cardRect.left + cardRect.width / 2;
+                const distance = Math.abs(cardCenter - containerCenter);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closestCard = card;
+                }
+            });
+
+            return closestCard ? parseInt(closestCard.dataset.patternId) : null;
+        }
+
+        function updatePatternFocus() {
+            const cards = document.querySelectorAll('.pattern-card');
+            cards.forEach(card => {
+                const patternId = parseInt(card.dataset.patternId);
+                if (patternId === syncState.focusedPatternId) {
+                    card.classList.add('focused');
+                } else {
+                    card.classList.remove('focused');
+                }
+            });
+        }
+
+        function renderSynchronizedEncounters() {
+            if (!syncState.isSynced || !syncState.focusedPatternId) {
+                renderRecentLogs();
+                return;
+            }
+
+            const container = document.getElementById('recentLogs');
+            const scrollIndicator = document.getElementById('encountersScrollIndicator');
+
+            // Get all encounters with pattern info
+            const allEncounters = appData.encounters
+                .slice(-30)
+                .reverse()
+                .map(encounter => {
+                    const pattern = appData.patterns.find(p => p.id === encounter.patternId);
+                    return { 
+                        ...encounter, 
+                        patternText: pattern ? pattern.text : 'Unknown Pattern',
+                        isFocusedPattern: encounter.patternId === syncState.focusedPatternId
+                    };
+                });
+
+            if (allEncounters.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No encounters logged yet</h3>
+                        <p>Start logging when thoughts cross your awareness</p>
+                    </div>
+                `;
+                scrollIndicator.style.display = 'none';
+                return;
+            }
+
+            // Sort: focused pattern encounters first, then others
+            const sortedEncounters = [
+                ...allEncounters.filter(enc => enc.isFocusedPattern),
+                ...allEncounters.filter(enc => !enc.isFocusedPattern)
+            ];
+
+            scrollIndicator.style.display = 'block';
+
+            container.innerHTML = sortedEncounters.map(encounter => `
+                <div class="encounter-card ${encounter.isFocusedPattern ? 'focused-pattern' : ''}" 
+                     data-pattern-id="${encounter.patternId}"
+                     onclick="focusPatternFromEncounter(${encounter.patternId})">
+                    <div class="log-entry-header">
+                        <div>
+                            <span class="emotion-indicator ${encounter.emotion}"></span>
+                            <strong>${encounter.patternText}</strong>
+                            ${encounter.isFocusedPattern ? '<span style="color: #667eea; font-size: 0.7rem; margin-left: 8px;">●</span>' : ''}
+                        </div>
+                        <div style="font-size: 0.7rem; color: #a0aec0;">
+                            ${new Date(encounter.timestamp).toLocaleTimeString().slice(0, 5)}
+                        </div>
+                    </div>
+                    <div class="log-entry-meta">
+                        ${encounter.context ? `Context: ${encounter.context} • ` : ''}
+                        Emotion: ${encounter.emotion}
+                    </div>
+                    ${encounter.notes ? `<div style="margin-top: 8px; color: #e2e8f0; font-size: 0.8rem; font-style: italic;">"${encounter.notes}"</div>` : ''}
+                    <textarea class="note-area" placeholder="Add notes about this encounter (fears, insights, patterns)..." 
+                              onblur="updateEncounterNote(${encounter.id}, this.value)" 
+                              onclick="event.stopPropagation()"
+                              style="display: ${encounter.notes ? 'block' : 'none'};">${encounter.notes || ''}</textarea>
+                    <div class="log-entry-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-tiny btn-primary" onclick="toggleNoteArea(${encounter.id})">
+                            ${encounter.notes ? 'Edit Note' : 'Add Note'}
+                        </button>
+                        <button class="btn btn-tiny" onclick="archiveEncounter(${encounter.id})" 
+                                style="background: rgba(237, 137, 54, 0.2); color: #ed8936;">Archive</button>
+                        <button class="btn btn-tiny" onclick="deleteEncounter(${encounter.id})" 
+                                style="background: rgba(245, 101, 101, 0.2); color: #f56565;">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function focusPatternFromEncounter(patternId) {
+            const patternsContainer = document.getElementById('patternsContainer');
+            const targetCard = patternsContainer.querySelector(`[data-pattern-id="${patternId}"]`);
+            
+            if (targetCard) {
+                // Scroll to center the target pattern card
+                const containerRect = patternsContainer.getBoundingClientRect();
+                const cardRect = targetCard.getBoundingClientRect();
+                const scrollLeft = targetCard.offsetLeft - (containerRect.width / 2) + (cardRect.width / 2);
+                
+                patternsContainer.scrollTo({
+                    left: scrollLeft,
+                    behavior: 'smooth'
+                });
+
+                // Update sync state
+                syncState.focusedPatternId = patternId;
+                syncState.isSynced = true;
+                syncState.lastPatternScroll = Date.now();
+                
+                updatePatternFocus();
+                updateSyncStatus();
+                
+                // Small delay to ensure scroll completes before re-rendering encounters
+                setTimeout(() => {
+                    renderSynchronizedEncounters();
+                }, 300);
+            }
+        }
+
+        function updateSyncStatus() {
+            const syncStatusEl = document.getElementById('syncStatus');
+            if (syncStatusEl) {
+                if (syncState.isSynced) {
+                    syncStatusEl.textContent = '🔄 Synced';
+                    syncStatusEl.className = 'sync-status synced';
+                } else {
+                    syncStatusEl.textContent = '✋ Manual';
+                    syncStatusEl.className = 'sync-status manual';
+                }
+            }
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
         }
 
         function addPattern() {
@@ -930,7 +1189,13 @@
             appData.encounters.push(encounter);
             saveData();
             renderPatterns();
-            renderRecentLogs();
+            
+            // Update encounters based on sync state
+            if (syncState.isSynced) {
+                renderSynchronizedEncounters();
+            } else {
+                renderRecentLogs();
+            }
             renderAnalytics();
         }
 
@@ -939,7 +1204,12 @@
                 appData.encounters = appData.encounters.filter(e => e.id !== encounterId);
                 saveData();
                 renderPatterns();
-                renderRecentLogs();
+                
+                if (syncState.isSynced) {
+                    renderSynchronizedEncounters();
+                } else {
+                    renderRecentLogs();
+                }
                 renderAnalytics();
             }
         }
@@ -971,7 +1241,12 @@
                 appData.encounters.splice(encounterIndex, 1);
                 saveData();
                 renderPatterns();
-                renderRecentLogs();
+                
+                if (syncState.isSynced) {
+                    renderSynchronizedEncounters();
+                } else {
+                    renderRecentLogs();
+                }
                 renderArchive();
                 renderAnalytics();
             }
@@ -1041,6 +1316,7 @@
 
         function renderPatterns() {
             const container = document.getElementById('patternsContainer');
+            const scrollIndicator = document.getElementById('patternsScrollIndicator');
             
             if (appData.patterns.length === 0) {
                 container.innerHTML = `
@@ -1049,8 +1325,11 @@
                         <p>Add your first thought pattern to begin tracking</p>
                     </div>
                 `;
+                scrollIndicator.style.display = 'none';
                 return;
             }
+
+            scrollIndicator.style.display = 'block';
 
             container.innerHTML = appData.patterns.map(pattern => {
                 const encounters = appData.encounters.filter(e => e.patternId === pattern.id);
@@ -1059,7 +1338,7 @@
                 const lastEncounter = encounters.length > 0 ? encounters[encounters.length - 1] : null;
 
                 return `
-                    <div class="pattern-card">
+                    <div class="pattern-card" data-pattern-id="${pattern.id}">
                         <div class="pattern-header">
                             <div class="pattern-title">${pattern.text}</div>
                             <button class="btn btn-small" onclick="deletePattern(${pattern.id})" style="background: rgba(245, 101, 101, 0.2); color: #f56565;">×</button>
@@ -1085,7 +1364,12 @@
                         </button>
 
                         <div class="context-tags">
-                            ${contextOptions.map(ctx => `
+                            ${contextOptions.slice(0, 3).map(ctx => `
+                                <div class="context-tag" onclick="selectContext(${pattern.id}, '${ctx}')">${ctx}</div>
+                            `).join('')}
+                        </div>
+                        <div class="context-tags">
+                            ${contextOptions.slice(3).map(ctx => `
                                 <div class="context-tag" onclick="selectContext(${pattern.id}, '${ctx}')">${ctx}</div>
                             `).join('')}
                         </div>
@@ -1098,6 +1382,13 @@
                     </div>
                 `;
             }).join('');
+
+            // Initialize first pattern as focused if none is set
+            if (!syncState.focusedPatternId && appData.patterns.length > 0) {
+                syncState.focusedPatternId = appData.patterns[0].id;
+                updatePatternFocus();
+                renderSynchronizedEncounters();
+            }
         }
 
         function quickLog(patternId) {
@@ -1123,15 +1414,11 @@
             logEncounter(patternId, '', emotion);
         }
 
-        // Carousel state
-        let currentPage = 0;
-        const encountersPerPage = 5;
-
         function renderRecentLogs() {
-            const container = document.getElementById('carouselContainer');
-            const navContainer = document.getElementById('carouselNav');
+            const container = document.getElementById('recentLogs');
+            const scrollIndicator = document.getElementById('encountersScrollIndicator');
             const recentEncounters = appData.encounters
-                .slice(-50) // Limit to last 50 for performance
+                .slice(-20)
                 .reverse()
                 .map(encounter => {
                     const pattern = appData.patterns.find(p => p.id === encounter.patternId);
@@ -1140,118 +1427,49 @@
 
             if (recentEncounters.length === 0) {
                 container.innerHTML = `
-                    <div class="carousel-page">
-                        <div class="empty-state">
-                            <h3>No encounters logged yet</h3>
-                            <p>Start logging when thoughts cross your awareness</p>
-                        </div>
+                    <div class="empty-state">
+                        <h3>No encounters logged yet</h3>
+                        <p>Start logging when thoughts cross your awareness</p>
                     </div>
                 `;
-                navContainer.style.display = 'none';
+                scrollIndicator.style.display = 'none';
                 return;
             }
 
-            // Create pages
-            const pages = [];
-            for (let i = 0; i < recentEncounters.length; i += encountersPerPage) {
-                pages.push(recentEncounters.slice(i, i + encountersPerPage));
-            }
+            scrollIndicator.style.display = recentEncounters.length > 1 ? 'block' : 'none';
 
-            // Render carousel pages
-            container.innerHTML = pages.map(page => `
-                <div class="carousel-page">
-                    ${page.map(encounter => `
-                        <div class="log-entry">
-                            <div class="log-entry-header">
-                                <div>
-                                    <span class="emotion-indicator ${encounter.emotion}"></span>
-                                    <strong>${encounter.patternText}</strong>
-                                </div>
-                                <div style="font-size: 0.7rem; color: #a0aec0;">
-                                    ${new Date(encounter.timestamp).toLocaleTimeString().slice(0, 5)}
-                                </div>
-                            </div>
-                            <div class="log-entry-meta">
-                                ${encounter.context ? `Context: ${encounter.context} • ` : ''}
-                                Emotion: ${encounter.emotion}
-                            </div>
-                            ${encounter.notes ? `<div style="margin-top: 8px; color: #e2e8f0; font-size: 0.8rem; font-style: italic;">"${encounter.notes}"</div>` : ''}
-                            <textarea class="note-area" placeholder="Add notes about this encounter (fears, insights, patterns)..." 
-                                      onblur="updateEncounterNote(${encounter.id}, this.value)" 
-                                      style="display: ${encounter.notes ? 'block' : 'none'};">${encounter.notes || ''}</textarea>
-                            <div class="log-entry-actions">
-                                <button class="btn btn-tiny btn-primary" onclick="toggleNoteArea(${encounter.id})">
-                                    ${encounter.notes ? 'Edit Note' : 'Add Note'}
-                                </button>
-                                <button class="btn btn-tiny" onclick="archiveEncounter(${encounter.id})" 
-                                        style="background: rgba(237, 137, 54, 0.2); color: #ed8936;">Archive</button>
-                                <button class="btn btn-tiny" onclick="deleteEncounter(${encounter.id})" 
-                                        style="background: rgba(245, 101, 101, 0.2); color: #f56565;">Delete</button>
-                            </div>
+            container.innerHTML = recentEncounters.map(encounter => `
+                <div class="encounter-card" data-pattern-id="${encounter.patternId}"
+                     onclick="focusPatternFromEncounter(${encounter.patternId})">
+                    <div class="log-entry-header">
+                        <div>
+                            <span class="emotion-indicator ${encounter.emotion}"></span>
+                            <strong>${encounter.patternText}</strong>
                         </div>
-                    `).join('')}
+                        <div style="font-size: 0.7rem; color: #a0aec0;">
+                            ${new Date(encounter.timestamp).toLocaleTimeString().slice(0, 5)}
+                        </div>
+                    </div>
+                    <div class="log-entry-meta">
+                        ${encounter.context ? `Context: ${encounter.context} • ` : ''}
+                        Emotion: ${encounter.emotion}
+                    </div>
+                    ${encounter.notes ? `<div style="margin-top: 8px; color: #e2e8f0; font-size: 0.8rem; font-style: italic;">"${encounter.notes}"</div>` : ''}
+                    <textarea class="note-area" placeholder="Add notes about this encounter (fears, insights, patterns)..." 
+                              onblur="updateEncounterNote(${encounter.id}, this.value)" 
+                              onclick="event.stopPropagation()"
+                              style="display: ${encounter.notes ? 'block' : 'none'};">${encounter.notes || ''}</textarea>
+                    <div class="log-entry-actions" onclick="event.stopPropagation()">
+                        <button class="btn btn-tiny btn-primary" onclick="toggleNoteArea(${encounter.id})">
+                            ${encounter.notes ? 'Edit Note' : 'Add Note'}
+                        </button>
+                        <button class="btn btn-tiny" onclick="archiveEncounter(${encounter.id})" 
+                                style="background: rgba(237, 137, 54, 0.2); color: #ed8936;">Archive</button>
+                        <button class="btn btn-tiny" onclick="deleteEncounter(${encounter.id})" 
+                                style="background: rgba(245, 101, 101, 0.2); color: #f56565;">Delete</button>
+                    </div>
                 </div>
             `).join('');
-
-            // Reset to first page if current page exceeds available pages
-            if (currentPage >= pages.length) {
-                currentPage = 0;
-            }
-
-            // Show navigation if multiple pages
-            if (pages.length > 1) {
-                navContainer.style.display = 'flex';
-                renderCarouselNav(pages.length);
-                updateCarouselPosition();
-            } else {
-                navContainer.style.display = 'none';
-                currentPage = 0;
-                // Ensure container is positioned correctly for single page
-                container.style.transform = 'translateX(0%)';
-            }
-        }
-
-        function renderCarouselNav(totalPages) {
-            const dotsContainer = document.getElementById('carouselDots');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-
-            // Create dots
-            dotsContainer.innerHTML = Array.from({ length: totalPages }, (_, i) => 
-                `<div class="carousel-dot ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})"></div>`
-            ).join('');
-
-            // Update buttons
-            prevBtn.disabled = currentPage === 0;
-            nextBtn.disabled = currentPage === totalPages - 1;
-        }
-
-        function updateCarouselPosition() {
-            const container = document.getElementById('carouselContainer');
-            container.style.transform = `translateX(-${currentPage * 100}%)`;
-        }
-
-        function prevPage() {
-            if (currentPage > 0) {
-                currentPage--;
-                updateCarouselPosition();
-                renderCarouselNav(document.getElementById('carouselDots').children.length);
-            }
-        }
-
-        function nextPage() {
-            const totalPages = document.getElementById('carouselDots').children.length;
-            if (currentPage < totalPages - 1) {
-                currentPage++;
-                updateCarouselPosition();
-                renderCarouselNav(totalPages);
-            }
-        }
-
-        function goToPage(pageIndex) {
-            currentPage = pageIndex;
-            updateCarouselPosition();
-            renderCarouselNav(document.getElementById('carouselDots').children.length);
         }
 
         function toggleRecentSettings() {
@@ -1280,7 +1498,7 @@
             }
 
             container.innerHTML = archivedEncounters.map(encounter => `
-                <div class="log-entry" style="border-left-color: #ed8936;">
+                <div class="encounter-card" style="border-left-color: #ed8936;">
                     <div class="log-entry-header">
                         <div>
                             <span class="emotion-indicator ${encounter.emotion}"></span>
@@ -1348,7 +1566,6 @@
 
         function generateInsights() {
             const insights = [];
-            const today = new Date().toISOString().split('T')[0];
             
             // Most active pattern
             const patternCounts = {};
@@ -1356,16 +1573,18 @@
                 patternCounts[e.patternId] = (patternCounts[e.patternId] || 0) + 1;
             });
             
-            const mostActivePatternId = Object.keys(patternCounts).reduce((a, b) => 
-                patternCounts[a] > patternCounts[b] ? a : b
-            );
-            const mostActivePattern = appData.patterns.find(p => p.id == mostActivePatternId);
-            
-            if (mostActivePattern) {
-                insights.push({
-                    title: 'Most Active Pattern',
-                    content: `"${mostActivePattern.text}" with ${patternCounts[mostActivePatternId]} encounters. This pattern dominates your mental landscape.`
-                });
+            if (Object.keys(patternCounts).length > 0) {
+                const mostActivePatternId = Object.keys(patternCounts).reduce((a, b) => 
+                    patternCounts[a] > patternCounts[b] ? a : b
+                );
+                const mostActivePattern = appData.patterns.find(p => p.id == mostActivePatternId);
+                
+                if (mostActivePattern) {
+                    insights.push({
+                        title: 'Most Active Pattern',
+                        content: `"${mostActivePattern.text}" with ${patternCounts[mostActivePatternId]} encounters. This pattern dominates your mental landscape.`
+                    });
+                }
             }
 
             // Emotional patterns
@@ -1389,14 +1608,16 @@
                 hourCounts[hour] = (hourCounts[hour] || 0) + 1;
             });
             
-            const peakHour = Object.keys(hourCounts).reduce((a, b) => 
-                hourCounts[a] > hourCounts[b] ? a : b
-            );
-            
-            insights.push({
-                title: 'Peak Mental Activity',
-                content: `${peakHour}:00 is your most active hour for pattern encounters. Consider what conditions or contexts make your mind most active at this time.`
-            });
+            if (Object.keys(hourCounts).length > 0) {
+                const peakHour = Object.keys(hourCounts).reduce((a, b) => 
+                    hourCounts[a] > hourCounts[b] ? a : b
+                );
+                
+                insights.push({
+                    title: 'Peak Mental Activity',
+                    content: `${peakHour}:00 is your most active hour for pattern encounters. Consider what conditions or contexts make your mind most active at this time.`
+                });
+            }
 
             return insights;
         }
@@ -1411,7 +1632,6 @@
             const now = new Date();
             const currentHour = now.getHours();
 
-            // Allow report generation after 7 PM or if there's data from previous days
             if (currentHour >= 19 || appData.encounters.length > 0) {
                 showReport();
             } else {
@@ -1437,7 +1657,7 @@
                 todayEncounters.forEach(encounter => {
                     const pattern = appData.patterns.find(p => p.id === encounter.patternId);
                     reportHTML += `
-                        <div class="log-entry">
+                        <div class="encounter-card" style="min-width: 100%; margin-bottom: 10px;">
                             <span class="emotion-indicator ${encounter.emotion}"></span>
                             <strong>${pattern ? pattern.text : 'Unknown'}</strong> - ${new Date(encounter.timestamp).toLocaleTimeString().slice(0, 5)}
                             ${encounter.context ? `<br><small>Context: ${encounter.context}</small>` : ''}
@@ -1446,14 +1666,13 @@
                     `;
                 });
 
-                // Pattern analysis
-                const hours = todayEncounters.map(e => new Date(e.timestamp).getHours());
-                const emotionCounts = {};
-                todayEncounters.forEach(e => {
-                    emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
-                });
+                if (todayEncounters.length > 0) {
+                    const hours = todayEncounters.map(e => new Date(e.timestamp).getHours());
+                    const emotionCounts = {};
+                    todayEncounters.forEach(e => {
+                        emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
+                    });
 
-                if (hours.length > 0) {
                     const mostActiveHour = hours.reduce((a, b, i, arr) => 
                         arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b
                     );
@@ -1538,27 +1757,22 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
                     
-                    // Validate data structure
                     if (!importedData || typeof importedData !== 'object') {
                         throw new Error('Invalid data format');
                     }
 
-                    // Handle different export formats (full export vs daily report)
                     let patterns = [];
                     let encounters = [];
                     let reflections = [];
 
                     if (importedData.patterns && importedData.encounters) {
-                        // Full export format
                         patterns = importedData.patterns || [];
                         encounters = importedData.encounters || [];
                         reflections = importedData.reflections || [];
                     } else if (importedData.encounters && Array.isArray(importedData.encounters)) {
-                        // Daily report format - extract patterns from encounter data
                         encounters = importedData.encounters || [];
                         reflections = importedData.reflections || [];
                         
-                        // Create patterns from imported encounters
                         const uniquePatterns = new Set();
                         encounters.forEach(enc => {
                             if (enc.patternText && !appData.patterns.some(p => p.text === enc.patternText)) {
@@ -1574,21 +1788,17 @@
                         }));
                     }
 
-                    // Track pattern mappings (old ID/text -> new ID)
                     const patternMapping = new Map();
                     
-                    // Merge patterns (avoid duplicates by text)
                     patterns.forEach(pattern => {
                         const existingPattern = appData.patterns.find(p => 
                             p.text.toLowerCase() === pattern.text.toLowerCase()
                         );
                         
                         if (existingPattern) {
-                            // Pattern already exists, map to existing ID
                             patternMapping.set(pattern.id, existingPattern.id);
                             patternMapping.set(pattern.text, existingPattern.id);
                         } else {
-                            // Create new pattern with new ID
                             const newPattern = {
                                 ...pattern,
                                 id: Date.now() + Math.random()
@@ -1599,25 +1809,18 @@
                         }
                     });
 
-                    // Process encounters with proper pattern mapping
                     let importedEncounters = 0;
                     encounters.forEach(encounter => {
-                        // Ensure encounter has notes field
                         if (!encounter.notes) encounter.notes = '';
                         
-                        // Map pattern ID correctly
                         let correctPatternId = encounter.patternId;
                         
-                        // If we have patternText, use that for mapping
                         if (encounter.patternText) {
                             correctPatternId = patternMapping.get(encounter.patternText);
-                        }
-                        // If no patternText but we have original patternId, try to map it
-                        else if (encounter.patternId && patternMapping.has(encounter.patternId)) {
+                        } else if (encounter.patternId && patternMapping.has(encounter.patternId)) {
                             correctPatternId = patternMapping.get(encounter.patternId);
                         }
                         
-                        // Only add if we have a valid pattern ID and it's not a duplicate
                         if (correctPatternId && !appData.encounters.some(e => 
                             e.timestamp === encounter.timestamp && e.patternId === correctPatternId
                         )) {
@@ -1630,7 +1833,6 @@
                         }
                     });
 
-                    // Merge reflections (avoid duplicates by date and content)
                     let importedReflections = 0;
                     reflections.forEach(reflection => {
                         if (!appData.reflections.some(r => 
@@ -1641,17 +1843,12 @@
                         }
                     });
 
-                    // Save merged data
                     saveData();
-                    
-                    // Re-render all components
                     renderPatterns();
                     renderRecentLogs();
                     renderAnalytics();
                     
                     alert(`Import successful! Added ${patterns.length} patterns, ${importedEncounters} encounters, and ${importedReflections} reflections.`);
-                    
-                    // Clear file input
                     fileInput.value = '';
                     
                 } catch (error) {
@@ -1673,7 +1870,7 @@
             };
 
             const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const dataBlob = new Blob([dataStr], {type: "application/json"});
             const url = URL.createObjectURL(dataBlob);
             
             const link = document.createElement('a');
@@ -1697,35 +1894,6 @@
             if (e.key === 'Enter') {
                 addPattern();
             }
-        });
-
-        // Add touch support for carousel
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        function handleSwipe() {
-            const swipeThreshold = 50;
-            if (touchEndX < touchStartX - swipeThreshold) {
-                // Swipe left - next page
-                nextPage();
-            }
-            if (touchEndX > touchStartX + swipeThreshold) {
-                // Swipe right - previous page
-                prevPage();
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const carouselContainer = document.getElementById('carouselContainer');
-            
-            carouselContainer.addEventListener('touchstart', function(e) {
-                touchStartX = e.changedTouches[0].screenX;
-            });
-
-            carouselContainer.addEventListener('touchend', function(e) {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-            });
         });
 
         // Initialize app
