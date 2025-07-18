@@ -852,11 +852,16 @@
             const stored = localStorage.getItem('mindscape-data');
             if (stored) {
                 try {
-                    appData = JSON.parse(stored);
-                    if (!appData.patterns) appData.patterns = [];
-                    if (!appData.encounters) appData.encounters = [];
-                    if (!appData.archivedEncounters) appData.archivedEncounters = [];
-                    if (!appData.reflections) appData.reflections = [];
+                    const parsedData = JSON.parse(stored);
+                    
+                    // Ensure backward compatibility - merge with existing data structure
+                    appData = {
+                        patterns: parsedData.patterns || [],
+                        encounters: parsedData.encounters || [],
+                        archivedEncounters: parsedData.archivedEncounters || [],
+                        reflections: parsedData.reflections || [],
+                        version: '2.2'
+                    };
                     
                     // Ensure existing encounters have notes field
                     appData.encounters.forEach(encounter => {
@@ -865,8 +870,18 @@
                     appData.archivedEncounters.forEach(encounter => {
                         if (!encounter.notes) encounter.notes = '';
                     });
+                    
+                    console.log('Data loaded successfully:', appData); // Debug log
                 } catch (e) {
                     console.error('Error loading data:', e);
+                    // Reset to default if corrupted
+                    appData = {
+                        patterns: [],
+                        encounters: [],
+                        archivedEncounters: [],
+                        reflections: [],
+                        version: '2.2'
+                    };
                 }
             }
         }
@@ -1178,6 +1193,11 @@
                 </div>
             `).join('');
 
+            // Reset to first page if current page exceeds available pages
+            if (currentPage >= pages.length) {
+                currentPage = 0;
+            }
+
             // Show navigation if multiple pages
             if (pages.length > 1) {
                 navContainer.style.display = 'flex';
@@ -1186,6 +1206,8 @@
             } else {
                 navContainer.style.display = 'none';
                 currentPage = 0;
+                // Ensure container is positioned correctly for single page
+                container.style.transform = 'translateX(0%)';
             }
         }
 
@@ -1224,6 +1246,12 @@
                 updateCarouselPosition();
                 renderCarouselNav(totalPages);
             }
+        }
+
+        function goToPage(pageIndex) {
+            currentPage = pageIndex;
+            updateCarouselPosition();
+            renderCarouselNav(document.getElementById('carouselDots').children.length);
         }
 
         function toggleRecentSettings() {
@@ -1669,6 +1697,35 @@
             if (e.key === 'Enter') {
                 addPattern();
             }
+        });
+
+        // Add touch support for carousel
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // Swipe left - next page
+                nextPage();
+            }
+            if (touchEndX > touchStartX + swipeThreshold) {
+                // Swipe right - previous page
+                prevPage();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const carouselContainer = document.getElementById('carouselContainer');
+            
+            carouselContainer.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+
+            carouselContainer.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            });
         });
 
         // Initialize app
