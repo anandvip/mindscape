@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindscape Evolution</title>
+    <style>
+        /* All previous styles from the clean rewrite are here... */
+        :root { /* ... */ }
+        * { /* ... */ }
+        body { /* ... */ }
+        /* ...etc... */
+
+        /* Styles from the clean rewrite remain, with additions/modifications */
+        .card { /* ... */ }
+        .pattern-card { position: relative; padding-bottom: 45px; } /* Add padding for the new footer */
+
+        /* NEW: Styles for the new features */
+        .pattern-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .intervention-badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: white;
+        }
+        .intervention-badge.explore { background: #48bb78; }
+        .intervention-badge.dismiss { background: #a0aec0; }
+
+        .noise-category-badge {
+            opacity: 0.8;
+        }
+
+        /* Analytics Section Styles */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        .analytics-card {
+            background: rgba(74, 85, 104, 0.3);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .analytics-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        .analytics-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- MODIFIED: Header text -->
+        <header class="header">
+            <h1>🧠 Mindscape Evolution</h1>
+            <p>Consciously Evolve Your Relationship With Your Mind.</p>
+        </header>
+
+        <div class="time-display" id="time-display"></div>
+
+        <main>
+            <!-- MODIFIED: "Add Pattern" is now a button to open the intervention modal -->
+            <section class="section">
+                <div class="form-section" style="text-align: center;">
+                    <button class="btn btn-primary" id="open-intervention-modal-btn" style="padding: 15px 30px; font-size: 1rem;">
+                        Capture a New Thought...
+                    </button>
+                </div>
+            </section>
+
+            <!-- NEW: Analytics Section -->
+            <section class="section">
+                <div class="section-header"><h2 class="section-title">Mindscape Analytics</h2></div>
+                <div class="analytics-grid" id="analytics-grid">
+                    <!-- Analytics cards will be rendered here -->
+                </div>
+            </section>
+            
+            <!-- Active Patterns Section (Structure is the same) -->
+            <section class="section">
+                <div class="section-header"><h2 class="section-title">Active Patterns</h2></div>
+                <div class="scroll-container" id="patterns-container"></div>
+                <div class="dots-container" id="patterns-dots"></div>
+            </section>
+
+            <!-- Other sections (Logging, Encounters, Reflections) remain the same -->
+            <!-- ... -->
+        </main>
+    </div>
+
+    <!-- NEW / MODIFIED: The modal is now for conscious intervention -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" id="modal-close-btn">×</button>
+            <h2>🛑 Conscious Intervention</h2>
+            <p style="opacity: 0.8; margin-bottom: 20px;">Before this thought becomes a pattern, classify it and decide your relationship with it.</p>
+            
+            <label>The Thought or Person:</label>
+            <input type="text" id="intervention-thought-input" placeholder="What just crossed your mind?">
+            
+            <label style="display: block; margin-top: 15px;">What is the nature of this thought?</label>
+            <div class="choice-grid" id="noise-category-grid" style="margin-top: 8px;">
+                <!-- Noise Categories Rendered Here -->
+            </div>
+
+            <label style="display: block; margin-top: 20px;">What is your conscious choice?</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 8px;">
+                <button class="btn btn-primary" id="intervention-explore-btn">🔍 Explore It</button>
+                <button class="btn btn-secondary" id="intervention-dismiss-btn">🗑️ Dismiss as Noise</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // -----------------------------------------------------------------------------
+    //  1. STATE & CONSTANTS (MODIFIED)
+    // -----------------------------------------------------------------------------
+    let state = {
+        patterns: [],
+        encounters: [],
+        reflections: [],
+        ui: {
+            focusedPatternId: null,
+            loggingPatternId: null
+        }
+    };
+
+    const CONTEXT_OPTIONS = ['Work', 'Home', 'Commute', 'Social', 'Content', 'Alone'];
+    const EMOTION_OPTIONS = { /* ... same ... */ };
+
+    // NEW: Constants for the intervention feature
+    const NOISE_CATEGORIES = {
+        'anxiety': '😰 Anxiety Spiral',
+        'creative': '💡 Creative Flow',
+        'social': '👥 Social Worry',
+        'productive': '⚡ Productive Thought',
+        'rumination': '🔄 Rumination Loop'
+    };
+
+    // MODIFIED: DOM Element references
+    const elements = {
+        // ... all previous elements
+        openInterventionModalBtn: document.getElementById('open-intervention-modal-btn'),
+        modalOverlay: document.getElementById('modal-overlay'),
+        modalCloseBtn: document.getElementById('modal-close-btn'),
+        interventionThoughtInput: document.getElementById('intervention-thought-input'),
+        noiseCategoryGrid: document.getElementById('noise-category-grid'),
+        interventionExploreBtn: document.getElementById('intervention-explore-btn'),
+        interventionDismissBtn: document.getElementById('intervention-dismiss-btn'),
+        analyticsGrid: document.getElementById('analytics-grid'),
+        // ... all other elements
+    };
+
+    // -----------------------------------------------------------------------------
+    //  2. CORE LOGIC (ACTIONS) (MODIFIED)
+    // -----------------------------------------------------------------------------
+    const actions = {
+        // MODIFIED: This is now the main way to add a pattern
+        addPatternWithIntervention(text, noiseCategory, interventionChoice) {
+            if (!text || !noiseCategory || !interventionChoice) {
+                alert('Please complete all fields to create a pattern.');
+                return;
+            }
+            state.patterns.push({
+                id: Date.now(),
+                text: text.trim(),
+                createdAt: new Date().toISOString(),
+                active: true,
+                // NEW data points
+                noiseCategory: noiseCategory,
+                interventionChoice: interventionChoice // 'explore' or 'dismiss'
+            });
+            actions.closeInterventionModal();
+            saveAndRender();
+        },
+
+        // NEW: Actions for the intervention modal
+        openInterventionModal() {
+            elements.interventionThoughtInput.value = '';
+            // Clear selections
+            document.querySelectorAll('#noise-category-grid .choice-option.active').forEach(el => el.classList.remove('active'));
+            elements.modalOverlay.classList.add('active');
+        },
+        closeInterventionModal() {
+            elements.modalOverlay.classList.remove('active');
+        },
+
+        // ... other actions like logEncounter, archivePattern, saveReflection remain the same ...
+        // ... exportData, importData also remain the same ...
+    };
+
+    // -----------------------------------------------------------------------------
+    //  3. RENDER LOGIC (MODIFIED)
+    // -----------------------------------------------------------------------------
+    function render() {
+        renderAnalytics(); // NEW
+        renderPatterns();
+        renderEncounters();
+    }
+    
+    // NEW: Function to render the analytics dashboard
+    function renderAnalytics() {
+        const totalPatterns = state.patterns.length;
+        if (totalPatterns === 0) {
+            elements.analyticsGrid.innerHTML = '<div class="analytics-card"><div class="analytics-label">No data yet. Capture a thought to begin!</div></div>';
+            return;
+        }
+
+        const categoryCounts = state.patterns.reduce((acc, pattern) => {
+            acc[pattern.noiseCategory] = (acc[pattern.noiseCategory] || 0) + 1;
+            return acc;
+        }, {});
+
+        elements.analyticsGrid.innerHTML = Object.entries(categoryCounts).map(([key, count]) => {
+            const percentage = Math.round((count / totalPatterns) * 100);
+            return `
+                <div class="analytics-card">
+                    <div class="analytics-number">${percentage}%</div>
+                    <div class="analytics-label">${NOISE_CATEGORIES[key]}</div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // MODIFIED: renderPatterns now includes the new footer info
+    function renderPatterns() {
+        const activePatterns = state.patterns.filter(p => p.active);
+        elements.patternsContainer.innerHTML = activePatterns.map(pattern => {
+            const encounterCount = state.encounters.filter(e => e.patternId === pattern.id).length;
+            return `
+                <div class="card pattern-card ${state.ui.focusedPatternId === pattern.id ? 'focused' : ''}" data-pattern-id="${pattern.id}">
+                    <div class="pattern-header">
+                        <div class="pattern-text">${pattern.text}</div>
+                        <div class="pattern-count">${encounterCount}</div>
+                    </div>
+                    <div class="pattern-meta">Created: ${new Date(pattern.createdAt).toLocaleDateString()}</div>
+                    <div class="pattern-actions">
+                        <button class="btn btn-primary btn-small js-log-btn">Log Encounter</button>
+                        <button class="btn btn-secondary btn-small js-archive-btn">Archive</button>
+                    </div>
+                    <!-- NEW: Footer showing intervention data -->
+                    <div class="pattern-footer">
+                        <div class="noise-category-badge">${NOISE_CATEGORIES[pattern.noiseCategory]}</div>
+                        <div class="intervention-badge ${pattern.interventionChoice}">${pattern.interventionChoice.toUpperCase()}</div>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="card"><p>Capture a thought to begin.</p></div>';
+        renderDots(elements.patternsDots, elements.patternsContainer);
+    }
+    
+    // MODIFIED: renderChoiceGrids now renders noise categories too
+    function renderChoiceGrids() {
+        // ... context and emotion grids are the same ...
+        elements.noiseCategoryGrid.innerHTML = Object.entries(NOISE_CATEGORIES).map(([key, label]) => 
+            `<div class="choice-option" data-type="noise" data-value="${key}">${label}</div>`
+        ).join('');
+    }
+
+    // ... other render functions (renderEncounters, renderDots) remain the same ...
+
+    // -----------------------------------------------------------------------------
+    //  4. EVENT LISTENERS & INITIALIZATION (MODIFIED)
+    // -----------------------------------------------------------------------------
+
+    function setupEventListeners() {
+        // MODIFIED: Button now opens the modal
+        elements.openInterventionModalBtn.addEventListener('click', actions.openInterventionModal);
+
+        // NEW: Event listeners for the intervention modal
+        elements.modalCloseBtn.addEventListener('click', actions.closeInterventionModal);
+        
+        const handleInterventionChoice = (choice) => {
+            const text = elements.interventionThoughtInput.value.trim();
+            const noiseCategory = document.querySelector('#noise-category-grid .choice-option.active')?.dataset.value;
+            actions.addPatternWithIntervention(text, noiseCategory, choice);
+        };
+        elements.interventionExploreBtn.addEventListener('click', () => handleInterventionChoice('explore'));
+        elements.interventionDismissBtn.addEventListener('click', () => handleInterventionChoice('dismiss'));
+
+        // Generic listener for all choice grids (context, emotion, noise)
+        document.body.addEventListener('click', (e) => {
+            if (e.target.matches('.choice-option')) {
+                const type = e.target.dataset.type;
+                // Deselect others of the same type within the same grid
+                e.target.closest('.choice-grid').querySelectorAll(`.choice-option[data-type="${type}"].active`).forEach(el => el.classList.remove('active'));
+                e.target.classList.add('active');
+            }
+        });
+
+        // ... all other event listeners remain the same ...
+    }
+
+    // ... All other functions (setupScrollListener, getCenterCardIndex, etc.) remain the same ...
+
+    // -----------------------------------------------------------------------------
+    //  5. DATA PERSISTENCE & INITIALIZATION
+    // -----------------------------------------------------------------------------
+    // ... No changes needed here. The init() and saveAndRender() functions work as is!
+    
+    function saveAndRender() { /* ... same ... */ }
+    function init() { /* ... same ... */ }
+
+    // Kick everything off!
+    init();
+});
+</script>
+</body>
+</html>
