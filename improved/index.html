@@ -5,224 +5,676 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mindscape Pattern Tracker</title>
     <style>
-        /* --- Existing styles are the same until here --- */
-
-        /* Mobile Carousel System - REFACTORED */
-        .carousel-container {
-            /* This is now a native scroll container */
-            overflow-x: auto;
-            scroll-snap-type: x mandatory; /* The magic! Enforces snapping on the horizontal axis. */
-            scroll-behavior: smooth; /* Nice smooth programmatic scrolling */
-
-            /* Hide the scrollbar for a cleaner look */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none;  /* IE 10+ */
+        /* 1. Global Styles & Reset */
+        :root {
+            --primary-glow: rgba(102, 126, 234, 0.6);
+            --primary-color: #667eea;
         }
 
-        .carousel-container::-webkit-scrollbar {
-            display: none; /* Safari and Chrome */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .carousel {
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* 2. Layout & Containers */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .time-display {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .section {
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+
+        .section-header {
             display: flex;
-            /* REMOVED: transition, will-change, etc. The browser handles this now. */
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
         }
 
-        /* Pattern Cards */
-        .pattern-card {
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        /* 3. CSS Scroll Snap Container (The Carousel Replacement) */
+        .scroll-container {
+            display: flex;
+            overflow-x: auto;
+            /* This is the magic: enables snapping on the horizontal axis. */
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding-bottom: 15px; /* Space for the scrollbar if visible */
+
+            /* Hides the scrollbar for a cleaner, app-like feel */
+            scrollbar-width: none; /* Firefox */
+        }
+        .scroll-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        /* 4. Cards (Patterns & Encounters) */
+        .card {
+            flex-shrink: 0;
+            width: calc(100vw - 60px); /* Card width relative to viewport */
+            margin-right: 15px;
+            /* This is the second piece of magic: tells each card where to snap. */
+            scroll-snap-align: center;
             background: rgba(74, 85, 104, 0.6);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 15px;
             border: 1px solid rgba(226, 232, 240, 0.1);
-            flex-shrink: 0;
             transition: all 0.3s ease;
-            position: relative;
-            margin-right: 15px;
-            min-width: 280px;
-            width: calc(100vw - 50px);
-            max-width: calc(100vw - 50px);
-            scroll-snap-align: center; /* The second piece of magic! Each card will snap to the center. */
+        }
+        .card:last-child {
+            margin-right: 0;
         }
 
-        /* --- All other styles remain the same --- */
+        .pattern-card.focused {
+            box-shadow: 0 0 20px var(--primary-glow), 0 0 40px rgba(102, 126, 234, 0.3);
+            border-color: var(--primary-color);
+        }
+
+        .encounter-card.focused-pattern {
+             border-left: 3px solid var(--primary-color);
+             background: rgba(102, 126, 234, 0.15);
+        }
+        .encounter-card {
+             border-left: 3px solid transparent;
+        }
+
+
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .pattern-text { font-weight: 600; }
+        .pattern-count {
+            background: rgba(102, 126, 234, 0.3);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .pattern-meta { opacity: 0.7; font-size: 0.8rem; margin: 10px 0; }
+        .pattern-actions { display: flex; gap: 8px; }
+
+        .encounter-header { display: flex; justify-content: space-between; }
+        .encounter-pattern { font-weight: 600; }
+        .encounter-time { font-size: 0.7rem; opacity: 0.7; }
+        .encounter-meta { display: flex; gap: 10px; margin: 8px 0; }
+        .encounter-notes { font-size: 0.8rem; opacity: 0.8; margin-top: 8px; font-style: italic; }
+        .encounter-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+
+        /* 5. UI Elements (Buttons, Forms, Tags, Dots) */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .btn-small { padding: 6px 12px; font-size: 0.7rem; }
+
+        .form-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(74, 85, 104, 0.8);
+            color: #e2e8f0;
+            margin-bottom: 15px;
+        }
+        textarea { resize: vertical; min-height: 80px; }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .dots-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .dot.active { background-color: var(--primary-color); }
+
+        .tag { padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
+        .context-tag { background: rgba(160, 174, 192, 0.3); color: #e2e8f0; }
+        .emotion-tag.neutral { background: rgba(160, 174, 192, 0.3); color: #e2e8f0; }
+        .emotion-tag.triggered { background: rgba(245, 101, 101, 0.3); color: #fed7d7; }
+        .emotion-tag.curious { background: rgba(72, 187, 120, 0.3); color: #c6f6d5; }
+        .emotion-tag.resistant { background: rgba(237, 137, 54, 0.3); color: #feebc8; }
+
+        .choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin: 10px 0; }
+        .choice-option { padding: 8px; border: 1px solid rgba(226, 232, 240, 0.2); border-radius: 6px; text-align: center; cursor: pointer; transition: all 0.2s ease; font-size: 0.8rem; }
+        .choice-option.active { border-color: var(--primary-color); color: #e2e8f0; background: rgba(102, 126, 234, 0.2); }
+
+        /* 6. Modal & Other UI */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(5px);
+            z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 60, 114, 0.95);
+            border-radius: 16px; padding: 30px;
+            max-width: 90vw; max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-close { position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; color: #e2e8f0; cursor: pointer; }
+        .info-icon { position: fixed; top: 20px; right: 20px; width: 30px; height: 30px; border-radius: 50%; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; z-index: 100; }
     </style>
 </head>
 <body>
-    <!-- The HTML Structure remains exactly the same -->
-    <!-- ... all body content ... -->
-    <script>
-        // Data structure for patterns and encounters (No changes)
-        let appData = { ... };
+    <div class="container">
+        <header class="header">
+            <h1>🧠 Mindscape Pattern Tracker</h1>
+            <p>Witness your thoughts, understand your patterns.</p>
+        </header>
 
-        // Synchronization state (No changes)
-        let syncState = { ... };
+        <div class="time-display" id="time-display"></div>
 
-        // --- DELETED ---
-        // The entire MobileCarousel class is removed.
-        // class MobileCarousel { ... } // GONE!
+        <main>
+            <!-- Add New Pattern Section -->
+            <section class="section">
+                <div class="form-section">
+                    <input type="text" id="pattern-input" placeholder="What thought or person would you like to track?" maxlength="100">
+                    <button class="btn btn-primary" id="add-pattern-btn">Start Tracking</button>
+                </div>
+            </section>
 
-        // Current logging state (No changes)
-        let currentLoggingPattern = null;
-        let selectedContext = null;
-        let selectedEmotion = null;
-        const contextOptions = ['Work', 'Home', 'Commute', 'Social', 'Content', 'Alone'];
-        const emotionOptions = [ ... ];
+            <!-- Active Patterns Section -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Active Patterns</h2>
+                </div>
+                <div class="scroll-container" id="patterns-container"></div>
+                <div class="dots-container" id="patterns-dots"></div>
+            </section>
 
+            <!-- Logging Interface (hidden by default) -->
+            <section class="section" id="log-section" style="display: none;">
+                <div class="section-header"><h2 class="section-title">Log Encounter</h2></div>
+                <div class="form-section">
+                    <div><strong>Pattern:</strong> <span id="log-pattern-text"></span></div>
+                    <label style="display: block; margin: 15px 0 8px; font-weight: 600;">Context:</label>
+                    <div class="choice-grid" id="context-grid"></div>
+                    <label style="display: block; margin: 15px 0 8px; font-weight: 600;">How did you feel?</label>
+                    <div class="choice-grid" id="emotion-grid"></div>
+                    <label style="display: block; margin: 15px 0 8px; font-weight: 600;">Notes (optional):</label>
+                    <textarea id="notes-input" placeholder="Add any additional context or insights..."></textarea>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" id="log-encounter-btn">Log Encounter</button>
+                        <button class="btn btn-secondary" id="cancel-log-btn">Cancel</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Recent Encounters Section -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Encounters</h2>
+                </div>
+                <div class="scroll-container" id="encounters-container"></div>
+                <div class="dots-container" id="encounters-dots"></div>
+            </section>
 
-        // +++ REFACTORED +++
-        // Replaces the complex class with a simple setup function.
-        function setupSnapCarousel(containerId, dotsId, onSlideChangeCallback) {
-            const container = document.getElementById(containerId);
-            const dotsContainer = document.getElementById(dotsId);
-            let timeout;
+            <!-- Daily Reflection & Data Section -->
+            <section class="section">
+                <div class="section-header"><h2 class="section-title">Daily Reflection & Data</h2></div>
+                <div class="form-section">
+                    <textarea id="reflection-input" placeholder="What insights can you gain from today's observations?"></textarea>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <button class="btn btn-primary" id="save-reflection-btn">Save Reflection</button>
+                        <button class="btn btn-primary" id="export-btn">Export Data</button>
+                    </div>
+                     <div style="text-align: center; margin-top: 15px;">
+                        <label for="import-file" class="btn btn-secondary" style="cursor: pointer;">Import Data</label>
+                        <input type="file" id="import-file" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
-            // 1. Listen for when the user scrolls the container
-            container.addEventListener('scroll', () => {
-                // Use a timeout to run logic only when scrolling has stopped
-                clearTimeout(timeout);
-                timeout = setTimeout(() => {
-                    const cards = Array.from(container.querySelector('.carousel').children);
-                    if (cards.length === 0) return;
+    <!-- Info Modal -->
+    <div class="info-icon" id="info-icon">i</div>
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal">
+            <button class="modal-close" id="modal-close-btn">×</button>
+            <h2>🧠 Your Journey to Self-Awareness</h2>
+            <p>This tool helps you develop metacognitive awareness by observing your thoughts without being consumed by them.</p>
+            <h3>How It Works</h3>
+            <ul style="margin: 10px 0 15px 20px;">
+                <li><strong>Track a Pattern:</strong> Add any recurring thought, feeling, or person.</li>
+                <li><strong>Log Encounters:</strong> When the pattern appears, log it with context and your emotional reaction.</li>
+                <li><strong>Swipe to Sync:</strong> Swipe through your patterns to automatically see their related encounters below.</li>
+                <li><strong>Reflect:</strong> Use the reflection area to journal your insights.</li>
+            </ul>
+            <p>All data is stored **only on your device** in your browser's local storage. Nothing is ever sent to a server.</p>
+        </div>
+    </div>
 
-                    // 2. Find which card is currently snapped in the center
-                    const containerCenter = container.offsetWidth / 2;
-                    let closestCardIndex = -1;
-                    let minDistance = Infinity;
+<script>
+// =================================================================================
+//  MINDSCAPE PATTERN TRACKER - CLEAN REWRITE
+// =================================================================================
+document.addEventListener('DOMContentLoaded', () => {
 
-                    cards.forEach((card, index) => {
-                        const cardRect = card.getBoundingClientRect();
-                        const containerRect = container.getBoundingClientRect();
-                        const cardCenter = (cardRect.left - containerRect.left) + (cardRect.width / 2);
-                        const distance = Math.abs(containerCenter - cardCenter);
+    // -----------------------------------------------------------------------------
+    //  1. STATE & CONSTANTS
+    // -----------------------------------------------------------------------------
 
-                        if (distance < minDistance) {
-                            minDistance = distance;
-                            closestCardIndex = index;
-                        }
-                    });
-                    
-                    // 3. Update the dots to reflect the current card
-                    updateDots(dotsContainer, closestCardIndex, cards.length);
+    // The single source of truth for the application's data.
+    let state = {
+        patterns: [],
+        encounters: [],
+        reflections: [],
+        ui: {
+            focusedPatternId: null,
+            loggingPatternId: null
+        }
+    };
 
-                    // 4. If a callback is provided (for the patterns carousel), call it.
-                    if (onSlideChangeCallback) {
-                        onSlideChangeCallback(closestCardIndex);
+    const CONTEXT_OPTIONS = ['Work', 'Home', 'Commute', 'Social', 'Content', 'Alone'];
+    const EMOTION_OPTIONS = {
+        'neutral': 'Neutral',
+        'triggered': 'Triggered',
+        'curious': 'Curious',
+        'resistant': 'Resistant'
+    };
+
+    // DOM Element References
+    const elements = {
+        patternInput: document.getElementById('pattern-input'),
+        addPatternBtn: document.getElementById('add-pattern-btn'),
+        patternsContainer: document.getElementById('patterns-container'),
+        patternsDots: document.getElementById('patterns-dots'),
+        encountersContainer: document.getElementById('encounters-container'),
+        encountersDots: document.getElementById('encounters-dots'),
+        logSection: document.getElementById('log-section'),
+        logPatternText: document.getElementById('log-pattern-text'),
+        contextGrid: document.getElementById('context-grid'),
+        emotionGrid: document.getElementById('emotion-grid'),
+        notesInput: document.getElementById('notes-input'),
+        logEncounterBtn: document.getElementById('log-encounter-btn'),
+        cancelLogBtn: document.getElementById('cancel-log-btn'),
+        reflectionInput: document.getElementById('reflection-input'),
+        saveReflectionBtn: document.getElementById('save-reflection-btn'),
+        exportBtn: document.getElementById('export-btn'),
+        importFile: document.getElementById('import-file'),
+        infoIcon: document.getElementById('info-icon'),
+        modalOverlay: document.getElementById('modal-overlay'),
+        modalCloseBtn: document.getElementById('modal-close-btn'),
+        timeDisplay: document.getElementById('time-display'),
+    };
+
+    // -----------------------------------------------------------------------------
+    //  2. CORE LOGIC (ACTIONS)
+    // -----------------------------------------------------------------------------
+
+    const actions = {
+        addPattern(text) {
+            if (!text || text.trim().length === 0) return;
+            state.patterns.push({
+                id: Date.now(),
+                text: text.trim(),
+                createdAt: new Date().toISOString(),
+                active: true
+            });
+            elements.patternInput.value = '';
+            saveAndRender();
+        },
+        logEncounter(context, emotion, notes) {
+            if (!state.ui.loggingPatternId || !context || !emotion) {
+                alert('Please select a context and an emotion.');
+                return;
+            }
+            state.encounters.push({
+                id: Date.now(),
+                patternId: state.ui.loggingPatternId,
+                timestamp: new Date().toISOString(),
+                context, emotion, notes
+            });
+            actions.closeLogForm();
+            saveAndRender();
+        },
+        archivePattern(patternId) {
+            const pattern = state.patterns.find(p => p.id === patternId);
+            if (pattern && confirm(`Archive the pattern "${pattern.text}"?`)) {
+                pattern.active = false;
+                saveAndRender();
+            }
+        },
+        saveReflection(text) {
+             if (!text || text.trim().length === 0) {
+                 alert('Please write a reflection before saving.');
+                 return;
+             }
+             state.reflections.push({
+                 id: Date.now(),
+                 text: text.trim(),
+                 date: new Date().toISOString().split('T')[0]
+             });
+             elements.reflectionInput.value = '';
+             alert('Reflection saved!');
+             saveAndRender();
+        },
+        openLogForm(patternId) {
+            const pattern = state.patterns.find(p => p.id === patternId);
+            if (!pattern) return;
+            state.ui.loggingPatternId = patternId;
+            elements.logPatternText.textContent = pattern.text;
+            elements.logSection.style.display = 'block';
+            elements.logSection.scrollIntoView({ behavior: 'smooth' });
+        },
+        closeLogForm() {
+            state.ui.loggingPatternId = null;
+            elements.logSection.style.display = 'none';
+            elements.notesInput.value = '';
+            // Deselect choices
+            document.querySelectorAll('.choice-option.active').forEach(el => el.classList.remove('active'));
+        },
+        setFocusedPattern(patternId) {
+            state.ui.focusedPatternId = patternId;
+            // No save needed for UI state, just re-render to apply focus styles
+            render();
+        },
+        exportData() {
+            const dataStr = JSON.stringify(state, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `mindscape-backup-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        },
+        importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedState = JSON.parse(e.target.result);
+                    if (confirm('This will overwrite your current data. Are you sure?')) {
+                        state.patterns = importedState.patterns || [];
+                        state.encounters = importedState.encounters || [];
+                        state.reflections = importedState.reflections || [];
+                        saveAndRender();
+                        alert('Data imported successfully!');
                     }
-                }, 150); // 150ms debounce
+                } catch (error) {
+                    alert('Error importing data. The file may be invalid.');
+                    console.error('Import Error:', error);
+                }
+            };
+            reader.readAsText(file);
+            elements.importFile.value = ''; // Reset for next import
+        }
+    };
+
+    // -----------------------------------------------------------------------------
+    //  3. RENDER LOGIC (Updating the UI)
+    // -----------------------------------------------------------------------------
+
+    function render() {
+        renderPatterns();
+        renderEncounters();
+    }
+
+    function renderPatterns() {
+        const activePatterns = state.patterns.filter(p => p.active);
+        elements.patternsContainer.innerHTML = activePatterns.map(pattern => {
+            const encounterCount = state.encounters.filter(e => e.patternId === pattern.id).length;
+            return `
+                <div class="card pattern-card ${state.ui.focusedPatternId === pattern.id ? 'focused' : ''}" data-pattern-id="${pattern.id}">
+                    <div class="pattern-header">
+                        <div class="pattern-text">${pattern.text}</div>
+                        <div class="pattern-count">${encounterCount}</div>
+                    </div>
+                    <div class="pattern-meta">Created: ${new Date(pattern.createdAt).toLocaleDateString()}</div>
+                    <div class="pattern-actions">
+                        <button class="btn btn-primary btn-small js-log-btn">Log Encounter</button>
+                        <button class="btn btn-secondary btn-small js-archive-btn">Archive</button>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="card"><p>Add a pattern above to begin.</p></div>';
+        renderDots(elements.patternsDots, elements.patternsContainer);
+    }
+
+    function renderEncounters() {
+        let encountersToRender = state.encounters.slice(-30).reverse();
+        // If a pattern is focused, sort its encounters to the top
+        if (state.ui.focusedPatternId) {
+            encountersToRender.sort((a, b) => {
+                if (a.patternId === state.ui.focusedPatternId && b.patternId !== state.ui.focusedPatternId) return -1;
+                if (b.patternId === state.ui.focusedPatternId && a.patternId !== state.ui.focusedPatternId) return 1;
+                return 0;
             });
         }
+        elements.encountersContainer.innerHTML = encountersToRender.map(encounter => {
+            const pattern = state.patterns.find(p => p.id === encounter.patternId);
+            return `
+                <div class="card encounter-card ${state.ui.focusedPatternId === encounter.patternId ? 'focused-pattern' : ''}">
+                    <div class="encounter-header">
+                        <div class="encounter-pattern">${pattern ? pattern.text : 'Archived Pattern'}</div>
+                        <div class="encounter-time">${new Date(encounter.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                    <div class="encounter-meta">
+                        <div class="tag context-tag">${encounter.context}</div>
+                        <div class="tag emotion-tag ${encounter.emotion}">${EMOTION_OPTIONS[encounter.emotion]}</div>
+                    </div>
+                    ${encounter.notes ? `<div class="encounter-notes">"${encounter.notes}"</div>` : ''}
+                </div>
+            `;
+        }).join('') || '<div class="card"><p>No encounters logged yet.</p></div>';
+        renderDots(elements.encountersDots, elements.encountersContainer);
+    }
+    
+    function renderDots(dotsContainer, scrollContainer) {
+        const cardCount = scrollContainer.children.length;
+        dotsContainer.innerHTML = Array.from({ length: cardCount }, (_, i) => `<div class="dot" data-index="${i}"></div>`).join('');
+        updateActiveDot(dotsContainer, scrollContainer);
+    }
 
-        function createDots(dotsContainer, numCards, container) {
-            dotsContainer.innerHTML = '';
-            for (let i = 0; i < numCards; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                dot.addEventListener('click', () => {
-                    // When a dot is clicked, scroll the corresponding card into view
-                    const card = container.querySelector('.carousel').children[i];
-                    if (card) {
-                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    }
-                });
-                dotsContainer.appendChild(dot);
-            }
-        }
+    function renderChoiceGrids() {
+        elements.contextGrid.innerHTML = CONTEXT_OPTIONS.map(opt => 
+            `<div class="choice-option" data-type="context" data-value="${opt}">${opt}</div>`
+        ).join('');
+        elements.emotionGrid.innerHTML = Object.entries(EMOTION_OPTIONS).map(([key, label]) => 
+            `<div class="choice-option" data-type="emotion" data-value="${key}">${label}</div>`
+        ).join('');
+    }
 
-        function updateDots(dotsContainer, currentIndex, numCards) {
-            const dots = dotsContainer.children;
-            if (dots.length !== numCards) return; // Avoid errors during re-render
-            for (let i = 0; i < dots.length; i++) {
-                dots[i].classList.toggle('active', i === currentIndex);
-            }
-        }
+    // -----------------------------------------------------------------------------
+    //  4. EVENT LISTENERS & INITIALIZATION
+    // -----------------------------------------------------------------------------
+
+    function setupEventListeners() {
+        // Main Actions
+        elements.addPatternBtn.addEventListener('click', () => actions.addPattern(elements.patternInput.value));
+        elements.patternInput.addEventListener('keypress', (e) => e.key === 'Enter' && actions.addPattern(elements.patternInput.value));
+
+        // Event delegation for dynamically created buttons
+        document.body.addEventListener('click', (e) => {
+            const patternCard = e.target.closest('.pattern-card');
+            if (!patternCard) return;
+            const patternId = Number(patternCard.dataset.patternId);
+            if (e.target.matches('.js-log-btn')) actions.openLogForm(patternId);
+            if (e.target.matches('.js-archive-btn')) actions.archivePattern(patternId);
+        });
         
-        // Initialize app
-        function init() {
-            loadData();
-            updateTime();
-            setInterval(updateTime, 1000);
-            setupContextAndEmotionGrids();
-            renderPatterns();
-            renderEncounters();
-            
-            // +++ REFACTORED +++
-            // No more creating new class instances. Just call the setup functions.
-            setupSnapCarousel('patternsContainer', 'patternsDots', onPatternSlideChange);
-            setupSnapCarousel('encountersContainer', 'encountersDots', null); // No callback needed for encounters
-        }
+        // Log Form
+        elements.logEncounterBtn.addEventListener('click', () => {
+            const selectedContext = document.querySelector('.choice-option[data-type="context"].active')?.dataset.value;
+            const selectedEmotion = document.querySelector('.choice-option[data-type="emotion"].active')?.dataset.value;
+            actions.logEncounter(selectedContext, selectedEmotion, elements.notesInput.value);
+        });
+        elements.cancelLogBtn.addEventListener('click', actions.closeLogForm);
+        document.body.addEventListener('click', (e) => {
+            if (e.target.matches('.choice-option')) {
+                const type = e.target.dataset.type;
+                // Deselect others of the same type
+                document.querySelectorAll(`.choice-option[data-type="${type}"].active`).forEach(el => el.classList.remove('active'));
+                e.target.classList.add('active');
+            }
+        });
         
-        // This function is now the callback passed to the setup function
-        function onPatternSlideChange(index) {
-            syncState.isSynced = true;
-            updateSyncStatus();
-            
-            const patterns = appData.patterns.filter(p => p.active);
-            if (patterns[index]) {
-                const newFocusedId = patterns[index].id;
-                // Only re-render if the focused pattern actually changes
-                if (syncState.focusedPatternId !== newFocusedId) {
-                    syncState.focusedPatternId = newFocusedId;
-                    updatePatternFocus();
-                    renderSynchronizedEncounters();
-                }
-            }
-        }
+        // Data & Reflection
+        elements.saveReflectionBtn.addEventListener('click', () => actions.saveReflection(elements.reflectionInput.value));
+        elements.exportBtn.addEventListener('click', actions.exportData);
+        elements.importFile.addEventListener('change', actions.importData);
 
-        function renderPatterns() {
-            const container = document.getElementById('patternsCarousel');
-            const dotsContainer = document.getElementById('patternsDots');
-            const activePatterns = appData.patterns.filter(p => p.active);
-            
-            container.innerHTML = '';
-
-            if (activePatterns.length === 0) {
-                 // ... same as before
-            } else {
-                 // ... same as before
-            }
-            
-            // +++ REFACTORED +++
-            // After rendering the cards, we must recreate the dots.
-            createDots(dotsContainer, activePatterns.length, container.parentElement);
-            updateDots(dotsContainer, 0, activePatterns.length); // Activate first dot initially
-            updatePatternFocus();
-        }
-
-        function renderEncounters() {
-            // ... (The renderEncounters and renderSynchronizedEncounters functions remain the same)
-            // But after rendering, we must update their dots too.
-            const container = document.getElementById('encountersCarousel');
-            const dotsContainer = document.getElementById('encountersDots');
-            const numCards = container.children.length;
-
-            createDots(dotsContainer, numCards, container.parentElement);
-            updateDots(dotsContainer, 0, numCards);
-        }
-
-        // --- Other functions like addPattern, logEncounter, saveData etc. remain unchanged. ---
-        // The key is that they call renderPatterns() or renderEncounters() which now
-        // correctly rebuilds the dots.
+        // Modal
+        elements.infoIcon.addEventListener('click', () => elements.modalOverlay.classList.add('active'));
+        elements.modalCloseBtn.addEventListener('click', () => elements.modalOverlay.classList.remove('active'));
+        elements.modalOverlay.addEventListener('click', () => elements.modalOverlay.classList.remove('active'));
         
-        // The focusPatternFromEncounter function needs one small change to scroll programmatically.
-        function focusPatternFromEncounter(patternId) {
-            const activePatterns = appData.patterns.filter(p => p.active);
-            const patternIndex = activePatterns.findIndex(p => p.id === patternId);
-            
-            if (patternIndex !== -1) {
-                // Instead of calling a carousel method, we find the card and scroll to it.
-                const patternsContainer = document.getElementById('patternsCarousel');
-                const cardToFocus = patternsContainer.children[patternIndex];
-                if (cardToFocus) {
-                    cardToFocus.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                }
-                // The scroll event listener will naturally handle the rest (updating sync state, etc.)
+        // Scroll Snap Listeners for dot updates & synchronization
+        setupScrollListener(elements.patternsContainer, (index) => {
+            const card = elements.patternsContainer.children[index];
+            if (card) {
+                const patternId = Number(card.dataset.patternId);
+                actions.setFocusedPattern(patternId);
             }
+            updateActiveDot(elements.patternsDots, elements.patternsContainer);
+        });
+        setupScrollListener(elements.encountersContainer, () => updateActiveDot(elements.encountersDots, elements.encountersContainer));
+    }
+    
+    // A helper to handle the scroll-end detection for CSS Snap
+    function setupScrollListener(container, callback) {
+        let scrollTimeout;
+        container.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const centerIndex = getCenterCardIndex(container);
+                if(callback) callback(centerIndex);
+            }, 100); // Debounce to fire only when scroll ends
+        });
+    }
+    
+    function getCenterCardIndex(container) {
+        let minDistance = Infinity;
+        let centerIndex = 0;
+        const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
+        Array.from(container.children).forEach((card, index) => {
+            const cardCenter = card.getBoundingClientRect().left + card.offsetWidth / 2;
+            const distance = Math.abs(containerCenter - cardCenter);
+            if (distance < minDistance) {
+                minDistance = distance;
+                centerIndex = index;
+            }
+        });
+        return centerIndex;
+    }
+
+    function updateActiveDot(dotsContainer, scrollContainer) {
+        const centerIndex = getCenterCardIndex(scrollContainer);
+        dotsContainer.querySelectorAll('.dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === centerIndex);
+        });
+    }
+
+    // -----------------------------------------------------------------------------
+    //  5. DATA PERSISTENCE & INITIALIZATION
+    // -----------------------------------------------------------------------------
+    
+    function saveAndRender() {
+        // Save state to localStorage
+        localStorage.setItem('mindscape-data', JSON.stringify(state));
+        render();
+    }
+
+    function init() {
+        // Load state from localStorage
+        const savedState = localStorage.getItem('mindscape-data');
+        if (savedState) {
+            state = JSON.parse(savedState);
+            // Ensure UI state is reset on load
+            if (!state.ui) state.ui = {};
+            state.ui.focusedPatternId = null;
+            state.ui.loggingPatternId = null;
         }
 
+        renderChoiceGrids();
+        setupEventListeners();
+        render();
+        
+        setInterval(() => {
+            elements.timeDisplay.textContent = new Date().toLocaleString();
+        }, 1000);
+    }
 
-        // Initialize app when DOM is ready
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    // Kick everything off!
+    init();
+});
+</script>
 </body>
 </html>
