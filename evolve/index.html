@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindscape Evolution - Conscious Intervention Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .evolution-section {
+            margin: 30px 0;
+            padding: 25px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .evolution-title {
+            color: #667eea;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Pattern Creation with Conscious Intervention */
+        .pattern-creator {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .thought-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .thought-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .intervention-panel {
+            background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #f6ad55;
+        }
+
+        .intervention-title {
+            color: #c53030;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .noise-category-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .noise-tag {
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .noise-tag.anxiety { border-color: #f56565; background: rgba(245, 101, 101, 0.1); }
+        .noise-tag.creative { border-color: #48bb78; background: rgba(72, 187, 120, 0.1); }
+        .noise-tag.social { border-color: #ed8936; background: rgba(237, 137, 54, 0.1); }
+        .noise-tag.productive { border-color: #667eea; background: rgba(102, 126, 234, 0.1); }
+        .noise-tag.rumination { border-color: #9f7aea; background: rgba(159, 122, 234, 0.1); }
+
+        .noise-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .noise-tag.selected {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .intervention-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-explore {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-dismiss {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Pattern Analytics Dashboard */
+        .analytics-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .analytics-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        .analytics-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+
+        .analytics-label {
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .analytics-insight {
+            color: #4a5568;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        /* Noise Pattern Visualization */
+        .pattern-viz {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .pattern-timeline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .pattern-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .pattern-info {
+            flex-grow: 1;
+        }
+
+        .pattern-time {
+            font-size: 0.8rem;
+            color: #718096;
+        }
+
+        .conscious-intervention-badge {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: 10px;
+        }
+
+        .demo-section {
+            background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border: 2px solid #29b6f6;
+        }
+
+        .demo-title {
+            color: #0277bd;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .adaptive-message {
+            background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4caf50;
+            margin: 10px 0;
+        }
+
+        .adaptive-message .icon {
+            display: inline-block;
+            margin-right: 8px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠✨ Mindscape Evolution</h1>
+            <p>Conscious Intervention Tool for Mental Pattern Recognition</p>
+        </div>
+
+        <div class="evolution-section">
+            <div class="evolution-title">
+                🎯 Feature 1: Conscious Intervention at Pattern Creation
+            </div>
+            <p style="margin-bottom: 20px; color: #4a5568;">The moment you create a thought pattern, immediately classify it and decide your relationship with it.</p>
+            
+            <div class="pattern-creator">
+                <h3 style="color: #4a5568; margin-bottom: 15px;">New Thought Pattern</h3>
+                <input type="text" class="thought-input" placeholder="What thought or person crossed your mind?" value="Why did John ignore my message?">
+                
+                <div class="intervention-panel">
+                    <div class="intervention-title">🛑 CONSCIOUS INTERVENTION MOMENT</div>
+                    <p style="margin-bottom: 15px; color: #744210;">Before this thought becomes a pattern, classify its nature:</p>
+                    
+                    <div class="noise-category-grid">
+                        <div class="noise-tag anxiety selected">😰 Anxiety Spiral</div>
+                        <div class="noise-tag creative">💡 Creative Flow</div>
+                        <div class="noise-tag social">👥 Social Worry</div>
+                        <div class="noise-tag productive">⚡ Productive Thought</div>
+                        <div class="noise-tag rumination">🔄 Rumination Loop</div>
+                    </div>
+                    
+                    <div class="intervention-buttons">
+                        <button class="btn btn-explore">🔍 WORTH EXPLORING</button>
+                        <button class="btn btn-dismiss">🗑️ DISMISS AS NOISE</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="evolution-section">
+            <div class="evolution-title">
+                📊 Feature 2: Noise Pattern Analytics
+            </div>
+            <p style="margin-bottom: 20px; color: #4a5568;">Discover which types of mental noise dominate your mindscape.</p>
+            
+            <div class="analytics-dashboard">
+                <div class="analytics-card">
+                    <div class="analytics-number" style="color: #f56565;">67%</div>
+                    <div class="analytics-label">Anxiety Patterns</div>
+                    <div class="analytics-insight">Your dominant noise type</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-number" style="color: #48bb78;">23%</div>
+                    <div class="analytics-label">Productive Thoughts</div>
+                    <div class="analytics-insight">Keep nurturing these</div>
+                </div>
+                <div class="analytics-card">
+                    <div class="analytics-number" style="color: #ed8936;">10%</div>
+                    <div class="analytics-label">Creative Flows</div>
+                    <div class="analytics-insight">Rare but valuable</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="evolution-section">
+            <div class="evolution-title">
+                🎛️ Feature 3: Adaptive Tracking Modes
+            </div>
+            <p style="margin-bottom: 20px; color: #4a5568;">Different mental noise requires different tracking approaches.</p>
+            
+            <div class="pattern-viz">
+                <h4 style="color: #4a5568; margin-bottom: 15px;">Today's Mental Landscape</h4>
+                
+                <div class="pattern-timeline">
+                    <div class="pattern-dot" style="background: #f56565;"></div>
+                    <div class="pattern-info">
+                        <strong>John message worry</strong>
+                        <div class="pattern-time">09:23 AM - Anxiety Mode</div>
+                    </div>
+                    <span class="conscious-intervention-badge">DISMISSED</span>
+                </div>
+                
+                <div class="pattern-timeline">
+                    <div class="pattern-dot" style="background: #48bb78;"></div>
+                    <div class="pattern-info">
+                        <strong>Project idea: Voice notes app</strong>
+                        <div class="pattern-time">11:45 AM - Creative Mode</div>
+                    </div>
+                    <span class="conscious-intervention-badge">EXPLORED</span>
+                </div>
+                
+                <div class="pattern-timeline">
+                    <div class="pattern-dot" style="background: #9f7aea;"></div>
+                    <div class="pattern-info">
+                        <strong>Did I lock the door?</strong>
+                        <div class="pattern-time">02:15 PM - Rumination Mode</div>
+                    </div>
+                    <span class="conscious-intervention-badge">DISMISSED</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <div class="demo-title">🌱 Adaptive Intelligence in Action</div>
+            <p style="margin-bottom: 15px; color: #0277bd;">Your tool learns and adapts to help you become more flexible and responsive to your changing environment:</p>
+            
+            <div class="adaptive-message">
+                <span class="icon">🧘</span>
+                <strong>Mindscape Insight:</strong> You tend to have anxiety spirals about social interactions between 9-11 AM. Consider a morning mindfulness practice.
+            </div>
+            
+            <div class="adaptive-message">
+                <span class="icon">⚡</span>
+                <strong>Pattern Shift Detected:</strong> Your creative thoughts increased 40% this week. Your conscious intervention is working!
+            </div>
+            
+            <div class="adaptive-message">
+                <span class="icon">🎯</span>
+                <strong>Adaptation Suggestion:</strong> Time to graduate from tracking "John message worry" - you've successfully dismissed it 8 times. Ready for a new challenge?
+            </div>
+        </div>
+
+        <div class="evolution-section">
+            <div class="evolution-title">
+                🚀 The Vision: Conscious Evolution Tool
+            </div>
+            <p style="color: #4a5568; line-height: 1.6;">
+                This isn't just thought tracking - it's <strong>conscious beings intervening in their own mental makeup</strong>. 
+                Each interaction builds your capacity to observe, choose, and adapt. You're not just managing thoughts; 
+                you're <strong>evolving your relationship with your mind itself</strong>.
+            </p>
+            <br>
+            <p style="color: #667eea; font-style: italic; text-align: center; font-size: 1.1rem;">
+                "The goal is not a quiet mind, but a conscious mind that can dance with change."
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Add interactivity to noise tags
+        document.querySelectorAll('.noise-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                // Remove selected from all tags
+                document.querySelectorAll('.noise-tag').forEach(t => t.classList.remove('selected'));
+                // Add selected to clicked tag
+                this.classList.add('selected');
+            });
+        });
+
+        // Add button interactivity
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Visual feedback
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-2px)';
+                }, 150);
+                
+                // Show appropriate message based on button type
+                if (this.classList.contains('btn-explore')) {
+                    alert('✨ Great choice! This thought pattern will be tracked for deeper exploration and insights.');
+                } else if (this.classList.contains('btn-dismiss')) {
+                    alert('🗑️ Wise decision! This noise pattern has been dismissed. You\'ve just practiced conscious intervention.');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
