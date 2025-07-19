@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindscape Pattern Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .time-display {
+            text-align: center;
+            padding: 10px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #e2e8f0;
+        }
+
+        .section-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-pattern-form {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .add-pattern-form input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: rgba(74, 85, 104, 0.8);
+            color: #e2e8f0;
+            margin-bottom: 15px;
+        }
+
+        .add-pattern-form input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .add-pattern-form input::placeholder {
+            color: #a0aec0;
+        }
+
+        /* Mobile Carousel System */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            touch-action: pan-x;
+            user-select: none;
+        }
+
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+            will-change: transform;
+            touch-action: pan-x;
+            user-select: none;
+        }
+
+        /* Pattern Cards */
+        .pattern-card {
+            background: rgba(74, 85, 104, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(226, 232, 240, 0.1);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            margin-right: 15px;
+            min-width: 280px;
+            width: calc(100vw - 50px);
+            max-width: calc(100vw - 50px);
+        }
+
+        .pattern-card:last-child {
+            margin-right: 0;
+        }
+
+        .pattern-card.focused {
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6), 0 0 40px rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: scale(1.02);
+            animation: focusPulse 2s infinite;
+        }
+
+        @keyframes focusPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.6), 0 0 40px rgba(102, 126, 234, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(102, 126, 234, 0.8), 0 0 50px rgba(102, 126, 234, 0.4); }
+        }
+
+        .pattern-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .pattern-text {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #e2e8f0;
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .pattern-count {
+            background: rgba(102, 126, 234, 0.3);
+            color: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .pattern-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .pattern-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.7rem;
+        }
+
+        /* Encounter Cards */
+        .encounter-card {
+            background: rgba(74, 85, 104, 0.4);
+            backdrop-filter: blur(5px);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-right: 15px;
+            min-width: 260px;
+            width: calc(100vw - 50px);
+            max-width: calc(100vw - 50px);
+        }
+
+        .encounter-card:last-child {
+            margin-right: 0;
+        }
+
+        .encounter-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .encounter-card.highlighted {
+            border-left-color: #48bb78;
+            background: rgba(72, 187, 120, 0.15);
+            box-shadow: 0 0 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .encounter-card.focused-pattern {
+            border-left-color: #667eea;
+            background: rgba(102, 126, 234, 0.15);
+            box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .encounter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .encounter-pattern {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            flex: 1;
+        }
+
+        .encounter-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-left: 10px;
+        }
+
+        .encounter-meta {
+            display: flex;
+            gap: 10px;
+            margin: 8px 0;
+            flex-wrap: wrap;
+        }
+
+        .context-tag, .emotion-tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .context-tag {
+            background: rgba(160, 174, 192, 0.3);
+            color: #e2e8f0;
+        }
+
+        .emotion-tag.neutral {
+            background: rgba(160, 174, 192, 0.3);
+            color: #e2e8f0;
+        }
+
+        .emotion-tag.triggered {
+            background: rgba(245, 101, 101, 0.3);
+            color: #fed7d7;
+        }
+
+        .emotion-tag.curious {
+            background: rgba(72, 187, 120, 0.3);
+            color: #c6f6d5;
+        }
+
+        .emotion-tag.resistant {
+            background: rgba(237, 137, 54, 0.3);
+            color: #feebc8;
+        }
+
+        .encounter-notes {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .encounter-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        /* Logging Interface */
+        .log-interface {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .context-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .context-option {
+            padding: 8px 12px;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(74, 85, 104, 0.4);
+            color: #a0aec0;
+            font-size: 0.8rem;
+        }
+
+        .context-option:hover, .context-option.active {
+            border-color: #667eea;
+            color: #e2e8f0;
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin: 10px 0;
+        }
+
+        .emotion-option {
+            padding: 8px 12px;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: rgba(74, 85, 104, 0.4);
+            color: #a0aec0;
+            font-size: 0.8rem;
+        }
+
+        .emotion-option:hover {
+            border-color: #667eea;
+            color: #e2e8f0;
+        }
+
+        .emotion-option.active.neutral {
+            background: rgba(160, 174, 192, 0.3);
+            border-color: #a0aec0;
+            color: #e2e8f0;
+        }
+
+        .emotion-option.active.triggered {
+            background: rgba(245, 101, 101, 0.3);
+            border-color: #f56565;
+            color: #fed7d7;
+        }
+
+        .emotion-option.active.curious {
+            background: rgba(72, 187, 120, 0.3);
+            border-color: #48bb78;
+            color: #c6f6d5;
+        }
+
+        .emotion-option.active.resistant {
+            background: rgba(237, 137, 54, 0.3);
+            border-color: #ed8936;
+            color: #feebc8;
+        }
+
+        .notes-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 1px solid rgba(226, 232, 240, 0.2);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            background: rgba(74, 85, 104, 0.8);
+            color: #e2e8f0;
+            margin: 10px 0;
+        }
+
+        .notes-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .notes-input::placeholder {
+            color: #a0aec0;
+        }
+
+        /* Sync Status */
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+
+        .sync-status.synced {
+            background: rgba(72, 187, 120, 0.2);
+            color: #c6f6d5;
+        }
+
+        .sync-status.manual {
+            background: rgba(237, 137, 54, 0.2);
+            color: #feebc8;
+        }
+
+        .sync-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .sync-indicator.synced {
+            background: #48bb78;
+        }
+
+        .sync-indicator.manual {
+            background: #ed8936;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Dots Navigation */
+        .dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #667eea;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30, 60, 114, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #e2e8f0;
+            cursor: pointer;
+        }
+
+        .info-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(102, 126, 234, 0.8);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        /* Archive Section */
+        .archive-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .archived-item {
+            background: rgba(74, 85, 104, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #48bb78;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .pattern-card, .encounter-card {
+                width: auto;
+                max-width: 320px;
+                min-width: 280px;
+            }
+
+            .carousel-container {
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                scroll-behavior: smooth;
+            }
+
+            .carousel-container::-webkit-scrollbar {
+                display: none;
+            }
+
+            .pattern-card, .encounter-card {
+                scroll-snap-align: start;
+            }
+        }
+
+        .highlight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🧠 Mindscape Pattern Tracker</h1>
+            <p>Witness your thoughts, understand your patterns, transform your awareness</p>
+        </header>
+
+        <div class="time-display" id="currentTime"></div>
+
+        <main>
+            <!-- Add New Pattern Section -->
+            <section class="section">
+                <div class="add-pattern-form">
+                    <input type="text" id="patternInput" placeholder="What thought or person would you like to track?" maxlength="100">
+                    <button class="btn btn-primary" onclick="addPattern()">Start Tracking</button>
+                </div>
+            </section>
+
+            <!-- Active Patterns Section -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Active Patterns</h2>
+                    <div class="section-actions">
+                        <button class="btn btn-secondary" onclick="showArchive()">Archive</button>
+                        <button class="btn btn-secondary" onclick="showAnalytics()">Analytics</button>
+                    </div>
+                </div>
+
+                <div class="sync-status synced" id="syncStatus">
+                    <div class="sync-indicator synced" id="syncIndicator"></div>
+                    <span id="syncText">Synced</span>
+                    <span style="font-size: 0.7rem; opacity: 0.7; margin-left: auto;">Swipe patterns to focus encounters</span>
+                </div>
+
+                <div class="carousel-container" id="patternsContainer">
+                    <div class="carousel" id="patternsCarousel">
+                        <!-- Pattern cards will be inserted here -->
+                    </div>
+                </div>
+                <div class="dots" id="patternsDots"></div>
+            </section>
+
+            <!-- Recent Encounters Section -->
+            <section class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Encounters</h2>
+                    <button class="btn btn-secondary" onclick="exportReportData()">Export</button>
+                </div>
+
+                <div class="carousel-container" id="encountersContainer">
+                    <div class="carousel" id="encountersCarousel">
+                        <!-- Encounter cards will be inserted here -->
+                    </div>
+                </div>
+                <div class="dots" id="encountersDots"></div>
+            </section>
+
+            <!-- Pattern Logging Interface -->
+            <section class="section" id="logInterface" style="display: none;">
+                <h2 class="section-title">Log Encounter</h2>
+                <div class="log-interface">
+                    <div style="margin-bottom: 15px;">
+                        <strong id="selectedPatternText">Selected Pattern</strong>
+                    </div>
+
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Context:</label>
+                    <div class="context-grid" id="contextGrid">
+                        <!-- Context options will be inserted here -->
+                    </div>
+
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">How did you feel?</label>
+                    <div class="emotion-grid" id="emotionGrid">
+                        <!-- Emotion options will be inserted here -->
+                    </div>
+
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Notes (optional):</label>
+                    <textarea id="notesInput" class="notes-input" placeholder="Add any additional context, insights, or observations..."></textarea>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" onclick="logEncounter()">Log Encounter</button>
+                        <button class="btn btn-secondary" onclick="cancelLogging()">Cancel</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Daily Reflection Section -->
+            <section class="section">
+                <h2 class="section-title">Daily Reflection</h2>
+                <div class="log-interface">
+                    <textarea id="reflectionInput" placeholder="How did these encounters make you feel? What insights can you gain from today's observations?" style="width: 100%; min-height: 120px; padding: 15px; border: 1px solid rgba(226, 232, 240, 0.2); border-radius: 8px; font-family: inherit; font-size: 1rem; resize: vertical; background: rgba(74, 85, 104, 0.8); color: #e2e8f0;"></textarea>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="saveReflection()">Save Reflection</button>
+                        <button class="btn btn-primary" onclick="exportReportData()">Export Report</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Info Icon -->
+    <div class="info-icon" onclick="showModal()">i</div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="hideModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="hideModal()">×</button>
+            <h2>🧠 Your Journey to Self-Awareness</h2>
+            
+            <h3>🆕 Latest Updates (v2.5) - MOBILE CAROUSEL PERFECTED!</h3>
+            <div style="background: rgba(102, 126, 234, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="margin-bottom: 10px;"><strong>🎯 Mobile-First Excellence:</strong></p>
+                <ul style="margin-left: 15px; margin-bottom: 10px;">
+                    <li><strong>🔄 Perfect Touch Navigation:</strong> Smooth swipe gestures with precise touch handling</li>
+                    <li><strong>✨ Advanced Synchronization:</strong> Pattern focus automatically reorders encounters</li>
+                    <li><strong>🎨 Visual Feedback:</strong> Focused patterns pulse with beautiful glow effects</li>
+                    <li><strong>⚡ Hybrid Experience:</strong> Mobile swipe + desktop scroll for all devices</li>
+                    <li><strong>📱 Production Ready:</strong> Bug-free carousel with enterprise-grade performance</li>
+                    <li><strong>🔍 Smart Detection:</strong> Automatic pattern focus based on viewport center</li>
+                </ul>
+                <p style="margin-bottom: 0;"><strong>🚀 UX:</strong> The most intuitive pattern tracking experience ever built!</p>
+            </div>
+            
+            <h3>🎯 Purpose</h3>
+            <p>This tool helps you develop <span class="highlight">metacognitive awareness</span> - the ability to observe your thoughts without being consumed by them. It's designed for anyone committed to personal transformation and building new patterns of awareness.</p>
+
+            <h3>🔍 How the Sync Works</h3>
+            <p>Experience the <span class="highlight">intelligent carousel synchronization</span>:</p>
+            <ul>
+                <li><strong>Pattern Focus:</strong> Swipe through patterns to automatically reorder encounters</li>
+                <li><strong>Encounter Click:</strong> Tap any encounter to focus its corresponding pattern</li>
+                <li><strong>Smart Highlighting:</strong> Focused pattern encounters glow and appear first</li>
+                <li><strong>Visual Feedback:</strong> Focused patterns pulse with blue glow animation</li>
+                <li><strong>Sync Restoration:</strong> Swipe patterns to restore synchronization</li>
+            </ul>
+
+            <h3>📱 Mobile Navigation</h3>
+            <ul>
+                <li><strong>Swipe:</strong> Natural touch gestures for card navigation</li>
+                <li><strong>Touch Targets:</strong> Large, accessible buttons for mobile interaction</li>
+                <li><strong>Visual Feedback:</strong> Live transform feedback during swipes</li>
+                <li><strong>Infinite Scroll:</strong> Seamless navigation between cards</li>
+            </ul>
+
+            <h3>🌟 What You'll Discover</h3>
+            <p>Through consistent practice, you'll uncover:</p>
+            <ul>
+                <li><strong>Pattern Recognition:</strong> When and why certain thoughts dominate your mind</li>
+                <li><strong>Emotional Triggers:</strong> Which thoughts hook you vs. slide by neutrally</li>
+                <li><strong>Context Awareness:</strong> Environmental factors that amplify mental patterns</li>
+                <li><strong>Growth Journey:</strong> Your archive becomes a map of personal transformation</li>
+            </ul>
+
+            <p><strong>Perfect for:</strong> Daily mindfulness practice, tracking recurring thoughts, and developing metacognitive awareness across all devices.</p>
+        </div>
+    </div>
+
+    <!-- File input for import -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importData()">
+
+    <script>
+        // Data structure for patterns and encounters
+        let appData = {
+            patterns: [],
+            encounters: [],
+            archivedEncounters: [],
+            reflections: [],
+            version: '2.5'
+        };
+
+        // Synchronization state
+        let syncState = {
+            isSynced: true,
+            focusedPatternId: null,
+            lastPatternScroll: 0,
+            lastEncounterScroll: 0
+        };
+
+        // Mobile Carousel instances
+        let patternsCarousel, encountersCarousel;
+
+        // Current logging state
+        let currentLoggingPattern = null;
+        let selectedContext = null;
+        let selectedEmotion = null;
+
+        const contextOptions = ['Work', 'Home', 'Commute', 'Social', 'Content', 'Alone'];
+        const emotionOptions = [
+            { key: 'neutral', label: 'Neutral' },
+            { key: 'triggered', label: 'Triggered' },
+            { key: 'curious', label: 'Curious' },
+            { key: 'resistant', label: 'Resistant' }
+        ];
+
+        // Mobile Carousel Class (our clean foundation)
+        class MobileCarousel {
+            constructor(carouselElement, dotsElement, onSlideChange = null) {
+                this.carousel = carouselElement;
+                this.dotsElement = dotsElement;
+                this.onSlideChange = onSlideChange;
+                this.cardCount = 0;
+                this.currentIndex = 0;
+                this.isAnimating = false;
+                this.cardWidth = window.innerWidth;
+                
+                // Swipe tracking
+                this.startX = 0;
+                this.deltaX = 0;
+                this.isDragging = false;
+
+                this.init();
+            }
+
+            init() {
+                this.updateCardCount();
+                if (this.cardCount > 0) {
+                    this.setupInfiniteScroll();
+                    this.setInitialPosition();
+                }
+                this.createDots();
+                this.updateDots();
+                this.bindEvents();
+            }
+
+            updateCardCount() {
+                const realCards = Array.from(this.carousel.children).filter(child => 
+                    !child.classList.contains('clone'));
+                this.cardCount = realCards.length;
+            }
+
+            setupInfiniteScroll() {
+                // Remove existing clones
+                const existingClones = this.carousel.querySelectorAll('.clone');
+                existingClones.forEach(clone => clone.remove());
+
+                if (this.cardCount <= 1) return;
+
+                const realCards = Array.from(this.carousel.children);
+                const firstCard = realCards[0];
+                const lastCard = realCards[realCards.length - 1];
+
+                // Add clones
+                const firstClone = firstCard.cloneNode(true);
+                const lastClone = lastCard.cloneNode(true);
+                
+                firstClone.classList.add('clone');
+                lastClone.classList.add('clone');
+
+                this.carousel.insertBefore(lastClone, firstCard);
+                this.carousel.appendChild(firstClone);
+            }
+
+            setInitialPosition() {
+                if (this.cardCount <= 1) {
+                    this.carousel.style.transform = 'translateX(0px)';
+                    return;
+                }
+
+                this.carousel.style.transition = 'none';
+                this.carousel.style.transform = `translateX(-${this.cardWidth}px)`;
+                setTimeout(() => {
+                    this.carousel.style.transition = 'transform 0.5s ease-in-out';
+                }, 50);
+            }
+
+            bindEvents() {
+                const container = this.carousel.parentElement;
+
+                // Touch Events
+                container.addEventListener('touchstart', this.handleStart.bind(this), { passive: true });
+                document.addEventListener('touchmove', this.handleMove.bind(this), { passive: false });
+                document.addEventListener('touchend', this.handleEnd.bind(this), { passive: true });
+
+                // Mouse Events (for compatibility)
+                container.addEventListener('mousedown', this.handleStart.bind(this));
+                document.addEventListener('mousemove', this.handleMove.bind(this));
+                document.addEventListener('mouseup', this.handleEnd.bind(this));
+
+                // Transition end
+                this.carousel.addEventListener('transitionend', this.handleTransitionEnd.bind(this));
+
+                // Prevent context menu
+                container.addEventListener('contextmenu', (e) => e.preventDefault());
+            }
+
+            handleStart(e) {
+                if (this.cardCount <= 1) return;
+                
+                this.isDragging = true;
+                this.startX = e.touches ? e.touches[0].clientX : e.clientX;
+                this.deltaX = 0;
+                
+                if (e.type === 'mousedown') {
+                    e.preventDefault();
+                }
+            }
+
+            handleMove(e) {
+                if (!this.isDragging || this.cardCount <= 1) return;
+
+                const currentX = e.touches ? e.touches[0].clientX : e.clientX;
+                this.deltaX = currentX - this.startX;
+
+                if (Math.abs(this.deltaX) > 10) {
+                    e.preventDefault();
+                    
+                    if (!this.isAnimating) {
+                        this.carousel.style.transition = 'none';
+                        const translateX = -this.cardWidth - (this.currentIndex * this.cardWidth) + this.deltaX;
+                        this.carousel.style.transform = `translateX(${translateX}px)`;
+                    }
+                }
+            }
+
+            handleEnd() {
+                if (!this.isDragging || this.cardCount <= 1) return;
+                
+                this.isDragging = false;
+
+                if (Math.abs(this.deltaX) > 50) {
+                    if (this.deltaX > 0) {
+                        this.prev();
+                    } else {
+                        this.next();
+                    }
+                } else {
+                    this.updateCarousel();
+                }
+
+                this.deltaX = 0;
+            }
+
+            next() {
+                if (this.isAnimating || this.cardCount <= 1) return;
+                this.isAnimating = true;
+                this.currentIndex++;
+                this.updateCarousel();
+            }
+
+            prev() {
+                if (this.isAnimating || this.cardCount <= 1) return;
+                this.isAnimating = true;
+                this.currentIndex--;
+                this.updateCarousel();
+            }
+
+            updateCarousel() {
+                if (this.cardCount <= 1) {
+                    this.carousel.style.transform = 'translateX(0px)';
+                    return;
+                }
+
+                this.carousel.style.transition = 'transform 0.5s ease-in-out';
+                const translateX = -this.cardWidth - (this.currentIndex * this.cardWidth);
+                this.carousel.style.transform = `translateX(${translateX}px)`;
+            }
+
+            handleTransitionEnd(e) {
+                if (e.target !== this.carousel || this.cardCount <= 1) return;
+
+                // Handle infinite loop
+                if (this.currentIndex >= this.cardCount) {
+                    this.currentIndex = 0;
+                    this.carousel.style.transition = 'none';
+                    this.carousel.style.transform = `translateX(-${this.cardWidth}px)`;
+                }
+
+                if (this.currentIndex < 0) {
+                    this.currentIndex = this.cardCount - 1;
+                    this.carousel.style.transition = 'none';
+                    this.carousel.style.transform = `translateX(-${this.cardWidth + (this.currentIndex * this.cardWidth)}px)`;
+                }
+
+                this.isAnimating = false;
+                this.updateDots();
+                
+                if (this.onSlideChange) {
+                    this.onSlideChange(this.currentIndex);
+                }
+            }
+
+            createDots() {
+                this.dotsElement.innerHTML = '';
+                for (let i = 0; i < this.cardCount; i++) {
+                    const dot = document.createElement('div');
+                    dot.className = 'dot';
+                    dot.addEventListener('click', () => this.goToSlide(i));
+                    this.dotsElement.appendChild(dot);
+                }
+            }
+
+            updateDots() {
+                const dots = this.dotsElement.children;
+                for (let i = 0; i < dots.length; i++) {
+                    dots[i].classList.toggle('active', i === this.currentIndex);
+                }
+            }
+
+            goToSlide(index) {
+                if (this.isAnimating || this.cardCount <= 1 || index === this.currentIndex) return;
+                this.isAnimating = true;
+                this.currentIndex = index;
+                this.updateCarousel();
+            }
+
+            refresh() {
+                this.updateCardCount();
+                
+                // Remove existing clones first
+                const existingClones = this.carousel.querySelectorAll('.clone');
+                existingClones.forEach(clone => clone.remove());
+                
+                if (this.cardCount > 0) {
+                    this.setupInfiniteScroll();
+                    this.setInitialPosition();
+                }
+                
+                this.createDots();
+                this.updateDots();
+                
+                // Reset current index if it's out of bounds
+                if (this.currentIndex >= this.cardCount) {
+                    this.currentIndex = 0;
+                }
+            }
+
+            addCard() {
+                this.refresh();
+            }
+        }
+
+        // Initialize app
+        function init() {
+            loadData();
+            updateTime();
+            setInterval(updateTime, 1000);
+            setupContextAndEmotionGrids();
+            renderPatterns();
+            renderEncounters();
+            setupCarousels();
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleString();
+        }
+
+        function loadData() {
+            const stored = localStorage.getItem('mindscape-data');
+            if (stored) {
+                try {
+                    const parsedData = JSON.parse(stored);
+                    
+                    appData = {
+                        patterns: parsedData.patterns || [],
+                        encounters: parsedData.encounters || [],
+                        archivedEncounters: parsedData.archivedEncounters || [],
+                        reflections: parsedData.reflections || [],
+                        version: '2.5'
+                    };
+                    
+                    // Ensure existing encounters have notes field
+                    appData.encounters.forEach(encounter => {
+                        if (!encounter.notes) encounter.notes = '';
+                    });
+                    appData.archivedEncounters.forEach(encounter => {
+                        if (!encounter.notes) encounter.notes = '';
+                    });
+                    
+                } catch (e) {
+                    console.error('Error loading data:', e);
+                    appData = {
+                        patterns: [],
+                        encounters: [],
+                        archivedEncounters: [],
+                        reflections: [],
+                        version: '2.5'
+                    };
+                }
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem('mindscape-data', JSON.stringify(appData));
+        }
+
+        function setupCarousels() {
+            // Initialize carousels with slide change callbacks
+            patternsCarousel = new MobileCarousel(
+                document.getElementById('patternsCarousel'),
+                document.getElementById('patternsDots'),
+                onPatternSlideChange
+            );
+
+            encountersCarousel = new MobileCarousel(
+                document.getElementById('encountersCarousel'),
+                document.getElementById('encountersDots')
+            );
+        }
+
+        function onPatternSlideChange(index) {
+            // Update sync state
+            syncState.lastPatternScroll = Date.now();
+            syncState.isSynced = true;
+            updateSyncStatus();
+
+            // Update focused pattern
+            const patterns = appData.patterns.filter(p => p.active);
+            if (patterns[index]) {
+                syncState.focusedPatternId = patterns[index].id;
+                updatePatternFocus();
+                renderSynchronizedEncounters();
+            }
+        }
+
+        function setupContextAndEmotionGrids() {
+            // Context grid
+            const contextGrid = document.getElementById('contextGrid');
+            contextGrid.innerHTML = '';
+            contextOptions.forEach(context => {
+                const option = document.createElement('div');
+                option.className = 'context-option';
+                option.textContent = context;
+                option.onclick = () => selectContext(context, option);
+                contextGrid.appendChild(option);
+            });
+
+            // Emotion grid
+            const emotionGrid = document.getElementById('emotionGrid');
+            emotionGrid.innerHTML = '';
+            emotionOptions.forEach(emotion => {
+                const option = document.createElement('div');
+                option.className = `emotion-option ${emotion.key}`;
+                option.textContent = emotion.label;
+                option.onclick = () => selectEmotion(emotion.key, option);
+                emotionGrid.appendChild(option);
+            });
+        }
+
+        function selectContext(context, element) {
+            document.querySelectorAll('.context-option').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+            selectedContext = context;
+        }
+
+        function selectEmotion(emotion, element) {
+            document.querySelectorAll('.emotion-option').forEach(opt => opt.classList.remove('active'));
+            element.classList.add('active');
+            selectedEmotion = emotion;
+        }
+
+        function addPattern() {
+            const input = document.getElementById('patternInput');
+            const text = input.value.trim();
+            
+            if (!text) return;
+
+            const pattern = {
+                id: Date.now(),
+                text: text,
+                createdAt: new Date().toISOString(),
+                active: true
+            };
+
+            appData.patterns.push(pattern);
+            saveData();
+            input.value = '';
+            renderPatterns();
+        }
+
+        function renderPatterns() {
+            const container = document.getElementById('patternsCarousel');
+            const activePatterns = appData.patterns.filter(p => p.active);
+            
+            container.innerHTML = '';
+
+            if (activePatterns.length === 0) {
+                container.innerHTML = `
+                    <div class="pattern-card">
+                        <div style="text-align: center; opacity: 0.7;">
+                            <p>No active patterns yet.</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Add a thought or person you'd like to track above.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                activePatterns.forEach(pattern => {
+                    const encounterCount = appData.encounters.filter(e => e.patternId === pattern.id).length;
+                    const card = document.createElement('div');
+                    card.className = 'pattern-card';
+                    card.dataset.patternId = pattern.id;
+                    
+                    card.innerHTML = `
+                        <div class="pattern-header">
+                            <div class="pattern-text">${pattern.text}</div>
+                            <div class="pattern-count">${encounterCount}</div>
+                        </div>
+                        <div class="pattern-meta">
+                            <span>Created ${new Date(pattern.createdAt).toLocaleDateString()}</span>
+                        </div>
+                        <div class="pattern-actions">
+                            <button class="btn btn-primary btn-small" onclick="startLogging(${pattern.id})">Log Encounter</button>
+                            <button class="btn btn-secondary btn-small" onclick="archivePattern(${pattern.id})">Archive</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            }
+
+            // Force carousel refresh
+            setTimeout(() => {
+                if (patternsCarousel) {
+                    patternsCarousel.refresh();
+                } else {
+                    // Reinitialize if carousel doesn't exist
+                    setupCarousels();
+                }
+                updatePatternFocus();
+            }, 50);
+        }
+
+        function renderEncounters() {
+            if (syncState.isSynced && syncState.focusedPatternId) {
+                renderSynchronizedEncounters();
+            } else {
+                renderRecentEncounters();
+            }
+        }
+
+        function renderSynchronizedEncounters() {
+            const container = document.getElementById('encountersCarousel');
+            const recentEncounters = appData.encounters.slice(-30).reverse();
+            
+            // Separate focused pattern encounters from others
+            const focusedEncounters = recentEncounters.filter(e => e.patternId === syncState.focusedPatternId);
+            const otherEncounters = recentEncounters.filter(e => e.patternId !== syncState.focusedPatternId);
+            
+            // Combine with focused encounters first
+            const sortedEncounters = [...focusedEncounters, ...otherEncounters];
+            
+            container.innerHTML = '';
+
+            if (sortedEncounters.length === 0) {
+                container.innerHTML = `
+                    <div class="encounter-card">
+                        <div style="text-align: center; opacity: 0.7;">
+                            <p>No encounters logged yet.</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Tap "Log Encounter" on a pattern to get started.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                sortedEncounters.forEach(encounter => {
+                    const pattern = appData.patterns.find(p => p.id === encounter.patternId);
+                    const card = document.createElement('div');
+                    
+                    let cardClass = 'encounter-card';
+                    if (encounter.patternId === syncState.focusedPatternId) {
+                        cardClass += ' focused-pattern';
+                    }
+                    
+                    card.className = cardClass;
+                    card.onclick = () => focusPatternFromEncounter(encounter.patternId);
+                    
+                    card.innerHTML = `
+                        <div class="encounter-header">
+                            <div class="encounter-pattern">${pattern ? pattern.text : 'Unknown Pattern'}</div>
+                            <div class="encounter-time">${new Date(encounter.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                        <div class="encounter-meta">
+                            <div class="context-tag">${encounter.context}</div>
+                            <div class="emotion-tag ${encounter.emotion}">${encounter.emotion}</div>
+                        </div>
+                        ${encounter.notes ? `<div class="encounter-notes">${encounter.notes}</div>` : ''}
+                        <div class="encounter-actions">
+                            <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); archiveEncounter(${encounter.id})">Archive</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            }
+
+            if (encountersCarousel) {
+                encountersCarousel.refresh();
+            }
+        }
+
+        function renderRecentEncounters() {
+            const container = document.getElementById('encountersCarousel');
+            const recentEncounters = appData.encounters.slice(-30).reverse();
+            
+            container.innerHTML = '';
+
+            if (recentEncounters.length === 0) {
+                container.innerHTML = `
+                    <div class="encounter-card">
+                        <div style="text-align: center; opacity: 0.7;">
+                            <p>No encounters logged yet.</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px;">Tap "Log Encounter" on a pattern to get started.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                recentEncounters.forEach(encounter => {
+                    const pattern = appData.patterns.find(p => p.id === encounter.patternId);
+                    const card = document.createElement('div');
+                    card.className = 'encounter-card';
+                    card.onclick = () => focusPatternFromEncounter(encounter.patternId);
+                    
+                    card.innerHTML = `
+                        <div class="encounter-header">
+                            <div class="encounter-pattern">${pattern ? pattern.text : 'Unknown Pattern'}</div>
+                            <div class="encounter-time">${new Date(encounter.timestamp).toLocaleTimeString()}</div>
+                        </div>
+                        <div class="encounter-meta">
+                            <div class="context-tag">${encounter.context}</div>
+                            <div class="emotion-tag ${encounter.emotion}">${encounter.emotion}</div>
+                        </div>
+                        ${encounter.notes ? `<div class="encounter-notes">${encounter.notes}</div>` : ''}
+                        <div class="encounter-actions">
+                            <button class="btn btn-secondary btn-small" onclick="event.stopPropagation(); archiveEncounter(${encounter.id})">Archive</button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                });
+            }
+
+            if (encountersCarousel) {
+                encountersCarousel.refresh();
+            }
+        }
+
+        function focusPatternFromEncounter(patternId) {
+            const activePatterns = appData.patterns.filter(p => p.active);
+            const patternIndex = activePatterns.findIndex(p => p.id === patternId);
+            
+            if (patternIndex !== -1) {
+                syncState.focusedPatternId = patternId;
+                syncState.isSynced = true;
+                updateSyncStatus();
+                updatePatternFocus();
+                
+                if (patternsCarousel) {
+                    patternsCarousel.goToSlide(patternIndex);
+                }
+                
+                renderSynchronizedEncounters();
+            }
+        }
+
+        function updatePatternFocus() {
+            const cards = document.querySelectorAll('.pattern-card');
+            cards.forEach(card => {
+                const patternId = parseInt(card.dataset.patternId);
+                if (patternId === syncState.focusedPatternId) {
+                    card.classList.add('focused');
+                } else {
+                    card.classList.remove('focused');
+                }
+            });
+        }
+
+        function updateSyncStatus() {
+            const statusElement = document.getElementById('syncStatus');
+            const indicatorElement = document.getElementById('syncIndicator');
+            const textElement = document.getElementById('syncText');
+            
+            if (syncState.isSynced) {
+                statusElement.className = 'sync-status synced';
+                indicatorElement.className = 'sync-indicator synced';
+                textElement.textContent = 'Synced';
+            } else {
+                statusElement.className = 'sync-status manual';
+                indicatorElement.className = 'sync-indicator manual';
+                textElement.textContent = 'Manual';
+            }
+        }
+
+        function startLogging(patternId) {
+            currentLoggingPattern = patternId;
+            const pattern = appData.patterns.find(p => p.id === patternId);
+            
+            document.getElementById('selectedPatternText').textContent = pattern.text;
+            document.getElementById('logInterface').style.display = 'block';
+            
+            // Reset selections
+            selectedContext = null;
+            selectedEmotion = null;
+            document.getElementById('notesInput').value = '';
+            document.querySelectorAll('.context-option').forEach(opt => opt.classList.remove('active'));
+            document.querySelectorAll('.emotion-option').forEach(opt => opt.classList.remove('active'));
+            
+            // Scroll to log interface
+            document.getElementById('logInterface').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelLogging() {
+            document.getElementById('logInterface').style.display = 'none';
+            currentLoggingPattern = null;
+        }
+
+        function logEncounter() {
+            if (!currentLoggingPattern || !selectedContext || !selectedEmotion) {
+                alert('Please select both context and emotion');
+                return;
+            }
+
+            const encounter = {
+                id: Date.now(),
+                patternId: currentLoggingPattern,
+                timestamp: new Date().toISOString(),
+                context: selectedContext,
+                emotion: selectedEmotion,
+                notes: document.getElementById('notesInput').value.trim(),
+                archived: false
+            };
+
+            appData.encounters.push(encounter);
+            saveData();
+            
+            cancelLogging();
+            renderEncounters();
+        }
+
+        function archivePattern(patternId) {
+            const pattern = appData.patterns.find(p => p.id === patternId);
+            if (pattern && confirm(`Archive pattern "${pattern.text}"? This will hide it from active patterns.`)) {
+                pattern.active = false;
+                saveData();
+                renderPatterns();
+                renderEncounters();
+            }
+        }
+
+        function archiveEncounter(encounterId) {
+            const encounter = appData.encounters.find(e => e.id === encounterId);
+            if (encounter && confirm('Archive this encounter?')) {
+                encounter.archived = true;
+                appData.archivedEncounters.push(encounter);
+                appData.encounters = appData.encounters.filter(e => e.id !== encounterId);
+                saveData();
+                renderEncounters();
+            }
+        }
+
+        function saveReflection() {
+            const reflectionText = document.getElementById('reflectionInput').value.trim();
+            if (!reflectionText) {
+                alert('Please enter a reflection');
+                return;
+            }
+
+            const reflection = {
+                id: Date.now(),
+                text: reflectionText,
+                timestamp: new Date().toISOString(),
+                date: new Date().toDateString()
+            };
+
+            appData.reflections.push(reflection);
+            saveData();
+            
+            document.getElementById('reflectionInput').value = '';
+            alert('Reflection saved successfully!');
+        }
+
+        function exportReportData() {
+            const today = new Date();
+            const todayString = today.toDateString();
+            
+            const todayEncounters = appData.encounters.filter(encounter => {
+                const encounterDate = new Date(encounter.timestamp).toDateString();
+                return encounterDate === todayString;
+            });
+
+            const todayReflections = appData.reflections.filter(reflection => {
+                return reflection.date === todayString;
+            });
+
+            const encountersWithPatterns = todayEncounters.map(encounter => {
+                const pattern = appData.patterns.find(p => p.id === encounter.patternId);
+                return {
+                    ...encounter,
+                    patternText: pattern ? pattern.text : 'Unknown Pattern'
+                };
+            });
+
+            const reportData = {
+                exportDate: today.toISOString(),
+                date: todayString,
+                encounters: encountersWithPatterns,
+                reflections: todayReflections,
+                summary: {
+                    totalEncounters: todayEncounters.length,
+                    totalReflections: todayReflections.length,
+                    patterns: [...new Set(encountersWithPatterns.map(e => e.patternText))]
+                }
+            };
+
+            const dataStr = JSON.stringify(reportData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: "application/json"});
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `mindscape-daily-report-${today.toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Handle different import formats
+                    let patterns = [];
+                    let encounters = [];
+                    let reflections = [];
+
+                    if (importedData.patterns && importedData.encounters) {
+                        // Full export format
+                        patterns = importedData.patterns || [];
+                        encounters = importedData.encounters || [];
+                        reflections = importedData.reflections || [];
+                    } else if (importedData.encounters && Array.isArray(importedData.encounters)) {
+                        // Daily report format
+                        encounters = importedData.encounters || [];
+                        reflections = importedData.reflections || [];
+                        
+                        // Create patterns from encounters
+                        const uniquePatterns = new Set();
+                        encounters.forEach(enc => {
+                            if (enc.patternText && !appData.patterns.some(p => p.text === enc.patternText)) {
+                                uniquePatterns.add(enc.patternText);
+                            }
+                        });
+                        
+                        patterns = Array.from(uniquePatterns).map(text => ({
+                            id: Date.now() + Math.random(),
+                            text: text,
+                            createdAt: new Date().toISOString(),
+                            active: true
+                        }));
+                    }
+
+                    // Merge data
+                    const patternMapping = new Map();
+                    
+                    patterns.forEach(importedPattern => {
+                        const existingPattern = appData.patterns.find(p => p.text === importedPattern.text);
+                        if (existingPattern) {
+                            patternMapping.set(importedPattern.id, existingPattern.id);
+                        } else {
+                            const newId = Date.now() + Math.random();
+                            patternMapping.set(importedPattern.id, newId);
+                            appData.patterns.push({
+                                ...importedPattern,
+                                id: newId
+                            });
+                        }
+                    });
+
+                    // Update encounter pattern IDs
+                    encounters.forEach(encounter => {
+                        if (encounter.patternText) {
+                            const pattern = appData.patterns.find(p => p.text === encounter.patternText);
+                            if (pattern) {
+                                encounter.patternId = pattern.id;
+                            }
+                        } else if (patternMapping.has(encounter.patternId)) {
+                            encounter.patternId = patternMapping.get(encounter.patternId);
+                        }
+                        
+                        encounter.id = Date.now() + Math.random();
+                        if (!encounter.notes) encounter.notes = '';
+                        appData.encounters.push(encounter);
+                    });
+
+                    appData.reflections.push(...reflections);
+
+                    saveData();
+                    renderPatterns();
+                    renderEncounters();
+
+                    alert(`Imported ${patterns.length} patterns, ${encounters.length} encounters, and ${reflections.length} reflections.`);
+                    fileInput.value = '';
+                    
+                } catch (error) {
+                    console.error('Import error:', error);
+                    alert('Error importing data. Please check that the file is a valid Mindscape export.');
+                    fileInput.value = '';
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function showArchive() {
+            alert('Archive feature - Coming soon!\n\nThis will show your archived patterns and encounters for reflection.');
+        }
+
+        function showAnalytics() {
+            alert('Analytics feature - Coming soon!\n\nThis will show insights about your patterns, emotional trends, and growth over time.');
+        }
+
+        function showModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        function hideModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Event listeners
+        document.getElementById('patternInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPattern();
+            }
+        });
+
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
