@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindscape Pattern Tracker</title>
+    <style>
+        /* --- Existing styles are the same until here --- */
+
+        /* Mobile Carousel System - REFACTORED */
+        .carousel-container {
+            /* This is now a native scroll container */
+            overflow-x: auto;
+            scroll-snap-type: x mandatory; /* The magic! Enforces snapping on the horizontal axis. */
+            scroll-behavior: smooth; /* Nice smooth programmatic scrolling */
+
+            /* Hide the scrollbar for a cleaner look */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none;  /* IE 10+ */
+        }
+
+        .carousel-container::-webkit-scrollbar {
+            display: none; /* Safari and Chrome */
+        }
+
+        .carousel {
+            display: flex;
+            /* REMOVED: transition, will-change, etc. The browser handles this now. */
+        }
+
+        /* Pattern Cards */
+        .pattern-card {
+            background: rgba(74, 85, 104, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(226, 232, 240, 0.1);
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            margin-right: 15px;
+            min-width: 280px;
+            width: calc(100vw - 50px);
+            max-width: calc(100vw - 50px);
+            scroll-snap-align: center; /* The second piece of magic! Each card will snap to the center. */
+        }
+
+        /* --- All other styles remain the same --- */
+    </style>
+</head>
+<body>
+    <!-- The HTML Structure remains exactly the same -->
+    <!-- ... all body content ... -->
+    <script>
+        // Data structure for patterns and encounters (No changes)
+        let appData = { ... };
+
+        // Synchronization state (No changes)
+        let syncState = { ... };
+
+        // --- DELETED ---
+        // The entire MobileCarousel class is removed.
+        // class MobileCarousel { ... } // GONE!
+
+        // Current logging state (No changes)
+        let currentLoggingPattern = null;
+        let selectedContext = null;
+        let selectedEmotion = null;
+        const contextOptions = ['Work', 'Home', 'Commute', 'Social', 'Content', 'Alone'];
+        const emotionOptions = [ ... ];
+
+
+        // +++ REFACTORED +++
+        // Replaces the complex class with a simple setup function.
+        function setupSnapCarousel(containerId, dotsId, onSlideChangeCallback) {
+            const container = document.getElementById(containerId);
+            const dotsContainer = document.getElementById(dotsId);
+            let timeout;
+
+            // 1. Listen for when the user scrolls the container
+            container.addEventListener('scroll', () => {
+                // Use a timeout to run logic only when scrolling has stopped
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    const cards = Array.from(container.querySelector('.carousel').children);
+                    if (cards.length === 0) return;
+
+                    // 2. Find which card is currently snapped in the center
+                    const containerCenter = container.offsetWidth / 2;
+                    let closestCardIndex = -1;
+                    let minDistance = Infinity;
+
+                    cards.forEach((card, index) => {
+                        const cardRect = card.getBoundingClientRect();
+                        const containerRect = container.getBoundingClientRect();
+                        const cardCenter = (cardRect.left - containerRect.left) + (cardRect.width / 2);
+                        const distance = Math.abs(containerCenter - cardCenter);
+
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestCardIndex = index;
+                        }
+                    });
+                    
+                    // 3. Update the dots to reflect the current card
+                    updateDots(dotsContainer, closestCardIndex, cards.length);
+
+                    // 4. If a callback is provided (for the patterns carousel), call it.
+                    if (onSlideChangeCallback) {
+                        onSlideChangeCallback(closestCardIndex);
+                    }
+                }, 150); // 150ms debounce
+            });
+        }
+
+        function createDots(dotsContainer, numCards, container) {
+            dotsContainer.innerHTML = '';
+            for (let i = 0; i < numCards; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.addEventListener('click', () => {
+                    // When a dot is clicked, scroll the corresponding card into view
+                    const card = container.querySelector('.carousel').children[i];
+                    if (card) {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                });
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function updateDots(dotsContainer, currentIndex, numCards) {
+            const dots = dotsContainer.children;
+            if (dots.length !== numCards) return; // Avoid errors during re-render
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].classList.toggle('active', i === currentIndex);
+            }
+        }
+        
+        // Initialize app
+        function init() {
+            loadData();
+            updateTime();
+            setInterval(updateTime, 1000);
+            setupContextAndEmotionGrids();
+            renderPatterns();
+            renderEncounters();
+            
+            // +++ REFACTORED +++
+            // No more creating new class instances. Just call the setup functions.
+            setupSnapCarousel('patternsContainer', 'patternsDots', onPatternSlideChange);
+            setupSnapCarousel('encountersContainer', 'encountersDots', null); // No callback needed for encounters
+        }
+        
+        // This function is now the callback passed to the setup function
+        function onPatternSlideChange(index) {
+            syncState.isSynced = true;
+            updateSyncStatus();
+            
+            const patterns = appData.patterns.filter(p => p.active);
+            if (patterns[index]) {
+                const newFocusedId = patterns[index].id;
+                // Only re-render if the focused pattern actually changes
+                if (syncState.focusedPatternId !== newFocusedId) {
+                    syncState.focusedPatternId = newFocusedId;
+                    updatePatternFocus();
+                    renderSynchronizedEncounters();
+                }
+            }
+        }
+
+        function renderPatterns() {
+            const container = document.getElementById('patternsCarousel');
+            const dotsContainer = document.getElementById('patternsDots');
+            const activePatterns = appData.patterns.filter(p => p.active);
+            
+            container.innerHTML = '';
+
+            if (activePatterns.length === 0) {
+                 // ... same as before
+            } else {
+                 // ... same as before
+            }
+            
+            // +++ REFACTORED +++
+            // After rendering the cards, we must recreate the dots.
+            createDots(dotsContainer, activePatterns.length, container.parentElement);
+            updateDots(dotsContainer, 0, activePatterns.length); // Activate first dot initially
+            updatePatternFocus();
+        }
+
+        function renderEncounters() {
+            // ... (The renderEncounters and renderSynchronizedEncounters functions remain the same)
+            // But after rendering, we must update their dots too.
+            const container = document.getElementById('encountersCarousel');
+            const dotsContainer = document.getElementById('encountersDots');
+            const numCards = container.children.length;
+
+            createDots(dotsContainer, numCards, container.parentElement);
+            updateDots(dotsContainer, 0, numCards);
+        }
+
+        // --- Other functions like addPattern, logEncounter, saveData etc. remain unchanged. ---
+        // The key is that they call renderPatterns() or renderEncounters() which now
+        // correctly rebuilds the dots.
+        
+        // The focusPatternFromEncounter function needs one small change to scroll programmatically.
+        function focusPatternFromEncounter(patternId) {
+            const activePatterns = appData.patterns.filter(p => p.active);
+            const patternIndex = activePatterns.findIndex(p => p.id === patternId);
+            
+            if (patternIndex !== -1) {
+                // Instead of calling a carousel method, we find the card and scroll to it.
+                const patternsContainer = document.getElementById('patternsCarousel');
+                const cardToFocus = patternsContainer.children[patternIndex];
+                if (cardToFocus) {
+                    cardToFocus.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+                // The scroll event listener will naturally handle the rest (updating sync state, etc.)
+            }
+        }
+
+
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
