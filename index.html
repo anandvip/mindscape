@@ -957,11 +957,13 @@
                         try {
                             const imported = JSON.parse(e.target.result);
                             if (imported.patterns && imported.encounters) {
+                                // Merge all data including intentions
                                 state.patterns = [...state.patterns, ...(imported.patterns || [])];
                                 state.encounters = [...state.encounters, ...(imported.encounters || [])];
                                 state.reflections = [...state.reflections, ...(imported.reflections || [])];
                                 state.userEmotions = [...state.userEmotions, ...(imported.userEmotions || [])];
                                 
+                                // Remove duplicates by ID
                                 state.patterns = state.patterns.filter((item, index, self) => 
                                     index === self.findIndex(t => t.id === item.id));
                                 state.encounters = state.encounters.filter((item, index, self) => 
@@ -985,9 +987,1236 @@
                 }
             };
 
-            // Continue with full JavaScript - actions, templates, etc...
-            // [The rest of your original JavaScript code goes here]
+            const actions = {
+                addPattern(text) {
+                    const sanitized = sanitize(text);
+                    if (!sanitized || sanitized.length > MAX_INPUT_LENGTH) {
+                        toast.warning('Pattern text is required and must be under 200 characters');
+                        return false;
+                    }
+                    
+                    const exists = state.patterns.some(p => 
+                        p.text.toLowerCase() === sanitized.toLowerCase() && p.status === 'active'
+                    );
+                    
+                    if (exists) {
+                        toast.warning('This pattern already exists');
+                        return false;
+                    }
+                    
+                    state.patterns.unshift({
+                        id: generateId(),
+                        text: sanitized,
+                        originalText: sanitized,
+                        status: 'active',
+                        createdAt: new Date().toISOString(),
+                        encounters: 0
+                    });
+                    
+                    storage.save();
+                    render();
+                    toast.success('Pattern added successfully');
+                    return true;
+                },
+                
+                evolvePattern(id, newText) {
+                    const pattern = state.patterns.find(p => p.id === id);
+                    if (!pattern) return false;
+                    
+                    const sanitized = sanitize(newText);
+                    if (!sanitized) {
+                        toast.warning('Pattern text cannot be empty');
+                        return false;
+                    }
+                    
+                    pattern.text = sanitized;
+                    storage.save();
+                    render();
+                    toast.success('Pattern evolved');
+                    return true;
+                },
+                
+                retirePattern(id) {
+                    const pattern = state.patterns.find(p => p.id === id);
+                    if (!pattern) return false;
+                    
+                    pattern.status = 'retired';
+                    pattern.retiredAt = new Date().toISOString();
+                    storage.save();
+                    render();
+                    toast.info('Pattern retired');
+                    return true;
+                },
+                
+                reactivatePattern(id) {
+                    const pattern = state.patterns.find(p => p.id === id);
+                    if (!pattern) return false;
+                    
+                    pattern.status = 'active';
+                    delete pattern.retiredAt;
+                    storage.save();
+                    render();
+                    toast.success('Pattern reactivated');
+                    return true;
+                },
+                
+                logEncounter(patternId, context, emotionId) {
+                    const pattern = state.patterns.find(p => p.id === patternId);
+                    if (!pattern) return false;
+                    
+                    const encounter = {
+                        id: generateId(),
+                        patternId,
+                        timestamp: new Date().toISOString(),
+                        context: context || 'General',
+                        emotionId: emotionId || 'default',
+                        journal: '',
+                        flagged: false
+                    };
+                    
+                    state.encounters.unshift(encounter);
+                    pattern.encounters = (pattern.encounters || 0) + 1;
+                    
+                    if (state.encounters.length > MAX_ENCOUNTERS) {
+                        state.encounters = state.encounters.slice(0, MAX_ENCOUNTERS);
+                    }
+                    
+                    storage.save();
+                    render();
+                    toast.success('Encounter logged');
+                    return true;
+                },
+                
+                updateEncounter(id, updates) {
+                    const encounter = state.encounters.find(e => e.id === id);
+                    if (!encounter) return false;
+                    
+                    Object.assign(encounter, updates);
+                    storage.save();
+                    render();
+                    toast.success('Encounter updated');
+                    return true;
+                },
+                
+                deleteEncounter(id) {
+                    const index = state.encounters.findIndex(e => e.id === id);
+                    if (index === -1) return false;
+                    
+                    const encounter = state.encounters[index];
+                    const pattern = state.patterns.find(p => p.id === encounter.patternId);
+                    
+                    state.encounters.splice(index, 1);
+                    
+                    if (pattern) {
+                        pattern.encounters = Math.max(0, (pattern.encounters || 0) - 1);
+                    }
+                    
+                    storage.save();
+                    render();
+                    toast.warning('Encounter deleted');
+                    return true;
+                },
+                
+                toggleFlag(id) {
+                    const encounter = state.encounters.find(e => e.id === id);
+                    if (!encounter) return false;
+                    
+                    encounter.flagged = !encounter.flagged;
+                    storage.save();
+                    render();
+                    toast.info(encounter.flagged ? 'Encounter flagged' : 'Flag removed');
+                    return true;
+                },
+                
+                saveJournal(id, text) {
+                    const encounter = state.encounters.find(e => e.id === id);
+                    if (!encounter) return false;
+                    
+                    encounter.journal = sanitize(text);
+                    storage.save();
+                    render();
+                    toast.success('Journal saved');
+                    return true;
+                },
+                
+                addEmotion(name, color) {
+                    const sanitized = sanitize(name);
+                    if (!sanitized) {
+                        toast.warning('Emotion name is required');
+                        return false;
+                    }
+                    
+                    const exists = state.userEmotions.some(e => 
+                        e.name.toLowerCase() === sanitized.toLowerCase()
+                    );
+                    
+                    if (exists) {
+                        toast.warning('This emotion already exists');
+                        return false;
+                    }
+                    
+                    state.userEmotions.push({
+                        id: generateId(),
+                        name: sanitized,
+                        color: color || '#888888'
+                    });
+                    
+                    storage.save();
+                    render();
+                    toast.success('Emotion added');
+                    return true;
+                },
+                
+                deleteEmotion(id) {
+                    if (id === 'default') {
+                        toast.warning('Cannot delete default emotion');
+                        return false;
+                    }
+                    
+                    const index = state.userEmotions.findIndex(e => e.id === id);
+                    if (index === -1) return false;
+                    
+                    state.encounters.forEach(enc => {
+                        if (enc.emotionId === id) {
+                            enc.emotionId = 'default';
+                        }
+                    });
+                    
+                    state.userEmotions.splice(index, 1);
+                    storage.save();
+                    render();
+                    toast.warning('Emotion deleted');
+                    return true;
+                },
+                
+                saveIntention(text) {
+                    const sanitized = sanitize(text);
+                    if (!sanitized) return false;
+                    
+                    // Create new intention entry each time (don't overwrite)
+                    state.reflections.push({
+                        id: generateId(),
+                        type: 'intention',
+                        text: sanitized,
+                        date: new Date().toISOString().split('T')[0],
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    storage.save();
+                    render();
+                    toast.success('Intention logged');
+                    return true;
+                },
+                
+                setFocusedPattern(id) {
+                    state.ui.focusedPatternId = id;
+                    render();
+                }
+            };
+
+            const analytics = {
+                getStats() {
+                    const today = new Date().toISOString().split('T')[0];
+                    const thisWeek = new Date();
+                    thisWeek.setDate(thisWeek.getDate() - 7);
+                    
+                    return {
+                        totalPatterns: state.patterns.filter(p => p.status === 'active').length,
+                        totalEncounters: state.encounters.length,
+                        todayEncounters: state.encounters.filter(e => e.timestamp.startsWith(today)).length,
+                        weekEncounters: state.encounters.filter(e => new Date(e.timestamp) >= thisWeek).length,
+                        flaggedEncounters: state.encounters.filter(e => e.flagged).length,
+                        retiredPatterns: state.patterns.filter(p => p.status === 'retired').length
+                    };
+                },
+                
+                getMostActive() {
+                    const patternCounts = {};
+                    state.encounters.forEach(enc => {
+                        patternCounts[enc.patternId] = (patternCounts[enc.patternId] || 0) + 1;
+                    });
+                    
+                    return Object.entries(patternCounts)
+                        .sort(([,a], [,b]) => b - a)
+                        .slice(0, 5)
+                        .map(([id, count]) => ({
+                            pattern: state.patterns.find(p => p.id === id),
+                            count
+                        }));
+                },
+                
+                getEmotionBreakdown() {
+                    const emotionCounts = {};
+                    state.encounters.forEach(enc => {
+                        emotionCounts[enc.emotionId] = (emotionCounts[enc.emotionId] || 0) + 1;
+                    });
+                    
+                    return Object.entries(emotionCounts).map(([id, count]) => ({
+                        emotion: state.userEmotions.find(e => e.id === id),
+                        count,
+                        percentage: ((count / state.encounters.length) * 100).toFixed(1)
+                    }));
+                }
+            };
+
+            const templates = {
+                main() {
+                    return `
+                        <header class="header">
+                            <div class="consciousness-branding">
+                                <img src="https://raw.githubusercontent.com/anandvip/mindscape/refs/heads/main/logo/mindscaping.png" alt="Mindscape Logo" class="consciousness-logo">
+                                <h1>Mindscape</h1>
+                            </div>
+                            <p>Transform thoughts from invisible forces into observable data points</p>
+                        </header>
+                        
+                        <section class="section">
+                            <div class="form-section">
+                                <div class="input-group">
+                                    <input 
+                                        type="text" 
+                                        id="pattern-input" 
+                                        placeholder="What recurring thought would you like to observe?"
+                                        maxlength="${MAX_INPUT_LENGTH}"
+                                    >
+                                    <div class="char-counter">
+                                        <span id="char-count">0</span>/${MAX_INPUT_LENGTH}
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary" data-action="add-pattern">
+                                    Begin Tracking
+                                </button>
+                            </div>
+                        </section>
+                        
+                        <section class="section">
+                            <div class="section-header">
+                                <h2 class="section-title">Active Patterns</h2>
+                                <div class="section-actions">
+                                    <button class="btn btn-info btn-small" data-action="show-help">
+                                        ❓ Help
+                                    </button>
+                                    <button class="btn btn-secondary btn-small" data-action="show-analytics">
+                                        📊 Analytics
+                                    </button>
+                                    <button class="btn btn-secondary btn-small" data-action="show-archive">
+                                        📚 Archive
+                                    </button>
+                                    <button class="btn btn-secondary btn-small" data-action="show-palette">
+                                        🎨 Emotions
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="scroll-container" id="patterns-container"></div>
+                        </section>
+                        
+                        <section class="section">
+                            <div class="section-header">
+                                <h2 class="section-title">Recent Encounters</h2>
+                                <div class="section-actions">
+                                    <button class="btn btn-secondary btn-small" data-action="show-report">
+                                        📝 Daily Report
+                                    </button>
+                                    <button class="btn btn-info btn-small" data-action="import-data-trigger">
+                                        📥 Import
+                                    </button>
+                                    <button class="btn btn-info btn-small" data-action="export-data">
+                                        💾 Export
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="scroll-container" id="encounters-container"></div>
+                        </section>
+                        
+                        <footer style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.8rem; opacity: 0.7;">
+                            <p>© ${new Date().getFullYear()} Mindscape. Built with love in Kurukshetra, India by VA Graphics.</p>
+                        </footer>
+                    `;
+                },
+                
+                patternCard(pattern) {
+                    const isFocused = pattern.id === state.ui.focusedPatternId;
+                    const encounterCount = pattern.encounters || 0;
+                    const recentCount = state.encounters.filter(e => 
+                        e.patternId === pattern.id && 
+                        new Date(e.timestamp) > new Date(Date.now() - 24 * 60 * 60 * 1000)
+                    ).length;
+                    
+                    return `
+                        <div class="card pattern-card ${isFocused ? 'focused' : ''}" 
+                             data-id="${pattern.id}"
+                             data-action="focus-pattern">
+                            <div class="pattern-title">${sanitize(pattern.text)}</div>
+                            <div class="pattern-stats">
+                                <span>Total: ${encounterCount}</span>
+                                <span>Today: ${recentCount}</span>
+                            </div>
+                            <div class="pattern-actions">
+                                <button class="btn btn-primary btn-small" 
+                                        data-action="log-encounter" 
+                                        data-id="${pattern.id}">
+                                    📝 Log
+                                </button>
+                                <button class="btn btn-secondary btn-small" 
+                                        data-action="review-pattern" 
+                                        data-id="${pattern.id}">
+                                    ⚙️ Review
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                },
+                
+                encounterCard(encounter) {
+                    const pattern = state.patterns.find(p => p.id === encounter.patternId);
+                    const emotion = state.userEmotions.find(e => e.id === encounter.emotionId) || state.userEmotions[0];
+                    const isFocusedPattern = pattern?.id === state.ui.focusedPatternId;
+                    
+                    return `
+                        <div class="card encounter-card ${encounter.flagged ? 'flagged' : ''} ${isFocusedPattern ? 'focused-pattern' : ''}" 
+                             data-id="${encounter.id}">
+                            <div class="encounter-header">
+                                <div class="encounter-title">${sanitize(pattern?.text || 'Retired Pattern')}</div>
+                                <div class="encounter-time">${formatDate(encounter.timestamp)}</div>
+                            </div>
+                            <div class="encounter-meta">
+                                <div class="emotion-tag" style="background-color: ${emotion.color}20; border-left: 3px solid ${emotion.color};">
+                                    ${sanitize(emotion.name)}
+                                </div>
+                                <div class="context-tag">📍 ${sanitize(encounter.context)}</div>
+                            </div>
+                            ${encounter.journal ? `
+                                <div class="journal-preview">
+                                    ${sanitize(encounter.journal.substring(0, 100))}${encounter.journal.length > 100 ? '...' : ''}
+                                </div>
+                            ` : ''}
+                            <div class="encounter-actions">
+                                <button class="btn btn-secondary btn-small" 
+                                        data-action="open-journal" 
+                                        data-id="${encounter.id}">
+                                    ✍️ Journal
+                                </button>
+                                <button class="btn btn-secondary btn-small" 
+                                        data-action="toggle-flag" 
+                                        data-id="${encounter.id}">
+                                    ${encounter.flagged ? '⭐ Unflag' : '☆ Flag'}
+                                </button>
+                                <button class="btn btn-secondary btn-small" 
+                                        data-action="edit-encounter" 
+                                        data-id="${encounter.id}">
+                                    ✏️ Edit
+                                </button>
+                                <button class="btn btn-danger btn-small" 
+                                        data-action="delete-encounter" 
+                                        data-id="${encounter.id}">
+                                    🗑️ Delete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                },
+                
+                emptyState(message, icon = '🌱') {
+                    return `
+                        <div class="card empty-state">
+                            <div class="empty-state-icon">${icon}</div>
+                            <p>${sanitize(message)}</p>
+                        </div>
+                    `;
+                }
+            };
+
+            const modalTemplates = {
+                help() {
+                    return {
+                        title: '🧭 How to Use Mindscape',
+                        content: `
+                            <div style="text-align: center; margin-bottom: 1.5rem;">
+                                <img src="https://raw.githubusercontent.com/anandvip/mindscape/refs/heads/main/logo/mindscaping.png" alt="Mindscape Logo" style="width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);">
+                            </div>
+                            <div class="form-section">
+                                <h4>🎯 Purpose</h4>
+                                <p style="margin-bottom: 16px;">Transform awareness into wisdom through mindful observation of your thoughts and emotions.</p>
+                                
+                                <h4>🚀 Getting Started</h4>
+                                <ol style="margin: 12px 0 16px 20px; line-height: 1.6;">
+                                    <li><strong>Add Patterns:</strong> Identify 3-5 recurring thoughts, emotions, or situations you want to observe</li>
+                                    <li><strong>Log Encounters:</strong> When a pattern appears in your awareness, tap "Log" immediately</li>
+                                    <li><strong>Choose Context:</strong> Where did this happen? (Work, Home, Social, etc.)</li>
+                                    <li><strong>Select Emotion:</strong> How did you feel? (Create custom emotions in Palette)</li>
+                                </ol>
+                                
+                                <h4>📝 Key Features</h4>
+                                <div style="margin: 12px 0;">
+                                    <p><strong>📝 Journal:</strong> Add insights and reflections to encounters</p>
+                                    <p><strong>⭐ Flag:</strong> Mark important encounters for review in Daily Report</p>
+                                    <p><strong>🎯 Intentions:</strong> Log and track your focus goals over time</p>
+                                    <p><strong>🏆 Retire:</strong> Move resolved patterns to Archive as growth milestones</p>
+                                    <p><strong>📊 Analytics:</strong> Discover patterns in your mental landscape</p>
+                                    <p><strong>🎨 Emotions:</strong> Create custom emotional states beyond "Neutral"</p>
+                                </div>
+                                
+                                <div style="background: rgba(255, 215, 0, 0.1); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--observer-gold); margin: 1.5rem 0; font-style: italic;">
+                                    <strong>The Metacognitive Shift:</strong><br><br>
+                                    • <strong>Before:</strong> The thought is an invisible, powerful force that happens <em>to</em> you.<br><br>
+                                    • <strong>After (with this observatory):</strong> The thought becomes a data point you can observe from a distance. You are no longer <em>in</em> the thought; you are <em>looking at</em> the thought.<br><br>
+                                    This is the practice of metacognition. The reflection observatory you see is not just a "nice to have"—<strong>it is arguably the most critical feature for transforming this tool from a simple counter into a genuine instrument for self-awareness.</strong> It's the space where insight happens.
+                                </div>
+                                
+                                <h4>💼 Professional Applications</h4>
+                                <div style="margin: 12px 0;">
+                                    <p><strong>Leadership:</strong> Track triggers, decision patterns, team interaction responses</p>
+                                    <p><strong>Sales:</strong> Monitor client interaction patterns and success indicators</p>
+                                    <p><strong>Performance:</strong> Identify productivity states and procrastination triggers</p>
+                                    <p><strong>Wellness:</strong> Corporate mindfulness and stress management tracking</p>
+                                    <p><strong>Change Management:</strong> Monitor adaptation patterns during transitions</p>
+                                </div>
+                                
+                                <h4>💡 Pro Tips</h4>
+                                <ul style="margin: 12px 0 16px 20px; line-height: 1.6;">
+                                    <li>Log encounters immediately when they happen</li>
+                                    <li>Focus on observing, not judging your patterns</li>
+                                    <li>Review flagged items weekly for insights</li>
+                                    <li>Use Daily Report to set intentions</li>
+                                    <li>Archive patterns when you've grown past them</li>
+                                </ul>
+                                
+                                <h4>🔄 The Journey</h4>
+                                <p style="color: var(--text-secondary); font-style: italic;">
+                                    "Between stimulus and response there is a space. In that space is our power to choose our response. 
+                                    In our response lies our growth and our freedom." - Viktor Frankl
+                                </p>
+                            </div>
+                        `
+                    };
+                },
+
+                logEncounter(pattern, encounter = null) {
+                    const isEdit = !!encounter;
+                    return {
+                        title: `${isEdit ? 'Edit' : 'Log'} Encounter: ${pattern.text}`,
+                        content: `
+                            <div class="form-section">
+                                <h4>Context</h4>
+                                <div class="choice-grid">
+                                    ${CONTEXT_OPTIONS.map(opt => `
+                                        <div class="choice-option ${encounter?.context === opt ? 'active' : ''}" 
+                                             data-action="select-context" 
+                                             data-value="${opt}"
+                                             role="button"
+                                             tabindex="0">
+                                            ${opt}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <h4>Emotional State</h4>
+                                <div class="choice-grid">
+                                    ${state.userEmotions.map(emo => `
+                                        <div class="choice-option ${encounter?.emotionId === emo.id ? 'active' : ''}" 
+                                             data-action="select-emotion" 
+                                             data-value="${emo.id}"
+                                             style="border-left: 4px solid ${emo.color};"
+                                             role="button"
+                                             tabindex="0">
+                                            ${emo.name}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <button class="btn btn-primary" 
+                                        data-action="submit-encounter" 
+                                        data-pattern-id="${pattern.id}"
+                                        data-encounter-id="${encounter?.id || ''}"
+                                        style="width: 100%; margin-top: 20px;">
+                                    ${isEdit ? 'Update' : 'Log'} Encounter
+                                </button>
+                            </div>
+                        `
+                    };
+                },
+                
+                reviewPattern(pattern) {
+                    return {
+                        title: `Review Pattern: ${pattern.text}`,
+                        content: `
+                            <div class="form-section">
+                                <h4>Evolve Pattern</h4>
+                                <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                                    Refine how you think about this pattern as your awareness deepens.
+                                </p>
+                                <textarea id="evolve-input" placeholder="Enter evolved pattern...">${pattern.text}</textarea>
+                                <button class="btn btn-primary" 
+                                        data-action="evolve-pattern" 
+                                        data-id="${pattern.id}">
+                                    Save Evolution
+                                </button>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>Retire Pattern</h4>
+                                <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                                    When you've resolved this pattern or no longer need to track it.
+                                </p>
+                                <button class="btn btn-warning" 
+                                        data-action="retire-pattern" 
+                                        data-id="${pattern.id}">
+                                    🏆 Retire Pattern
+                                </button>
+                            </div>
+                        `
+                    };
+                },
+                
+                journal(encounter) {
+                    const pattern = state.patterns.find(p => p.id === encounter.patternId);
+                    return {
+                        title: `Journal: ${pattern?.text || 'Pattern'}`,
+                        content: `
+                            <div class="form-section">
+                                <p style="color: var(--text-secondary); margin-bottom: 12px;">
+                                    ${formatDate(encounter.timestamp)}
+                                </p>
+                                <textarea id="journal-input" 
+                                          placeholder="What did you notice? What insights emerged?"
+                                          style="min-height: 150px;">${encounter.journal}</textarea>
+                                <button class="btn btn-primary" 
+                                        data-action="save-journal" 
+                                        data-id="${encounter.id}">
+                                    💾 Save Journal
+                                </button>
+                            </div>
+                        `
+                    };
+                },
+                
+                analytics() {
+                    const stats = analytics.getStats();
+                    const mostActive = analytics.getMostActive();
+                    const emotions = analytics.getEmotionBreakdown();
+                    
+                    return {
+                        title: '📊 Analytics Dashboard',
+                        content: `
+                            <div class="analytics-grid">
+                                <div class="stat-card">
+                                    <div class="stat-value">${stats.totalPatterns}</div>
+                                    <div class="stat-label">Active Patterns</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">${stats.totalEncounters}</div>
+                                    <div class="stat-label">Total Encounters</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">${stats.todayEncounters}</div>
+                                    <div class="stat-label">Today</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="stat-value">${stats.weekEncounters}</div>
+                                    <div class="stat-label">This Week</div>
+                                </div>
+                            </div>
+                            
+                            ${mostActive.length > 0 ? `
+                                <div class="form-section">
+                                    <h4>Most Active Patterns</h4>
+                                    ${mostActive.map(({pattern, count}) => `
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                            <span>${pattern?.text || 'Unknown'}</span>
+                                            <strong>${count} encounters</strong>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${emotions.length > 0 ? `
+                                <div class="form-section">
+                                    <h4>Emotional Patterns</h4>
+                                    ${emotions.map(({emotion, count, percentage}) => `
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <div style="width: 12px; height: 12px; background: ${emotion?.color}; border-radius: 50%;"></div>
+                                                <span>${emotion?.name || 'Unknown'}</span>
+                                            </div>
+                                            <div>
+                                                <strong>${count}</strong> <small>(${percentage}%)</small>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        `
+                    };
+                },
+                
+                palette() {
+                    return {
+                        title: '🎨 Emotion Palette',
+                        content: `
+                            <div class="form-section">
+                                <h4>Add New Emotion</h4>
+                                <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-bottom: 15px;">
+                                    <input type="text" id="emotion-name" placeholder="Emotion name..." maxlength="30">
+                                    <input type="color" id="emotion-color" value="#888888">
+                                </div>
+                                <button class="btn btn-primary" data-action="add-emotion">
+                                    Add Emotion
+                                </button>
+                            </div>
+                            
+                            <div class="form-section">
+                                <h4>Your Emotions</h4>
+                                ${state.userEmotions.map(emotion => `
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px;">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <div style="width: 16px; height: 16px; background: ${emotion.color}; border-radius: 4px;"></div>
+                                            <span>${emotion.name}</span>
+                                        </div>
+                                        ${emotion.id !== 'default' ? `
+                                            <button class="btn btn-danger btn-small" 
+                                                    data-action="delete-emotion" 
+                                                    data-id="${emotion.id}">
+                                                ✕
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        `
+                    };
+                },
+                
+                archive() {
+                    const retiredPatterns = state.patterns.filter(p => p.status === 'retired');
+                    
+                    return {
+                        title: '📚 Pattern Archive',
+                        content: `
+                            <div class="form-section">
+                                <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                                    Patterns you've consciously resolved or completed. A testament to your growth.
+                                </p>
+                                
+                                ${retiredPatterns.length > 0 ? `
+                                    ${retiredPatterns.map(pattern => `
+                                        <div style="margin-bottom: 16px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px;">
+                                            <div style="font-weight: 600; margin-bottom: 4px;">${pattern.text}</div>
+                                            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 8px;">
+                                                Original: "${pattern.originalText}"
+                                            </div>
+                                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">
+                                                Retired: ${pattern.retiredAt ? formatDate(pattern.retiredAt) : 'Unknown'}
+                                            </div>
+                                            <button class="btn btn-secondary btn-small" 
+                                                    data-action="reactivate-pattern" 
+                                                    data-id="${pattern.id}">
+                                                🔄 Reactivate
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                ` : `
+                                    <div class="empty-state">
+                                        <div class="empty-state-icon">🌱</div>
+                                        <p>No retired patterns yet. When you consciously resolve a pattern, it will appear here as a testament to your growth.</p>
+                                    </div>
+                                `}
+                            </div>
+                        `
+                    };
+                },
+                
+                dailyReport() {
+                    const today = new Date().toISOString().split('T')[0];
+                    const todayEncounters = state.encounters.filter(e => e.timestamp.startsWith(today));
+                    const flagged = state.encounters.filter(e => e.flagged);
+                    const intentions = state.reflections.filter(r => r.type === 'intention').slice(-10).reverse();
+                    
+                    return {
+                        title: '📝 Daily Report',
+                        content: `
+                            <div class="form-section">
+                                <h4>Today's Summary</h4>
+                                <div class="analytics-grid">
+                                    <div class="stat-card">
+                                        <div class="stat-value">${todayEncounters.length}</div>
+                                        <div class="stat-label">Encounters Today</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-value">${flagged.length}</div>
+                                        <div class="stat-label">Flagged Items</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${flagged.length > 0 ? `
+                                <div class="form-section">
+                                    <h4>⭐ Flagged for Review</h4>
+                                    ${flagged.map(encounter => {
+                                        const pattern = state.patterns.find(p => p.id === encounter.patternId);
+                                        return `
+                                            <div style="margin-bottom: 12px; padding: 12px; background: rgba(237, 137, 54, 0.1); border-left: 3px solid var(--warning-color); border-radius: 6px;">
+                                                <div style="font-weight: 600; margin-bottom: 4px;">${pattern?.text || 'Unknown Pattern'}</div>
+                                                <div style="font-size: 0.9rem; font-style: italic;">
+                                                    "${encounter.journal || 'No journal entry'}"
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : ''}
+                            
+                            ${intentions.length > 0 ? `
+                                <div class="form-section">
+                                    <h4>🎯 Recent Intentions</h4>
+                                    <div style="max-height: 200px; overflow-y: auto;">
+                                        ${intentions.map(intention => `
+                                            <div style="margin-bottom: 10px; padding: 10px; background: rgba(255, 215, 0, 0.1); border-left: 3px solid var(--observer-gold); border-radius: 6px;">
+                                                <div style="font-size: 0.9rem; margin-bottom: 4px;">"${intention.text}"</div>
+                                                <div style="font-size: 0.7rem; opacity: 0.7;">${formatDate(intention.timestamp)}</div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="form-section">
+                                <h4>Set New Intention</h4>
+                                <textarea id="intention-input" 
+                                          placeholder="What would you like to focus on? What intention do you want to set?"
+                                          style="min-height: 100px;"></textarea>
+                                <button class="btn btn-primary" data-action="save-intention">
+                                    💫 Log Intention
+                                </button>
+                            </div>
+                        `
+                    };
+                }
+            };
+
+            const renderPatterns = () => {
+                const activePatterns = state.patterns.filter(p => p.status === 'active');
+                
+                if (activePatterns.length === 0) {
+                    return templates.emptyState(
+                        'Welcome! Add a recurring thought or feeling above to begin your journey of self-awareness.',
+                        '🧠'
+                    );
+                }
+                
+                return activePatterns.map(pattern => templates.patternCard(pattern)).join('');
+            };
             
+            const renderEncounters = () => {
+                let encounters = [...state.encounters];
+                
+                if (state.ui.focusedPatternId) {
+                    encounters.sort((a, b) => {
+                        const aIsFocused = a.patternId === state.ui.focusedPatternId;
+                        const bIsFocused = b.patternId === state.ui.focusedPatternId;
+                        return bIsFocused - aIsFocused;
+                    });
+                }
+                
+                if (encounters.length === 0) {
+                    return templates.emptyState(
+                        'When you log an encounter with a pattern, it will appear here. The journey of awareness begins with the first observation.',
+                        '✨'
+                    );
+                }
+                
+                return encounters.slice(0, 50).map(encounter => templates.encounterCard(encounter)).join('');
+            };
+            
+            const render = () => {
+                if (elements.patternsContainer) {
+                    elements.patternsContainer.innerHTML = renderPatterns();
+                    setupIntersectionObserver();
+                }
+                
+                if (elements.encountersContainer) {
+                    elements.encountersContainer.innerHTML = renderEncounters();
+                }
+                
+                updateCharCounter();
+            };
+
+            const setupIntersectionObserver = () => {
+                if (observers.has('patterns')) {
+                    observers.get('patterns').disconnect();
+                    observers.delete('patterns');
+                }
+                
+                const patternCards = elements.patternsContainer.querySelectorAll('.pattern-card[data-id]');
+                if (patternCards.length === 0) return;
+                
+                const observer = new IntersectionObserver((entries) => {
+                    let mostVisible = null;
+                    let maxRatio = 0;
+                    
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+                            maxRatio = entry.intersectionRatio;
+                            mostVisible = entry.target.dataset.id;
+                        }
+                    });
+                    
+                    if (mostVisible && mostVisible !== state.ui.focusedPatternId) {
+                        state.ui.focusedPatternId = mostVisible;
+                        render();
+                    }
+                }, {
+                    root: elements.patternsContainer,
+                    threshold: [0.1, 0.25, 0.5, 0.75, 1.0]
+                });
+                
+                patternCards.forEach(card => observer.observe(card));
+                observers.set('patterns', observer);
+            };
+
+            const updateCharCounter = () => {
+                const input = elements.patternInput;
+                const counter = document.getElementById('char-count');
+                if (input && counter) {
+                    counter.textContent = input.value.length;
+                    counter.style.color = input.value.length > MAX_INPUT_LENGTH * 0.8 ? 
+                        'var(--warning-color)' : 'var(--text-secondary)';
+                }
+            };
+            
+            const actionHandlers = {
+                'add-pattern': () => {
+                    const input = elements.patternInput;
+                    if (actions.addPattern(input.value)) {
+                        input.value = '';
+                        updateCharCounter();
+                    }
+                },
+                
+                'focus-pattern': (e) => {
+                    const id = e.target.closest('[data-id]').dataset.id;
+                    actions.setFocusedPattern(id);
+                },
+                
+                'log-encounter': (e) => {
+                    const id = e.target.dataset.id;
+                    const pattern = state.patterns.find(p => p.id === id);
+                    if (pattern) {
+                        modal.open({
+                            ...modalTemplates.logEncounter(pattern),
+                            onOpen: (modalEl) => {
+                                const firstContext = modalEl.querySelector('[data-action="select-context"]');
+                                const firstEmotion = modalEl.querySelector('[data-action="select-emotion"]');
+                                if (firstContext) firstContext.click();
+                                if (firstEmotion) firstEmotion.click();
+                            }
+                        });
+                    }
+                },
+                
+                'review-pattern': (e) => {
+                    const id = e.target.dataset.id;
+                    const pattern = state.patterns.find(p => p.id === id);
+                    if (pattern) {
+                        modal.open(modalTemplates.reviewPattern(pattern));
+                    }
+                },
+                
+                'evolve-pattern': (e) => {
+                    const id = e.target.dataset.id;
+                    const input = document.getElementById('evolve-input');
+                    if (input && actions.evolvePattern(id, input.value)) {
+                        modal.close();
+                    }
+                },
+                
+                'retire-pattern': (e) => {
+                    const id = e.target.dataset.id;
+                    const pattern = state.patterns.find(p => p.id === id);
+                    
+                    modal.open({
+                        title: '🏆 Retire Pattern',
+                        content: `
+                            <div class="form-section">
+                                <p style="margin-bottom: 16px;">Are you sure you want to retire "<strong>${pattern?.text}</strong>"?</p>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                                    This pattern will be moved to your archive as a testament to your growth.
+                                </p>
+                                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                    <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                                    <button class="btn btn-warning" data-action="confirm-retire" data-id="${id}">
+                                        🏆 Retire Pattern
+                                    </button>
+                                </div>
+                            </div>
+                        `
+                    });
+                },
+                
+                'confirm-retire': (e) => {
+                    const id = e.target.dataset.id;
+                    if (actions.retirePattern(id)) {
+                        modal.closeAll();
+                    }
+                },
+                
+                'reactivate-pattern': (e) => {
+                    const id = e.target.dataset.id;
+                    const pattern = state.patterns.find(p => p.id === id);
+                    
+                    modal.open({
+                        title: '🔄 Reactivate Pattern',
+                        content: `
+                            <div class="form-section">
+                                <p style="margin-bottom: 16px;">Reactivate "<strong>${pattern?.text}</strong>"?</p>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                                    This pattern will return to your active tracking list.
+                                </p>
+                                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                    <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                                    <button class="btn btn-success" data-action="confirm-reactivate" data-id="${id}">
+                                        🔄 Reactivate
+                                    </button>
+                                </div>
+                            </div>
+                        `
+                    });
+                },
+                
+                'confirm-reactivate': (e) => {
+                    const id = e.target.dataset.id;
+                    if (actions.reactivatePattern(id)) {
+                        modal.close();
+                        modal.open(modalTemplates.archive());
+                    }
+                },
+                
+                'submit-encounter': (e) => {
+                    const patternId = e.target.dataset.patternId;
+                    const encounterId = e.target.dataset.encounterId;
+                    
+                    const selectedContext = document.querySelector('.choice-option[data-action="select-context"].active');
+                    const selectedEmotion = document.querySelector('.choice-option[data-action="select-emotion"].active');
+                    
+                    const context = selectedContext?.dataset.value || 'General';
+                    const emotionId = selectedEmotion?.dataset.value || 'default';
+                    
+                    let success = false;
+                    if (encounterId) {
+                        success = actions.updateEncounter(encounterId, { context, emotionId });
+                    } else {
+                        success = actions.logEncounter(patternId, context, emotionId);
+                    }
+                    
+                    if (success) {
+                        modal.close();
+                    }
+                },
+                
+                'edit-encounter': (e) => {
+                    const id = e.target.dataset.id;
+                    const encounter = state.encounters.find(e => e.id === id);
+                    const pattern = state.patterns.find(p => p.id === encounter?.patternId);
+                    
+                    if (encounter && pattern) {
+                        modal.open({
+                            ...modalTemplates.logEncounter(pattern, encounter),
+                            onOpen: (modalEl) => {
+                                const contextEl = modalEl.querySelector(`[data-action="select-context"][data-value="${encounter.context}"]`);
+                                const emotionEl = modalEl.querySelector(`[data-action="select-emotion"][data-value="${encounter.emotionId}"]`);
+                                
+                                if (contextEl) contextEl.classList.add('active');
+                                if (emotionEl) emotionEl.classList.add('active');
+                            }
+                        });
+                    }
+                },
+                
+                'delete-encounter': (e) => {
+                    const id = e.target.dataset.id;
+                    const encounter = state.encounters.find(e => e.id === id);
+                    const pattern = state.patterns.find(p => p.id === encounter?.patternId);
+                    
+                    modal.open({
+                        title: '🗑️ Delete Encounter',
+                        content: `
+                            <div class="form-section">
+                                <p style="margin-bottom: 16px;">Delete this encounter with "<strong>${pattern?.text || 'Unknown Pattern'}</strong>"?</p>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                                    ${formatDate(encounter?.timestamp)} • This action cannot be undone.
+                                </p>
+                                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                    <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                                    <button class="btn btn-danger" data-action="confirm-delete-encounter" data-id="${id}">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `
+                    });
+                },
+                
+                'confirm-delete-encounter': (e) => {
+                    const id = e.target.dataset.id;
+                    if (actions.deleteEncounter(id)) {
+                        modal.close();
+                    }
+                },
+                
+                'toggle-flag': (e) => {
+                    const id = e.target.dataset.id;
+                    actions.toggleFlag(id);
+                },
+                
+                'open-journal': (e) => {
+                    const id = e.target.dataset.id;
+                    const encounter = state.encounters.find(e => e.id === id);
+                    if (encounter) {
+                        modal.open(modalTemplates.journal(encounter));
+                    }
+                },
+                
+                'save-journal': (e) => {
+                    const id = e.target.dataset.id;
+                    const input = document.getElementById('journal-input');
+                    if (input && actions.saveJournal(id, input.value)) {
+                        modal.close();
+                    }
+                },
+                
+                'select-context': (e) => {
+                    document.querySelectorAll('[data-action="select-context"]').forEach(el => 
+                        el.classList.remove('active')
+                    );
+                    e.target.classList.add('active');
+                },
+                
+                'select-emotion': (e) => {
+                    document.querySelectorAll('[data-action="select-emotion"]').forEach(el => 
+                        el.classList.remove('active')
+                    );
+                    e.target.classList.add('active');
+                },
+                
+                'show-help': () => modal.open(modalTemplates.help()),
+                'show-analytics': () => modal.open(modalTemplates.analytics()),
+                'show-archive': () => modal.open(modalTemplates.archive()),
+                'show-palette': () => modal.open(modalTemplates.palette()),
+                'show-report': () => modal.open(modalTemplates.dailyReport()),
+                
+                'close-modal': () => modal.close(),
+                
+                'add-emotion': () => {
+                    const nameInput = document.getElementById('emotion-name');
+                    const colorInput = document.getElementById('emotion-color');
+                    
+                    if (nameInput && colorInput && actions.addEmotion(nameInput.value, colorInput.value)) {
+                        nameInput.value = '';
+                        colorInput.value = '#888888';
+                        modal.close();
+                        modal.open(modalTemplates.palette());
+                    }
+                },
+                
+                'delete-emotion': (e) => {
+                    const id = e.target.dataset.id;
+                    const emotion = state.userEmotions.find(e => e.id === id);
+                    const usageCount = state.encounters.filter(enc => enc.emotionId === id).length;
+                    
+                    modal.open({
+                        title: '🗑️ Delete Emotion',
+                        content: `
+                            <div class="form-section">
+                                <p style="margin-bottom: 16px;">Delete emotion "<strong>${emotion?.name}</strong>"?</p>
+                                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 20px;">
+                                    Used in ${usageCount} encounters. All will be changed to "Neutral".
+                                </p>
+                                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                                    <button class="btn btn-secondary" data-action="close-modal">Cancel</button>
+                                    <button class="btn btn-danger" data-action="confirm-delete-emotion" data-id="${id}">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `
+                    });
+                },
+                
+                'confirm-delete-emotion': (e) => {
+                    const id = e.target.dataset.id;
+                    if (actions.deleteEmotion(id)) {
+                        modal.close();
+                        modal.open(modalTemplates.palette());
+                    }
+                },
+                
+                'save-intention': () => {
+                    const input = document.getElementById('intention-input');
+                    if (input && actions.saveIntention(input.value)) {
+                        modal.close();
+                    }
+                },
+                
+                'export-data': () => {
+                    storage.export();
+                    toast.success('Data exported successfully');
+                },
+                
+                'import-data': (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        storage.import(file);
+                    }
+                }
+            };
+
+            const setupEventListeners = () => {
+                document.body.addEventListener('click', (e) => {
+                    const target = e.target.closest('[data-action]');
+                    if (target && actionHandlers[target.dataset.action]) {
+                        e.preventDefault();
+                        actionHandlers[target.dataset.action](e);
+                    }
+                });
+                
+                document.body.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape' && modal.stack.length > 0) {
+                        modal.close();
+                        return;
+                    }
+                    
+                    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('choice-option')) {
+                        e.preventDefault();
+                        e.target.click();
+                        return;
+                    }
+                    
+                    if (e.key === 'Enter' && e.target.id === 'pattern-input') {
+                        e.preventDefault();
+                        actionHandlers['add-pattern']();
+                        return;
+                    }
+                });
+                
+                document.body.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('modal-layer')) {
+                        modal.close();
+                    }
+                });
+                
+                if (elements.patternInput) {
+                    elements.patternInput.addEventListener('input', updateCharCounter);
+                }
+                
+                const importInput = document.createElement('input');
+                importInput.type = 'file';
+                importInput.accept = '.json';
+                importInput.style.display = 'none';
+                importInput.addEventListener('change', actionHandlers['import-data']);
+                document.body.appendChild(importInput);
+                
+                actionHandlers['import-data-trigger'] = () => importInput.click();
+            };
+
             const init = () => {
                 elements.appContainer = document.getElementById('app-container');
                 elements.modalContainer = document.getElementById('modal-container');
@@ -995,50 +2224,34 @@
                 
                 storage.load();
                 
-                elements.appContainer.innerHTML = `
-                    <header class="header">
-                        <div class="consciousness-branding">
-                            <img src="https://raw.githubusercontent.com/anandvip/mindscape/refs/heads/main/logo/mindscaping.png" alt="Mindscape Logo" class="consciousness-logo">
-                            <h1>Mindscape</h1>
-                        </div>
-                        <p>Transform thoughts from invisible forces into observable data points</p>
-                    </header>
-                    
-                    <section class="section">
-                        <div class="form-section">
-                            <div class="input-group">
-                                <input 
-                                    type="text" 
-                                    id="pattern-input" 
-                                    placeholder="What recurring thought would you like to observe?"
-                                    maxlength="200"
-                                >
-                                <div class="char-counter">
-                                    <span id="char-count">0</span>/200
-                                </div>
-                            </div>
-                            <button class="btn btn-primary" onclick="alert('Full Mindscape app loaded!')">
-                                Begin Tracking
-                            </button>
-                        </div>
-                    </section>
-                    
-                    <footer style="text-align: center; padding: 2rem 1rem; color: var(--text-secondary); font-size: 0.8rem; opacity: 0.7;">
-                        <p>© 2025 Mindscape. Built with love in Kurukshetra, India by <a href="https://vipulanand.in" style="color: var(--awareness-teal);">VA Graphics</a>.</p>
-                    </footer>
-                `;
+                elements.appContainer.innerHTML = templates.main();
                 
-                console.log('🧠 Mindscape SEO-optimized version ready');
+                elements.patternInput = document.getElementById('pattern-input');
+                elements.patternsContainer = document.getElementById('patterns-container');
+                elements.encountersContainer = document.getElementById('encounters-container');
+                
+                setupEventListeners();
+                
+                render();
+                
+                setInterval(() => {
+                    storage.save();
+                }, 30000);
+                
+                if (state.patterns.length === 0 && state.encounters.length === 0) {
+                    setTimeout(() => {
+                        toast.info('Welcome to Mindscape! Start by adding a pattern you want to observe.', 5000);
+                    }, 1000);
+                }
+                
+                console.log('🧠 Mindscape initialized successfully');
             };
 
-            // Register service worker for PWA
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js')
-                        .then(registration => console.log('SW registered'))
-                        .catch(registrationError => console.log('SW registration failed'));
-                });
-            }
+            window.addEventListener('beforeunload', () => {
+                storage.save();
+                observers.forEach(observer => observer.disconnect());
+                observers.clear();
+            });
 
             init();
         });
