@@ -1,0 +1,61 @@
+{
+  "name": "Mindscape - Metacognitive Awareness Tool",
+  "short_name": "Mindscape",
+  "description": "Transform awareness into wisdom through mindful observation of your thoughts and emotions. Professional metacognitive tool for self-awareness and performance optimization.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#8a2be2",
+  "background_color": "#1a1a2e",
+  "lang": "en-US",
+  "scope": "/",
+  "categories": ["health", "productivity", "lifestyle", "wellness"],
+  "screenshots": [
+    {
+      "src": "https://raw.githubusercontent.com/anandvip/mindscape/refs/heads/main/logo/mindscaping.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "platform": "wide",
+      "label": "Mindscape main interface"
+    }
+  ],
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon",
+      "purpose": "any"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/anandvip/mindscape/refs/heads/main/logo/mindscaping.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://raw.githubusercontent.com/anandvip/mindscape/refs/heads/main/logo/mindscaping.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Pattern Log",
+      "url": "/?action=quick-log",
+      "description": "Quickly log a pattern encounter"
+    },
+    {
+      "name": "Analytics",
+      "url": "/?view=analytics",
+      "description": "View your mindfulness analytics"
+    },
+    {
+      "name": "Daily Report",
+      "url": "/?view=report",
+      "description": "View today's mindfulness report"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
