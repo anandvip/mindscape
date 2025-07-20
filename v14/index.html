@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindscape Co-Creator</title>
+    <style>
+        :root { --bg-main: #1A202C; --bg-gradient: linear-gradient(135deg, #1A202C 0%, #2D3748 100%); --text-primary: #E2E8F0; --text-secondary: #A0AEC0; --surface-color: rgba(45, 55, 72, 0.9); --surface-border: rgba(226, 232, 240, 0.2); --primary-color: #805AD5; --glow-color: rgba(128, 90, 213, 0.4); --success-color: #48BB78; --warning-color: #ED8936; --danger-color: #E53E3E; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-main); color: var(--text-primary); }
+        .container { max-width: 1200px; margin: 0 auto; background: var(--bg-gradient); min-height: 100vh; }
+        .header { text-align: center; padding: 30px 20px; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); }
+        .header h1 { font-size: clamp(1.5rem, 5vw, 2.5rem); }
+        .section { padding: 0 20px; margin-bottom: 40px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-title { font-size: 1.4rem; font-weight: 600; }
+        .modal-layer { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 32, 44, 0.85); backdrop-filter: blur(8px); z-index: 1000; overflow-y: auto; padding: 20px; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .modal-content-wrapper { max-width: 700px; margin: 20px auto; }
+        .scroll-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; padding-bottom: 15px; scrollbar-width: none; gap: 15px; }
+        .scroll-container::-webkit-scrollbar { display: none; }
+        .card { flex-shrink: 0; width: min(calc(100vw - 55px), 400px); scroll-snap-align: center; background: var(--surface-color); backdrop-filter: blur(5px); border-radius: 12px; padding: 15px; border: 1px solid var(--surface-border); transition: all 0.3s ease; }
+        .pattern-card.focused { box-shadow: 0 0 20px var(--glow-color); border-color: var(--primary-color); transform: scale(1.02); }
+        .btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; }
+        .btn-small { padding: 6px 12px; font-size: 0.7rem; }
+        .btn-primary { background: linear-gradient(135deg, #805AD5 0%, #553C9A 100%); color: white; }
+        .btn-secondary { background: rgba(255, 255, 255, 0.25); color: var(--text-primary); border: 1px solid var(--surface-border); }
+        .btn-danger { background: var(--danger-color); color: white; }
+        .form-section { background: var(--surface-color); border-radius: 12px; padding: 20px; border: 1px solid var(--surface-border); margin-top: 20px; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--surface-border); border-radius: 8px; font-size: 1rem; background: rgba(0, 0, 0, 0.3); color: var(--text-primary); margin-bottom: 15px; font-family: inherit; }
+        .choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+        .choice-option { padding: 10px; border: 1px solid var(--surface-border); border-radius: 8px; text-align: center; cursor: pointer; }
+        .choice-option.active { border-color: var(--primary-color); box-shadow: 0 0 10px var(--glow-color); }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); color: white; padding: 10px 20px; border-radius: 8px; z-index: 2000; animation: toastAnim 3s forwards; }
+        @keyframes toastAnim { 0%,10% { opacity: 0; transform: translate(-50%,-10px) scale(0.9); } 20%,80% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px) scale(0.9); } }
+        @media (min-width: 1024px) { .scroll-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); overflow-x: visible; } }
+    </style>
+</head>
+<body>
+    <div id="app-container"></div>
+    <div class="modal-layer" id="modal-container"></div>
+    <div id="toast-container" aria-live="polite"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    let state = {};
+    const elements = {};
+    const CONTEXT_OPTIONS = ['Work', 'Home', 'Commute', 'Social', 'Media', 'Alone'];
+    const MAX_ENCOUNTERS = 200;
+
+    const actions = {
+        addPattern: (text) => { const s = sanitize(text); if(s) { state.patterns.unshift({ id: generateId(), text: s, originalText: s, status: 'active' }); saveAndRender(); showToast("Pattern Added"); } },
+        logEncounter: (pId, ctx, emoId) => { state.encounters.unshift({ id: generateId(), patternId: pId, timestamp: new Date().toISOString(), context: ctx, emotionId: emoId, journal: '', flagged: false }); if(state.encounters.length > MAX_ENCOUNTERS) state.encounters.pop(); saveAndRender(); },
+        updateEncounter: (id, ctx, emoId) => { const e = state.encounters.find(e => e.id === id); if(e) { e.context = ctx; e.emotionId = emoId; } saveAndRender(); },
+        deleteEncounter: (id) => { if(!confirm("Delete encounter?")) return; state.encounters = state.encounters.filter(e => e.id !== id); saveAndRender(); showToast("Encounter Deleted", "warning"); },
+        addEmotion: (name, color) => { const sName = sanitize(name); if (sName) { state.userEmotions.push({ id: generateId(), name: sName, color }); saveAndRender(); } },
+        deleteEmotion: (id) => { if (id !== 'default' && confirm("Delete emotion?")) { state.userEmotions = state.userEmotions.filter(e => e.id !== id); state.encounters.forEach(enc => { if (enc.emotionId === id) enc.emotionId = 'default'; }); saveAndRender(); } },
+        evolvePattern: (id, text) => { const p = state.patterns.find(p => p.id === id); if (p && sanitize(text)) { p.text = sanitize(text); saveAndRender(); showToast("Pattern Evolved"); } },
+        retirePattern: (id) => { if(!confirm("Retire pattern?")) return; const p = state.patterns.find(p => p.id === id); if (p) { p.status = 'retired'; saveAndRender(); showToast("Pattern Retired", "warning"); } },
+        reactivatePattern: (id) => { if(!confirm("Reactivate pattern?")) return; const p = state.patterns.find(p => p.id === id); if (p) { p.status = 'active'; saveAndRender(); showToast("Pattern Reactivated"); } },
+        toggleFlag: (id) => { const e = state.encounters.find(e => e.id === id); if(e) { e.flagged = !e.flagged; saveAndRender(); } },
+        saveJournal: (id, text) => { const e = state.encounters.find(e => e.id === id); if(e) { e.journal = sanitize(text); saveAndRender(); showToast("Journal Saved"); } },
+        saveIntention: (text) => { const today = new Date().toISOString().split('T')[0]; const r = state.reflections.find(r => r.date === today); if (r) r.intention = sanitize(text); else state.reflections.push({ date: today, intention: sanitize(text) }); saveAndRender(); showToast("Intention Saved"); },
+    };
+
+    const modalStack = {
+        stack: [],
+        push(content) { this.stack.push(content); this.render(); },
+        pop() { this.stack.pop(); this.render(); },
+        render() { elements.modalContainer.innerHTML = this.stack[this.stack.length - 1] || ''; elements.modalContainer.style.display = this.stack.length > 0 ? 'block' : 'none'; }
+    };
+
+    const templates = {
+        main: () => `<main id="main-content" class="container"><header class="header"><h1>Mindscape Co-Creator</h1></header><section class="section"><div class="form-section"><input type="text" id="pattern-input" placeholder="What new thought is present?"><button class="btn btn-primary" data-action="add-pattern">Begin Tracking</button></div></section><section class="section"><div class="section-header"><h2 class="section-title">Active Patterns</h2><div><button class="btn btn-secondary btn-small" data-action="toggle-archive">Retired</button><button class="btn btn-secondary btn-small" data-action="toggle-palette">Palette</button></div></div><div class="scroll-container" id="patterns-container"></div></section><section class="section"><div class="section-header"><h2 class="section-title">Recent Encounters</h2><button class="btn btn-secondary btn-small" data-action="generate-report">Daily Report</button></div><div class="scroll-container" id="encounters-container"></div></section></main>`,
+        view: (title, content) => `<div class="modal-content-wrapper"><div class="section-header"><h2 class="section-title">${title}</h2><button class="btn btn-secondary" data-action="close-view">Close</button></div>${content}</div>`,
+        palette: () => templates.view('Your Palette', `<div class="form-section"><h3>Add Emotion</h3><input type="text" id="emotion-name-input"><input type="color" id="emotion-color-input" value="#888888"><button class="btn btn-primary" data-action="add-emotion">Add</button></div><div>${state.userEmotions.map(e=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="border-left:4px solid ${e.color};padding-left:8px;">${e.name}</span>${e.id!=='default'?`<button data-action="delete-emotion" data-id="${e.id}" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.5rem;">×</button>`:''}</div>`).join('')||'<div class="card"><p>Create your first custom emotion.</p></div>'}</div>`),
+        archive: () => templates.view('Retired Patterns', `<div class="scroll-container">${state.patterns.filter(p=>p.status==='retired').map(p=>`<div class="card"><p><strong>${p.text}</strong></p><small>Original: "${p.originalText}"</small><div class="pattern-actions"><button class="btn btn-primary btn-small" data-action="reactivate-pattern" data-id="${p.id}">Reactivate</button></div></div>`).join('')||'<div class="card" style="line-height:1.6;"><p>No retired patterns yet. Keep growing!</p></div>'}</div>`),
+        review: (p) => templates.view(`Review: ${p.text}`, `<div class="form-section"><h3>Evolve Pattern</h3><textarea id="evolve-text-input">${p.text}</textarea><button class="btn btn-primary" data-action="evolve-pattern" data-id="${p.id}">Save</button></div><div class="form-section"><h3>Retire Pattern</h3><button class="btn btn-secondary" data-action="retire-pattern" data-id="${p.id}">Retire</button></div>`),
+        journal: (enc, p) => templates.view(`Journal: ${p.text}`, `<div class="form-section"><p>${new Date(enc.timestamp).toLocaleString()}</p><textarea id="journal-text-input">${enc.journal||''}</textarea><button class="btn btn-primary" data-action="save-journal" data-id="${enc.id}">Save</button></div>`),
+        log: (p, enc=null) => templates.view(enc?`Edit: ${p.text}`:`Log: ${p.text}`,`<div class="form-section"><div class="choice-grid">${CONTEXT_OPTIONS.map(opt=>`<div class="choice-option" role="button" tabindex="0" data-action="select-choice" data-type="context" data-value="${opt}">${opt}</div>`).join('')}</div><h3 style="margin-top:20px;">Emotion</h3><div class="choice-grid">${state.userEmotions.map(emo=>`<div class="choice-option" role="button" tabindex="0" data-action="select-choice" data-type="emotion" data-value="${emo.id}" style="border-left:4px solid ${emo.color};">${emo.name}</div>`).join('')}</div><button class="btn btn-primary" data-action="log-encounter-submit" data-id="${p.id}" data-encounter-id="${enc?.id||''}" style="width:100%;margin-top:20px;">${enc?'Update':'Log'}</button></div>`),
+        report: () => {
+            const today = new Date().toISOString().split('T')[0], intention = state.reflections.find(r=>r.date===today)?.intention||'', flagged = state.encounters.filter(e=>e.flagged);
+            return templates.view('Daily Report',`<div class="report-card"><h3>Summary</h3><p>Encounters Today: <strong>${state.encounters.filter(e=>e.timestamp.startsWith(today)).length}</strong></p></div><div class="report-card"><h3>★ Flagged for Review</h3>${flagged.length>0?flagged.map(e=>`<p><strong>${state.patterns.find(p=>p.id===e.patternId)?.text||'?'}:</strong> "${e.journal||'No journal.'}"</p>`).join(''):'<p>Nothing flagged. Use the ☆ icon to mark important encounters.</p>'}</div><div class="report-card"><h3>Intention for Tomorrow</h3><textarea id="intention-input">${intention}</textarea><button class="btn btn-primary" data-action="save-intention">Save</button></div>`);
+        }
+    };
+    
+    const render = () => { elements.appContainer.querySelector('#patterns-container').innerHTML = renderPatterns(); elements.appContainer.querySelector('#encounters-container').innerHTML = renderEncounters(); };
+    const renderPatterns = () => state.patterns.filter(p=>p.status==='active').map(p => `<div class="card pattern-card ${p.id===state.ui.focusedPatternId?'focused':''}" data-id="${p.id}"><p style="font-weight:600;">${p.text}</p><div class="pattern-actions"><button class="btn btn-primary btn-small" data-action="log-encounter" data-id="${p.id}">Log</button><button class="btn btn-secondary btn-small" data-action="review-pattern" data-id="${p.id}">Review</button></div></div>`).join('')||`<div class="card" style="line-height:1.6;"><p>Welcome! Add a recurring thought to begin.</p></div>`;
+    const renderEncounters = () => {
+        let encounters = [...state.encounters];
+        if(state.ui.focusedPatternId) { encounters.sort((a,b) => (b.patternId === state.ui.focusedPatternId) - (a.patternId === state.ui.focusedPatternId)); }
+        return encounters.map(e => {
+            const p = state.patterns.find(p => p.id === e.patternId), emo = state.userEmotions.find(em => em.id === e.emotionId) || state.userEmotions[0];
+            return `<div class="card encounter-card ${e.flagged?'flagged':''} ${p?.id===state.ui.focusedPatternId?'focused-pattern':''}" data-id="${e.id}"><p><strong>${p?.text||'Retired'}</strong></p><small>${new Date(e.timestamp).toLocaleString()}</small><div style="margin:8px 0;font-size:0.8rem;"><span style="border-left:3px solid ${emo.color};padding-left:6px;">${emo.name}</span><span style="opacity:0.7;"> • ${e.context}</span></div>${e.journal?`<div class="journal-preview">${e.journal.substring(0,80)}...</div>`:''}<div class="encounter-actions"><button class="btn btn-secondary btn-small" data-action="journal" data-id="${e.id}">Journal</button><button class="btn btn-secondary btn-small" data-action="toggle-flag" data-id="${e.id}">${e.flagged?'★ Unflag':'☆ Flag'}</button><button class="btn btn-secondary btn-small" data-action="edit-encounter" data-id="${e.id}">Edit</button><button class="btn btn-danger btn-small" data-action="delete-encounter" data-id="${e.id}">Del</button></div></div>`;
+        }).join('') || `<div class="card" style="line-height:1.6;"><p>When you log an encounter, it will appear here.</p></div>`;
+    };
+    
+    const actionHandlers = {
+        'add-pattern': () => { actions.addPattern(elements.patternInput.value); elements.patternInput.value = ''; },
+        'toggle-archive': () => modalStack.push(templates.archive()),
+        'toggle-palette': () => modalStack.push(templates.palette()),
+        'generate-report': () => modalStack.push(templates.report()),
+        'close-view': () => modalStack.pop(),
+        'review-pattern': (id) => modalStack.push(templates.review(state.patterns.find(p=>p.id===id))),
+        'retire-pattern': (id) => { actions.retirePattern(id); modalStack.pop(); },
+        'reactivate-pattern': (id) => { actions.reactivatePattern(id); modalStack.pop(); modalStack.push(templates.archive()); },
+        'evolve-pattern': (id, view) => { actions.evolvePattern(id, view.querySelector('#evolve-text-input').value); modalStack.pop(); },
+        'log-encounter': (id) => modalStack.push(templates.log(state.patterns.find(p=>p.id===id)), (modal)=>populateChoices(modal)),
+        'edit-encounter': (id) => { const enc = state.encounters.find(e=>e.id===id); modalStack.push(templates.log(state.patterns.find(p=>p.id===enc.patternId), enc), (modal)=>populateChoices(modal, enc)); },
+        'delete-encounter': (id) => actions.deleteEncounter(id),
+        'journal': (id) => { const enc = state.encounters.find(e=>e.id===id); modalStack.push(templates.journal(enc, state.patterns.find(p=>p.id===enc.patternId))); },
+        'toggle-flag': (id) => actions.toggleFlag(id),
+        'save-journal': (id, view) => { actions.saveJournal(id, view.querySelector('#journal-text-input').value); modalStack.pop(); },
+        'log-encounter-submit': (id, view, target) => { const encId = target.dataset.encounterId, context = view.querySelector('.choice-option[data-type="context"].active')?.dataset.value || 'General', emotionId = view.querySelector('.choice-option[data-type="emotion"].active')?.dataset.value || 'default'; if(encId) actions.updateEncounter(encId, context, emotionId); else actions.logEncounter(id, context, emotionId); modalStack.pop(); },
+        'add-emotion': (id, view) => { actions.addEmotion(view.querySelector('#emotion-name-input').value, view.querySelector('#emotion-color-input').value); modalStack.pop(); modalStack.push(templates.palette()); },
+        'delete-emotion': (id) => { actions.deleteEmotion(id); modalStack.pop(); modalStack.push(templates.palette()); },
+        'save-intention': (id, view) => { actions.saveIntention(view.querySelector('#intention-input').value); modalStack.pop(); },
+        'select-choice': (id, view, target) => { target.closest('.choice-grid')?.querySelectorAll('.active').forEach(opt=>opt.classList.remove('active')); target.classList.add('active'); },
+    };
+
+    function setupEventListeners() {
+        document.body.addEventListener('click', e => { const target = e.target.closest('[data-action]'); if (target) actionHandlers[target.dataset.action]?.(target.dataset.id, target.closest('.full-screen-view'), target); });
+        document.body.addEventListener('keydown', e => { if ((e.key==='Enter'||e.key===' ') && e.target.matches('.choice-option')) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click',{bubbles:true})); } });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape' && modalStack.stack.length > 0) modalStack.pop(); });
+        let observer = new IntersectionObserver((entries) => { entries.forEach(entry => { if(entry.isIntersecting) state.ui.focusedPatternId = entry.target.dataset.id; }); render(); }, { root: elements.patternsContainer, threshold: 0.6 });
+        document.querySelectorAll('#patterns-container .pattern-card').forEach(card => observer.observe(card));
+    }
+
+    function init() {
+        elements.appContainer = document.getElementById('app-container');
+        elements.modalContainer = document.getElementById('modal-container');
+        elements.toastContainer = document.getElementById('toast-container');
+        loadState();
+        elements.appContainer.innerHTML = templates.main();
+        Object.assign(elements, { patternInput: document.getElementById('pattern-input'), patternsContainer: document.getElementById('patterns-container'), encountersContainer: document.getElementById('encounters-container') });
+        setupEventListeners();
+        render();
+    }
+
+    const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+    const saveAndRender = () => { localStorage.setItem('mindscape-co-creator-data', JSON.stringify(state)); render(); };
+    const loadState = () => {
+        const defaultState = { patterns:[], encounters:[], userEmotions:[{id:'default',name:'Neutral',color:'#808080'}], reflections:[], ui:{focusedPatternId:null,focusedEncounterId:null} };
+        try { const saved = localStorage.getItem('mindscape-co-creator-data'); if(saved) { const loaded = JSON.parse(saved); state = { ...defaultState, ...loaded, ui: { ...defaultState.ui, ...(loaded.ui || {}) } }; } else { state = defaultState; } } catch (e) { state = defaultState; showToast("Could not load session", "danger"); }
+    };
+    const showToast = (message, type = 'success') => {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        toast.style.background = type === 'success' ? 'var(--success-color)' : 'var(--warning-color)';
+        elements.toastContainer.innerHTML = '';
+        elements.toastContainer.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    };
+    const populateChoices = (modal, enc) => {
+        if(enc) {
+            modal.querySelector(`.choice-option[data-type="context"][data-value="${enc.context}"]`)?.classList.add('active');
+            modal.querySelector(`.choice-option[data-type="emotion"][data-value="${enc.emotionId}"]`)?.classList.add('active');
+        }
+    };
+    const sanitize = (str) => { const div = document.createElement('div'); div.textContent = str; return div.innerHTML; };
+    
+    init();
+});
+</script>
+</body>
+</html>
