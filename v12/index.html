@@ -7,16 +7,15 @@
     <style>
         /* 1. Global Styles & Theming */
         :root {
-            --bg-gradient: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            --text-primary: #e2e8f0;
-            --text-secondary: #a0aec0;
-            --surface-color: rgba(45, 55, 72, 0.9);
-            --surface-border: rgba(226, 232, 240, 0.15);
-            --primary-color: #667eea;
-            --glow-color: rgba(102, 126, 234, 0.5);
-            --success-color: #48bb78;
-            --warning-color: #ed8936;
-            --danger-color: #f56565;
+            --bg-gradient: linear-gradient(135deg, #1A202C 0%, #2D3748 100%);
+            --text-primary: #E2E8F0;
+            --text-secondary: #A0AEC0;
+            --surface-color: rgba(45, 55, 72, 0.85);
+            --surface-border: rgba(226, 232, 240, 0.1);
+            --primary-color: #805AD5;
+            --glow-color: rgba(128, 90, 213, 0.4);
+            --success-color: #48BB78;
+            --warning-color: #ED8936;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -29,20 +28,18 @@
         /* 2. Layout & Main Sections */
         .container { max-width: 100%; margin: 0 auto; }
         .header { text-align: center; padding: 20px; background: rgba(0,0,0,0.2); backdrop-filter: blur(10px); }
-        .header h1 { font-size: 1.8rem; margin-bottom: 5px; color: var(--text-primary); }
-        .time-display { text-align: center; padding: 10px; font-size: 0.9rem; opacity: 0.7; }
+        .time-display { text-align: center; padding: 10px; font-size: 0.9rem; opacity: 0.6; }
         .section { padding: 0 20px; margin-bottom: 30px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .section-title { font-size: 1.3rem; font-weight: 600; }
         .full-screen-view {
-            display: none; /* Hidden by default */
-            position: fixed;
+            display: none; position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: var(--bg-gradient);
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 20px;
+            z-index: 1000; overflow-y: auto; padding: 20px;
+            animation: fadeIn 0.3s ease-in-out;
         }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         /* 3. Cards & Carousels */
         .scroll-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; padding-bottom: 15px; scrollbar-width: none; }
@@ -53,106 +50,71 @@
             border-radius: 12px; padding: 15px; border: 1px solid var(--surface-border);
             transition: all 0.3s ease;
         }
-        .card:last-child { margin-right: 0; }
         .pattern-card.focused { box-shadow: 0 0 20px var(--glow-color); border-color: var(--primary-color); }
         .encounter-card { border-left: 4px solid var(--surface-border); }
-        .encounter-card.focused-pattern { border-left-color: var(--primary-color); background: rgba(102, 126, 234, 0.1); }
+        .encounter-card.focused-pattern { border-left-color: var(--primary-color); background: rgba(128, 90, 213, 0.1); }
         .encounter-card.flagged { border-left-color: var(--warning-color); }
 
         /* 4. Buttons & UI Elements */
-        .btn { padding: 8px 16px; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; }
+        .btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; text-transform: uppercase; }
         .btn:hover { transform: translateY(-1px); }
-        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+        .btn-primary { background: linear-gradient(135deg, #805AD5 0%, #553C9A 100%); color: white; }
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: var(--text-primary); border: 1px solid var(--surface-border); }
         .form-section { background: var(--surface-color); border-radius: 12px; padding: 20px; border: 1px solid var(--surface-border); }
-        input[type="text"], textarea {
+        input[type="text"], input[type="color"], textarea {
             width: 100%; padding: 12px; border: 1px solid var(--surface-border); border-radius: 8px; font-size: 1rem;
             background: rgba(0, 0, 0, 0.3); color: var(--text-primary); margin-bottom: 15px; font-family: inherit;
         }
-        textarea { resize: vertical; min-height: 100px; }
+        textarea { resize: vertical; min-height: 150px; }
         input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px var(--glow-color); }
+        .choice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; }
+        .choice-option { padding: 10px; border: 1px solid var(--surface-border); border-radius: 8px; text-align: center; cursor: pointer; transition: box-shadow 0.2s; }
+        .choice-option.active { border-color: var(--primary-color); box-shadow: 0 0 10px var(--glow-color); }
 
         /* 5. Specific Component Styles */
-        .pattern-actions, .encounter-actions { display: flex; gap: 8px; margin-top: 15px; }
-        .journal-preview { font-size: 0.8rem; font-style: italic; opacity: 0.7; margin-top: 10px; border-left: 2px solid var(--primary-color); padding-left: 8px; }
+        .pattern-actions, .encounter-actions { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+        .journal-preview { font-size: 0.8rem; font-style: italic; opacity: 0.7; margin-top: 10px; border-left: 2px solid var(--primary-color); padding-left: 8px; max-height: 40px; overflow: hidden; }
         .report-card { margin-bottom: 20px; padding: 15px; border-radius: 8px; background: rgba(0,0,0,0.2); }
-        .report-card h3 { color: var(--primary-color); margin-bottom: 10px; }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <header class="header">
-            <h1>Mindscape Co-Creator</h1>
-            <p>Your co-creative workspace for the self.</p>
-        </header>
-        <div class="time-display" id="time-display"></div>
-
+        <!-- Main UI -->
         <main id="main-content">
-            <!-- Add Pattern -->
+            <header class="header"><h1>Mindscape Co-Creator</h1><p>Your workspace for the self.</p></header>
+            <div class="time-display" id="time-display"></div>
             <section class="section">
                 <div class="form-section">
                     <input type="text" id="pattern-input" placeholder="What new thought is present?" maxlength="100">
                     <button class="btn btn-primary" id="add-pattern-btn">Begin Tracking</button>
                 </div>
             </section>
-
-            <!-- Active Patterns -->
             <section class="section">
                 <div class="section-header">
                     <h2 class="section-title">Active Patterns</h2>
                     <div>
-                        <button class="btn btn-secondary btn-small" id="toggle-archive-btn">Retired</button>
-                        <button class="btn btn-secondary btn-small" id="toggle-palette-btn">Palette</button>
+                        <button class="btn btn-secondary" id="toggle-archive-btn">Retired</button>
+                        <button class="btn btn-secondary" id="toggle-palette-btn">Palette</button>
                     </div>
                 </div>
                 <div class="scroll-container" id="patterns-container"></div>
             </section>
-
-            <!-- Recent Encounters -->
             <section class="section">
                 <div class="section-header">
                     <h2 class="section-title">Recent Encounters</h2>
-                    <button class="btn btn-secondary btn-small" id="generate-report-btn">Daily Report</button>
+                    <button class="btn btn-secondary" id="generate-report-btn">Daily Report</button>
                 </div>
                 <div class="scroll-container" id="encounters-container"></div>
             </section>
         </main>
 
-        <!-- Full-Screen Views (hidden by default) -->
-        <div class="full-screen-view" id="archive-view">
-            <div class="section-header">
-                <h2 class="section-title">Retired Patterns</h2>
-                <button class="btn btn-secondary" id="close-archive-btn">Close</button>
-            </div>
-            <div id="retired-patterns-container"></div>
-        </div>
-
-        <div class="full-screen-view" id="palette-view">
-            <div class="section-header">
-                <h2 class="section-title">Your Emotional Palette</h2>
-                <button class="btn btn-secondary" id="close-palette-btn">Close</button>
-            </div>
-            <div class="form-section">
-                <h3>Add a New Emotion</h3>
-                <input type="text" id="emotion-name-input" placeholder="Name (e.g., Sonder, Anxiety)">
-                <input type="color" id="emotion-color-input" value="#888888">
-                <button class="btn btn-primary" id="add-emotion-btn">Add to Palette</button>
-            </div>
-            <div id="user-emotions-container"></div>
-        </div>
-
-        <div class="full-screen-view" id="report-view">
-            <div class="section-header">
-                <h2 class="section-title">Daily Reflection Report</h2>
-                <button class="btn btn-secondary" id="close-report-btn">Close</button>
-            </div>
-            <div id="report-content-container" class="form-section"></div>
-        </div>
-
-        <!-- Modals for focused tasks -->
+        <!-- Full-Screen Views (Templates will be injected here) -->
+        <div class="full-screen-view" id="archive-view"></div>
+        <div class="full-screen-view" id="palette-view"></div>
+        <div class="full-screen-view" id="report-view"></div>
         <div class="full-screen-view" id="review-modal"></div>
         <div class="full-screen-view" id="journal-modal"></div>
+        <div class="full-screen-view" id="log-modal"></div>
     </div>
 
 <script>
@@ -164,197 +126,243 @@ document.addEventListener('DOMContentLoaded', () => {
     let state = {
         patterns: [],
         encounters: [],
-        userEmotions: [],
-        reflections: [],
+        userEmotions: [{ id: 1, name: 'Neutral', color: '#808080' }],
         ui: { focusedPatternId: null }
     };
     const CONTEXT_OPTIONS = ['Work', 'Home', 'Commute', 'Social', 'Media', 'Alone'];
-    const elements = { /* All document.getElementById calls are consolidated here */ };
+    const elements = {}; // Populated in init()
 
     // -----------------------------------------------------------------------------
-    //  2. CORE LOGIC (ACTIONS) - Modify the state
+    //  2. STATE MODIFICATION (ACTIONS)
     // -----------------------------------------------------------------------------
     const actions = {
-        addPattern(text) {
-            if (!text) return;
+        addPattern: (text) => {
+            if (!text || text.trim() === '') return;
             state.patterns.push({
                 id: Date.now(), text: text.trim(), originalText: text.trim(),
                 createdAt: new Date().toISOString(), status: 'active', insights: []
             });
             saveAndRender();
         },
-        logEncounter(patternId, context, emotionId) {
+        logEncounter: (patternId, context, emotionId) => {
             state.encounters.push({
                 id: Date.now(), patternId, timestamp: new Date().toISOString(),
-                context, emotionId, journal: '', resources: [], flagged: false
+                context, emotionId, journal: '', flagged: false
             });
             saveAndRender();
         },
-        addEmotion(name, color) {
-            if (!name) return;
+        addEmotion: (name, color) => {
+            if (!name || name.trim() === '') return;
             state.userEmotions.push({ id: Date.now(), name: name.trim(), color });
             saveAndRender();
+            renderPaletteView(); // Re-render the view
         },
-        deleteEmotion(id) {
-            state.userEmotions = state.userEmotions.filter(e => e.id !== id);
-            saveAndRender();
+        deleteEmotion: (id) => {
+            if (id === 1) { alert("Cannot delete the default 'Neutral' emotion."); return; }
+            if (confirm("Are you sure? This will reset emotions for any encounters using it.")) {
+                state.userEmotions = state.userEmotions.filter(e => e.id !== id);
+                state.encounters.forEach(enc => { if (enc.emotionId === id) enc.emotionId = 1; });
+                saveAndRender();
+                renderPaletteView();
+            }
         },
-        startReview(patternId) {
-            renderReviewModal(patternId);
-            elements.reviewModal.style.display = 'block';
-        },
-        evolvePattern(patternId, newText) {
+        evolvePattern: (patternId, newText) => {
             const pattern = state.patterns.find(p => p.id === patternId);
-            if (pattern && newText) {
-                pattern.text = newText;
+            if (pattern && newText.trim() !== '') {
+                pattern.text = newText.trim();
                 saveAndRender();
             }
         },
-        retirePattern(patternId) {
+        retirePattern: (patternId) => {
             const pattern = state.patterns.find(p => p.id === patternId);
-            if (pattern) {
-                pattern.status = 'retired';
-                saveAndRender();
-            }
+            if (pattern) { pattern.status = 'retired'; saveAndRender(); }
         },
-        reactivatePattern(patternId) {
+        reactivatePattern: (patternId) => {
             const pattern = state.patterns.find(p => p.id === patternId);
-            if (pattern) {
-                pattern.status = 'active';
-                saveAndRender();
-            }
+            if (pattern) { pattern.status = 'active'; saveAndRender(); }
         },
-        toggleFlag(encounterId) {
+        toggleFlag: (encounterId) => {
             const encounter = state.encounters.find(e => e.id === encounterId);
             if(encounter) encounter.flagged = !encounter.flagged;
             saveAndRender();
         },
-        saveJournal(encounterId, text) {
+        saveJournal: (encounterId, text) => {
             const encounter = state.encounters.find(e => e.id === encounterId);
             if(encounter) encounter.journal = text;
             saveAndRender();
         },
-        // ... and so on for other state modifications
     };
 
     // -----------------------------------------------------------------------------
-    //  3. RENDER LOGIC - Read the state and update the DOM
+    //  3. UI RENDERING LOGIC
     // -----------------------------------------------------------------------------
     function render() {
         renderPatterns();
         renderEncounters();
-        renderPalette();
-        renderArchive();
     }
     
     function renderPatterns() {
         const activePatterns = state.patterns.filter(p => p.status === 'active');
         elements.patternsContainer.innerHTML = activePatterns.map(p => `
-            <div class="card pattern-card ${state.ui.focusedPatternId === p.id ? 'focused' : ''}" data-pattern-id="${p.id}">
-                <p style="font-weight: 600;">${p.text}</p>
+            <div class="card pattern-card ${state.ui.focusedPatternId === p.id ? 'focused' : ''}" data-id="${p.id}">
+                <p style="font-weight: 600; font-size: 1.1rem;">${p.text}</p>
                 <div class="pattern-actions">
-                    <button class="btn btn-primary btn-small js-log-btn">Log</button>
-                    <button class="btn btn-secondary btn-small js-review-btn">Review</button>
+                    <button class="btn btn-primary js-log-btn">Log Encounter</button>
+                    <button class="btn btn-secondary js-review-btn">Review Pattern</button>
                 </div>
-            </div>
-        `).join('') || '<div class="card"><p>Add a pattern to begin.</p></div>';
+            </div>`).join('') || '<div class="card"><p>Add a pattern to begin.</p></div>';
     }
 
     function renderEncounters() {
-        let encountersToRender = [...state.encounters].reverse();
-        // Sorting logic for focused pattern...
+        let encountersToRender = [...state.encounters].slice(-50).reverse();
         elements.encountersContainer.innerHTML = encountersToRender.map(e => {
             const pattern = state.patterns.find(p => p.id === e.patternId);
-            const emotion = state.userEmotions.find(em => em.id === e.emotionId);
+            const emotion = state.userEmotions.find(em => em.id === e.emotionId) || state.userEmotions[0];
             return `
-                <div class="card encounter-card ${state.ui.focusedPatternId === e.patternId ? 'focused-pattern' : ''} ${e.flagged ? 'flagged' : ''}" data-encounter-id="${e.id}">
+                <div class="card encounter-card ${state.ui.focusedPatternId === e.patternId ? 'focused-pattern' : ''} ${e.flagged ? 'flagged' : ''}" data-id="${e.id}">
                     <p><strong>${pattern?.text || 'Retired Pattern'}</strong></p>
                     <small>${new Date(e.timestamp).toLocaleString()}</small>
-                    ${e.journal ? `<p class="journal-preview">${e.journal.substring(0, 100)}...</p>` : ''}
+                    <div style="margin: 8px 0; font-size: 0.8rem;">
+                        <span style="border-left: 3px solid ${emotion.color}; padding-left: 6px;">${emotion.name}</span>
+                        <span style="opacity: 0.7;"> • ${e.context}</span>
+                    </div>
+                    ${e.journal ? `<p class="journal-preview">${e.journal.substring(0, 80)}...</p>` : ''}
                     <div class="encounter-actions">
-                        <button class="btn btn-secondary btn-small js-journal-btn">Journal</button>
+                        <button class="btn btn-primary btn-small js-journal-btn">Journal</button>
                         <button class="btn btn-secondary btn-small js-flag-btn">${e.flagged ? '★ Unflag' : '☆ Flag'}</button>
                     </div>
-                </div>
-            `;
+                </div>`;
         }).join('') || '<div class="card"><p>No encounters logged yet.</p></div>';
     }
     
-    function renderPalette() {
-        elements.userEmotionsContainer.innerHTML = state.userEmotions.map(e => `
-            <div class="card">
-                <span style="border-left: 4px solid ${e.color}; padding-left: 8px;">${e.name}</span>
-                <button class="js-delete-emotion-btn" data-id="${e.id}" style="float: right; color: var(--danger-color);">X</button>
-            </div>
-        `).join('');
-    }
-
-    function renderArchive() {
-        const retiredPatterns = state.patterns.filter(p => p.status === 'retired');
-        elements.retiredPatternsContainer.innerHTML = retiredPatterns.map(p => `
-            <div class="card">
-                <p><strong>${p.text}</strong> (Retired)</p>
-                <small>Original: "${p.originalText}"</small>
-                <div class="pattern-actions">
-                    <button class="btn btn-primary btn-small js-reactivate-btn" data-id="${p.id}">Reactivate</button>
-                </div>
-            </div>
-        `).join('') || '<div class="card"><p>No patterns retired yet.</p></div>';
-    }
-    
-    function renderReviewModal(patternId) {
-        const pattern = state.patterns.find(p => p.id === patternId);
-        // Generates the full HTML for the review modal and injects it into elements.reviewModal
-        // ... (includes inputs for evolving, buttons for retiring, etc.)
-    }
-
-    function renderJournalModal(encounterId) {
-        const encounter = state.encounters.find(e => e.id === encounterId);
-        // Generates HTML for the journal modal and injects it
-        // ... (includes textarea, resource inputs, etc.)
-    }
-    
-    function renderReport() {
-        // Generates the guided report HTML
-        let reportHTML = `<div class="report-card"><h3>...</h3>...</div>`;
-        elements.reportContentContainer.innerHTML = reportHTML;
-        elements.reportView.style.display = 'block';
+    // Renders content into a full-screen view
+    function renderView(viewElement, content) {
+        viewElement.innerHTML = content;
+        viewElement.style.display = 'block';
     }
 
     // -----------------------------------------------------------------------------
-    //  4. EVENT LISTENERS - Wire up the UI to the actions
+    //  4. TEMPLATING FOR VIEWS/MODALS
+    // -----------------------------------------------------------------------------
+    const templates = {
+        closeButton: (label = "Close") => `<button class="btn btn-secondary js-close-view" style="position: absolute; top: 20px; right: 20px;">${label}</button>`,
+        viewHeader: (title) => `<div class="section-header"><h2 class="section-title">${title}</h2>${templates.closeButton()}</div>`,
+
+        palette: () => `${templates.viewHeader('Your Emotional Palette')}
+            <div class="form-section"><h3>Add a New Emotion</h3>
+                <input type="text" id="emotion-name-input" placeholder="Name (e.g., Sonder, Anxiety)">
+                <input type="color" id="emotion-color-input" value="#888888" style="height: 40px; padding: 5px;">
+                <button class="btn btn-primary" id="add-emotion-btn">Add to Palette</button>
+            </div><div id="user-emotions-container"></div>`,
+        
+        archive: () => {
+            const retiredPatterns = state.patterns.filter(p => p.status === 'retired');
+            const content = retiredPatterns.map(p => `
+                <div class="card">
+                    <p><strong>${p.text}</strong></p>
+                    <small>Original: "${p.originalText}"</small>
+                    <div class="pattern-actions">
+                        <button class="btn btn-primary btn-small js-reactivate-btn" data-id="${p.id}">Reactivate</button>
+                    </div>
+                </div>
+            `).join('') || '<div class="card"><p>No patterns retired yet.</p></div>';
+            return `${templates.viewHeader('Retired Patterns')}<div class="scroll-container">${content}</div>`;
+        },
+        
+        review: (pattern) => `${templates.viewHeader(`Reviewing: ${pattern.text}`)}
+            <div class="form-section"><h3>Evolve Pattern</h3>
+                <p>Rewrite this thought into a more constructive or accurate one.</p>
+                <textarea id="evolve-text-input">${pattern.text}</textarea>
+                <button class="btn btn-primary js-evolve-pattern-btn" data-id="${pattern.id}">Save Evolution</button>
+            </div>
+            <div class="form-section"><h3>Retire Pattern</h3>
+                <p>This signifies you have consciously processed this thought pattern.</p>
+                <button class="btn btn-secondary js-retire-pattern-btn" data-id="${pattern.id}">Retire This Pattern</button>
+            </div>`,
+
+        journal: (encounter) => {
+            const pattern = state.patterns.find(p => p.id === encounter.patternId);
+            return `${templates.viewHeader(`Journal: ${pattern.text}`)}
+                <div class="form-section">
+                    <p>${new Date(encounter.timestamp).toLocaleString()}</p>
+                    <textarea id="journal-text-input" placeholder="What is the story here? What sensations are present? What wisdom is this moment offering?">${encounter.journal || ''}</textarea>
+                    <button class="btn btn-primary js-save-journal-btn" data-id="${encounter.id}">Save Journal</button>
+                </div>`;
+        },
+        
+        log: (pattern) => `${templates.viewHeader(`Log: ${pattern.text}`)}
+            <div class="form-section">
+                <h3>Context</h3>
+                <div class="choice-grid">${CONTEXT_OPTIONS.map(opt => `<div class="choice-option" data-type="context" data-value="${opt}">${opt}</div>`).join('')}</div>
+                <h3 style="margin-top: 20px;">Emotion</h3>
+                <div class="choice-grid">${state.userEmotions.map(emo => `<div class="choice-option" data-type="emotion" data-value="${emo.id}" style="border-left: 4px solid ${emo.color};">${emo.name}</div>`).join('')}</div>
+                <button class="btn btn-primary js-log-encounter-submit" data-id="${pattern.id}" style="width: 100%; margin-top: 20px;">Log Encounter</button>
+            </div>`,
+        
+        report: () => {
+            const todaysEncounters = state.encounters.filter(e => e.timestamp.startsWith(new Date().toISOString().split('T')[0]));
+            const flaggedEncounters = state.encounters.filter(e => e.flagged);
+            let content = `${templates.viewHeader('Daily Reflection Report')}`;
+            content += `<div class="report-card"><h3>Summary for ${new Date().toLocaleDateString()}</h3><p>Total Encounters Today: <strong>${todaysEncounters.length}</strong></p></div>`;
+            if (flaggedEncounters.length > 0) {
+                content += `<div class="report-card"><h3>★ Flagged for Deeper Look</h3>${flaggedEncounters.map(e => `<p><strong>${state.patterns.find(p=>p.id===e.patternId)?.text}:</strong> "${e.journal||'No journal.'}"</p>`).join('')}</div>`;
+            }
+            content += `<div class="report-card"><h3>Intention for Tomorrow</h3><textarea placeholder="Based on today's reflections, what is your single, focused intention for tomorrow?"></textarea></div>`;
+            return content;
+        }
+    };
+
+    // -----------------------------------------------------------------------------
+    //  5. EVENT LISTENERS & WIRING
     // -----------------------------------------------------------------------------
     function setupEventListeners() {
-        document.body.addEventListener('click', e => {
-            // Event delegation for all dynamically created buttons
-            if (e.target.matches('.js-log-btn')) {
-                const patternId = e.target.closest('.pattern-card').dataset.patternId;
-                // Here you would open a logging modal with context and custom emotions
-            }
-            if (e.target.matches('.js-review-btn')) {
-                const patternId = e.target.closest('.pattern-card').dataset.patternId;
-                actions.startReview(Number(patternId));
-            }
-            if (e.target.matches('.js-journal-btn')) {
-                const encounterId = e.target.closest('.encounter-card').dataset.encounterId;
-                renderJournalModal(Number(encounterId)); // Render and show the journal
-                elements.journalModal.style.display = 'block';
-            }
-            // ... and so on for every other button
+        // Main Add Pattern
+        elements.addPatternBtn.addEventListener('click', () => {
+            actions.addPattern(elements.patternInput.value);
+            elements.patternInput.value = '';
         });
 
-        // Listeners for top-level buttons to toggle full-screen views
-        elements.togglePaletteBtn.addEventListener('click', () => {
-            elements.paletteView.style.display = 'block';
+        // Event Delegation for all other actions
+        document.body.addEventListener('click', e => {
+            const target = e.target;
+            const id = Number(target.dataset.id) || Number(target.closest('.card')?.dataset.id);
+            if (!id && !target.id.includes('btn')) return;
+
+            // Pattern Card Actions
+            if (target.matches('.js-log-btn')) renderView(elements.logModal, templates.log(state.patterns.find(p=>p.id===id)));
+            if (target.matches('.js-review-btn')) renderView(elements.reviewModal, templates.review(state.patterns.find(p=>p.id===id)));
+            // Encounter Card Actions
+            if (target.matches('.js-journal-btn')) renderView(elements.journalModal, templates.journal(state.encounters.find(enc=>enc.id===id)));
+            if (target.matches('.js-flag-btn')) actions.toggleFlag(id);
+            
+            // View Toggles
+            if (target.id === 'toggle-archive-btn') renderView(elements.archiveView, templates.archive());
+            if (target.id === 'toggle-palette-btn') { renderView(elements.paletteView, templates.palette()); renderPalette(); }
+            if (target.id === 'generate-report-btn') renderView(elements.reportView, templates.report());
+
+            // Actions inside Views
+            if (target.matches('.js-close-view')) target.closest('.full-screen-view').style.display = 'none';
+            if (target.id === 'add-emotion-btn') actions.addEmotion(document.getElementById('emotion-name-input').value, document.getElementById('emotion-color-input').value);
+            if (target.matches('.js-delete-emotion-btn')) actions.deleteEmotion(id);
+            if (target.matches('.js-retire-pattern-btn')) { actions.retirePattern(id); target.closest('.full-screen-view').style.display = 'none'; }
+            if (target.matches('.js-evolve-pattern-btn')) actions.evolvePattern(id, document.getElementById('evolve-text-input').value);
+            if (target.matches('.js-reactivate-btn')) { actions.reactivatePattern(id); renderView(elements.archiveView, templates.archive()); }
+            if (target.matches('.js-save-journal-btn')) { actions.saveJournal(id, document.getElementById('journal-text-input').value); target.closest('.full-screen-view').style.display = 'none'; }
+            if (target.matches('.js-log-encounter-submit')) {
+                const context = document.querySelector('.choice-option[data-type="context"].active')?.dataset.value || 'General';
+                const emotionId = Number(document.querySelector('.choice-option[data-type="emotion"].active')?.dataset.value) || 1;
+                actions.logEncounter(id, context, emotionId);
+                target.closest('.full-screen-view').style.display = 'none';
+            }
+            if (target.matches('.choice-option')) {
+                target.closest('.choice-grid').querySelectorAll('.active').forEach(opt => opt.classList.remove('active'));
+                target.classList.add('active');
+            }
         });
-        elements.closePaletteBtn.addEventListener('click', () => {
-            elements.paletteView.style.display = 'none';
-        });
-        // ... similar listeners for Archive and Report views
     }
 
     // -----------------------------------------------------------------------------
-    //  5. DATA & INITIALIZATION
+    //  6. INITIALIZATION
     // -----------------------------------------------------------------------------
     function saveAndRender() {
         localStorage.setItem('mindscape-co-creator-data', JSON.stringify(state));
@@ -363,33 +371,22 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadState() {
         const savedState = localStorage.getItem('mindscape-co-creator-data');
         if (savedState) {
-            state = JSON.parse(savedState);
-            // Default any new properties if loading old data
-            if (!state.userEmotions) state.userEmotions = [];
+            const loaded = JSON.parse(savedState);
+            state = { ...state, ...loaded };
+            if (!state.userEmotions || state.userEmotions.length === 0) state.userEmotions = [{ id: 1, name: 'Neutral', color: '#808080' }];
         }
     }
     function init() {
-        // Consolidate all element lookups into the elements object for performance
-        const allElementIds = [
-            'time-display', 'main-content', 'pattern-input', 'add-pattern-btn',
-            'patterns-container', 'encounters-container', 'archive-view',
-            'retired-patterns-container', 'toggle-archive-btn', 'close-archive-btn',
-            'palette-view', 'toggle-palette-btn', 'close-palette-btn', 'emotion-name-input',
-            'emotion-color-input', 'add-emotion-btn', 'user-emotions-container',
-            'report-view', 'generate-report-btn', 'close-report-btn', 'report-content-container',
-            'review-modal', 'journal-modal'
-        ];
-        allElementIds.forEach(id => {
-            const camelCaseId = id.replace(/-./g, x => x[1].toUpperCase());
-            elements[camelCaseId] = document.getElementById(id);
+        // Consolidate all element lookups
+        const ids = ['time-display', 'main-content', 'pattern-input', 'add-pattern-btn', 'patterns-container', 'encounters-container', 'archive-view', 'toggle-archive-btn', 'palette-view', 'toggle-palette-btn', 'report-view', 'generate-report-btn', 'review-modal', 'journal-modal', 'log-modal'];
+        ids.forEach(id => {
+            const camelCase = id.replace(/-./g, x => x[1].toUpperCase());
+            elements[camelCase] = document.getElementById(id);
         });
-
         loadState();
         setupEventListeners();
-        render(); // Initial render
-        setInterval(() => {
-            elements.timeDisplay.textContent = new Date().toLocaleString();
-        }, 1000);
+        render();
+        setInterval(() => { elements.timeDisplay.textContent = new Date().toLocaleString(); }, 1000);
     }
 
     init();
