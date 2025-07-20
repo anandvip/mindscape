@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const storage = {
         save: () => { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { toast.warning('Could not save session.'); } },
         load: () => {
-            const defaultState = { patterns:[], encounters:[], userEmotions:[{id:'default',name:'Neutral',color:'#808080'}], reflections:[], ui:{focusedPatternId:null} };
+            const defaultState = { patterns: [], encounters: [], userEmotions: [{ id: 'default', name: 'Neutral', color: '#808080' }], reflections: [], ui: { focusedPatternId: null } };
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
                 state = saved ? { ...defaultState, ...JSON.parse(saved), ui: { ...defaultState.ui, ...(JSON.parse(saved).ui || {}) } } : defaultState;
@@ -129,37 +129,51 @@ document.addEventListener('DOMContentLoaded', () => {
         deleteEncounter: (id) => { if(!confirm("Delete encounter?"))return; const e=state.encounters.find(e=>e.id===id); if(!e)return; const p=state.patterns.find(p=>p.id===e.patternId); if(p)p.encounters=Math.max(0,p.encounters-1); state.encounters=state.encounters.filter(enc=>enc.id!==id); saveAndRender("Encounter Deleted","warning"); },
         retirePattern: (id) => { if(!confirm("Retire pattern?"))return; const p=state.patterns.find(p=>p.id===id); if(p){p.status='retired';p.retiredAt=new Date().toISOString();} saveAndRender("Pattern Retired","warning"); },
         reactivatePattern: (id) => { if(!confirm("Reactivate pattern?"))return; const p=state.patterns.find(p=>p.id===id); if(p)p.status='active'; saveAndRender("Pattern Reactivated"); },
-        // ... Other actions are one-liners that call saveAndRender and optionally toast
+        evolvePattern: (id, text) => { const p = state.patterns.find(p => p.id === id); if (p && sanitize(text)) { p.text = sanitize(text); saveAndRender("Pattern Evolved"); } },
+        addEmotion: (name, color) => { const sName = sanitize(name); if (sName) { state.userEmotions.push({ id: generateId(), name: sName, color }); saveAndRender("Emotion Added"); } },
+        deleteEmotion: (id) => { if (id !== 'default' && confirm("Delete emotion?")) { state.userEmotions = state.userEmotions.filter(e => e.id !== id); state.encounters.forEach(enc => { if (enc.emotionId === id) enc.emotionId = 'default'; }); saveAndRender("Emotion Deleted", "warning"); } },
+        toggleFlag: (id) => { const e = state.encounters.find(e => e.id === id); if(e) { e.flagged = !e.flagged; saveAndRender(); } },
+        saveJournal: (id, text) => { const e = state.encounters.find(e => e.id === id); if(e) { e.journal = sanitize(text); saveAndRender("Journal Saved"); } },
+        saveIntention: (text) => { const today = new Date().toISOString().split('T')[0]; const r = state.reflections.find(r => r.date === today); if (r) r.intention = sanitize(text); else state.reflections.push({ date: today, intention: sanitize(text) }); saveAndRender("Intention Saved"); },
     };
 
     const templates = {
-        // All templates are functions that return HTML strings
-        main: () => `<main class="container">...</main>`,
-        patternCard: (p) => `...`,
-        encounterCard: (e) => `...`,
-        // etc.
-    };
-
-    const render = () => {
-        elements.patternsContainer.innerHTML = renderPatterns();
-        elements.encountersContainer.innerHTML = renderEncounters();
-        setupIntersectionObserver();
-    };
-    const renderPatterns = () => { /* ... */ };
-    const renderEncounters = () => { /* ... */ };
-
-    const actionHandlers = {
-        'add-pattern': () => { actions.addPattern(elements.patternInput.value); elements.patternInput.value = ''; },
-        'log-encounter': (id) => modal.open({ title: `Log: ${state.patterns.find(p=>p.id===id)?.text}`, content: templates.log(state.patterns.find(p=>p.id===id)) }),
-        'close-modal': () => modal.close(),
-        // ... a complete map of all data-actions to their respective functions
+        main: () => `<main class="container"><header class="header"><h1>Mindscape Co-Creator</h1></header><section class="section"><div class="form-section"><input type="text" id="pattern-input" placeholder="What new thought is present?"><button class="btn btn-primary" data-action="add-pattern">Begin Tracking</button></div></section><section class="section"><div class="section-header"><h2 class="section-title">Active Patterns</h2><div><button class="btn btn-secondary btn-small" data-action="toggle-archive">Retired</button><button class="btn btn-secondary btn-small" data-action="toggle-palette">Palette</button></div></div><div class="scroll-container" id="patterns-container"></div></section><section class="section"><div class="section-header"><h2 class="section-title">Recent Encounters</h2><button class="btn btn-secondary btn-small" data-action="generate-report">Daily Report</button></div><div class="scroll-container" id="encounters-container"></div></section></main>`,
+        palette: () => ({ title: 'Your Palette', content: `<div class="form-section"><h3>Add Emotion</h3><input type="text" id="emotion-name-input"><input type="color" id="emotion-color-input" value="#888888"><button class="btn btn-primary" data-action="add-emotion">Add</button></div><div>${state.userEmotions.map(e=>`<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><span style="border-left:4px solid ${e.color};padding-left:8px;">${e.name}</span>${e.id!=='default'?`<button data-action="delete-emotion" data-id="${e.id}" style="background:none;border:none;color:var(--text-secondary);cursor:pointer;font-size:1.5rem;">×</button>`:''}</div>`).join('')||'<div class="card"><p>Create a custom emotion.</p></div>'}</div>` }),
+        archive: () => ({ title: 'Retired Patterns', content: `<div class="scroll-container">${state.patterns.filter(p=>p.status==='retired').map(p=>`<div class="card"><p><strong>${p.text}</strong></p><small>Original: "${p.originalText}"</small><div class="pattern-actions"><button class="btn btn-primary btn-small" data-action="reactivate-pattern" data-id="${p.id}">Reactivate</button></div></div>`).join('')||'<div class="card" style="line-height:1.6;"><p>No retired patterns yet.</p></div>'}</div>` }),
+        review: (p) => ({ title: `Review: ${p.text}`, content: `<div class="form-section"><h3>Evolve Pattern</h3><textarea id="evolve-text-input">${p.text}</textarea><button class="btn btn-primary" data-action="evolve-pattern" data-id="${p.id}">Save</button></div><div class="form-section"><h3>Retire Pattern</h3><button class="btn btn-secondary" data-action="retire-pattern" data-id="${p.id}">Retire</button></div>` }),
+        journal: (enc, p) => ({ title: `Journal: ${(p||{}).text||'Retired'}`, content: `<div class="form-section"><p>${new Date(enc.timestamp).toLocaleString()}</p><textarea id="journal-text-input">${enc.journal||''}</textarea><button class="btn btn-primary" data-action="save-journal" data-id="${enc.id}">Save</button></div>` }),
+        log: (p, enc=null) => ({ title: enc?`Edit: ${p.text}`:`Log: ${p.text}`, content:`<div class="form-section"><div class="choice-grid" data-type="context"></div><h3 style="margin-top:20px;">Emotion</h3><div class="choice-grid" data-type="emotion"></div><button class="btn btn-primary" data-action="log-encounter-submit" data-id="${p.id}" data-encounter-id="${enc?.id||''}" style="width:100%;margin-top:20px;">${enc?'Update':'Log'}</button></div>` }),
+        report: () => { const today=new Date().toISOString().split('T')[0], intention=state.reflections.find(r=>r.date===today)?.intention||'', flagged=state.encounters.filter(e=>e.flagged); return { title: 'Daily Report', content: `<div class="report-card"><h3>Summary</h3><p>Encounters Today: <strong>${state.encounters.filter(e=>e.timestamp.startsWith(today)).length}</strong></p></div><div class="report-card"><h3>★ Flagged for Review</h3>${flagged.length>0?flagged.map(e=>`<p><strong>${state.patterns.find(p=>p.id===e.patternId)?.text||'?'}:</strong> "${e.journal||'No journal.'}"</p>`).join(''):'<p>Nothing flagged.</p>'}</div><div class="report-card"><h3>Intention for Tomorrow</h3><textarea id="intention-input">${intention}</textarea><button class="btn btn-primary" data-action="save-intention">Save</button></div>`}; }
     };
     
+    const render = () => { elements.patternsContainer.innerHTML = renderPatterns(); elements.encountersContainer.innerHTML = renderEncounters(); setupIntersectionObserver(); };
+    const renderPatterns = () => state.patterns.filter(p=>p.status==='active').map(p => `<div class="card pattern-card ${p.id===state.ui.focusedPatternId?'focused':''}" data-id="${p.id}"><p style="font-weight:600;">${p.text}</p><div class="pattern-actions"><button class="btn btn-primary btn-small" data-action="log-encounter" data-id="${p.id}">Log</button><button class="btn btn-secondary btn-small" data-action="review-pattern" data-id="${p.id}">Review</button></div></div>`).join('')||`<div class="card"><p>Welcome! Add a recurring thought to begin.</p></div>`;
+    const renderEncounters = () => { let encs=[...state.encounters]; if(state.ui.focusedPatternId){encs.sort((a,b)=>(b.patternId===state.ui.focusedPatternId)-(a.patternId===state.ui.focusedPatternId));} return encs.map(e => { const p=state.patterns.find(p=>p.id===e.patternId), emo=state.userEmotions.find(em=>em.id===e.emotionId)||state.userEmotions[0]; return `<div class="card encounter-card ${e.flagged?'flagged':''} ${p?.id===state.ui.focusedPatternId?'focused-pattern':''}" data-id="${e.id}"><p><strong>${p?.text||'Retired'}</strong></p><small>${new Date(e.timestamp).toLocaleString()}</small><div style="margin:8px 0;font-size:0.8rem;"><span style="border-left:3px solid ${emo.color};padding-left:6px;">${emo.name}</span><span style="opacity:0.7;"> • ${e.context}</span></div>${e.journal?`<div class="journal-preview">${e.journal.substring(0,80)}...</div>`:''}<div class="pattern-actions"><button class="btn btn-secondary btn-small" data-action="journal" data-id="${e.id}">Journal</button><button class="btn btn-secondary btn-small" data-action="toggle-flag" data-id="${e.id}">${e.flagged?'★ Unflag':'☆ Flag'}</button><button class="btn btn-secondary btn-small" data-action="edit-encounter" data-id="${e.id}">Edit</button><button class="btn btn-danger btn-small" data-action="delete-encounter" data-id="${e.id}">Del</button></div></div>`; }).join('') || `<div class="card"><p>When you log an encounter, it will appear here.</p></div>`; };
+    
+    const actionHandlers = {
+        'add-pattern': () => { actions.addPattern(elements.patternInput.value); elements.patternInput.value = ''; },
+        'toggle-archive': () => modal.open(templates.archive()), 'toggle-palette': () => modal.open(templates.palette()), 'generate-report': () => modal.open(templates.report()),
+        'close-modal': () => modal.close(),
+        'review-pattern': (id) => modal.open(templates.review(state.patterns.find(p=>p.id===id))),
+        'retire-pattern': (id) => { actions.retirePattern(id); modal.close(); },
+        'reactivate-pattern': (id) => { actions.reactivatePattern(id); modal.close(); modal.open(templates.archive()); },
+        'evolve-pattern': (id, e) => { actions.evolvePattern(id, e.target.closest('.modal-content').querySelector('#evolve-text-input').value); modal.close(); },
+        'log-encounter': (id) => modal.open({ ...templates.log(state.patterns.find(p=>p.id===id)), onOpen: (modalEl) => populateChoices(modalEl) }),
+        'edit-encounter': (id) => { const enc = state.encounters.find(e=>e.id===id); modal.open({ ...templates.log(state.patterns.find(p=>p.id===enc.patternId), enc), onOpen: (modalEl) => populateChoices(modalEl, enc) }); },
+        'delete-encounter': (id) => actions.deleteEncounter(id),
+        'journal': (id) => { const enc = state.encounters.find(e=>e.id===id); modal.open(templates.journal(enc, state.patterns.find(p=>p.id===enc.patternId))); },
+        'toggle-flag': (id) => actions.toggleFlag(id),
+        'save-journal': (id, e) => { actions.saveJournal(id, e.target.closest('.modal-content').querySelector('#journal-text-input').value); modal.close(); },
+        'log-encounter-submit': (id, e) => { const encId = e.target.dataset.encounterId, modalEl = e.target.closest('.modal-content'), context = modalEl.querySelector('.choice-option[data-type="context"].active')?.dataset.value || 'General', emotionId = modalEl.querySelector('.choice-option[data-type="emotion"].active')?.dataset.value || 'default'; if(encId) actions.updateEncounter(encId, context, emotionId); else actions.logEncounter(id, context, emotionId); modal.close(); },
+        'add-emotion': (id, e) => { actions.addEmotion(e.target.closest('.modal-content').querySelector('#emotion-name-input').value, e.target.closest('.modal-content').querySelector('#emotion-color-input').value); modal.close(); modal.open(templates.palette()); },
+        'delete-emotion': (id) => { actions.deleteEmotion(id); modal.close(); modal.open(templates.palette()); },
+        'save-intention': (id, e) => { actions.saveIntention(e.target.closest('.modal-content').querySelector('#intention-input').value); modal.close(); },
+        'select-choice': (id, e) => { e.target.closest('.choice-grid')?.querySelectorAll('.active').forEach(opt=>opt.classList.remove('active')); e.target.classList.add('active'); },
+    };
+
     function setupEventListeners() {
-        document.body.addEventListener('click', e => {
-            const target = e.target.closest('[data-action]');
-            if (target) actionHandlers[target.dataset.action]?.(target.dataset.id, e);
-        });
+        document.body.addEventListener('click', e => { const target = e.target.closest('[data-action]'); if (target) actionHandlers[target.dataset.action]?.(target.dataset.id, e); });
         document.addEventListener('keydown', e => { if (e.key === 'Escape' && modal.stack.length > 0) modal.close(); });
     }
 
@@ -169,10 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const mostVisible = entries.reduce((acc, entry) => entry.intersectionRatio > (acc?.intersectionRatio || 0) ? entry : acc, null);
             if (mostVisible?.target) {
                 const focusedId = mostVisible.target.dataset.id;
-                if (state.ui.focusedPatternId !== focusedId) {
-                    state.ui.focusedPatternId = focusedId;
-                    render();
-                }
+                if (state.ui.focusedPatternId !== focusedId) { state.ui.focusedPatternId = focusedId; render(); }
             }
         }, { root: elements.patternsContainer, threshold: 0.75 });
         elements.patternsContainer?.querySelectorAll('.pattern-card').forEach(card => observer.observe(card));
@@ -192,15 +203,22 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         setupEventListeners();
         render();
-        if (state.patterns.length === 0) {
-            setTimeout(() => toast.info('Welcome! Add a pattern to begin.', 5000), 1000);
-        }
+        if (state.patterns.length === 0) { setTimeout(() => toast.info('Welcome! Add a pattern to begin.', 5000), 1000); }
     }
     
-    const saveAndRender = (toastMsg, toastType) => { storage.save(); render(); if(toastMsg) toast.show(toastMsg, toastType); };
-
+    const saveAndRender = (toastMsg, toastType) => { storage.save(); render(); if(toastMsg) toast.success(toastMsg, toastType); };
+    const populateChoices = (modalEl, enc) => {
+        const contextGrid=modalEl.querySelector('.choice-grid[data-type="context"]'), emotionGrid=modalEl.querySelector('.choice-grid[data-type="emotion"]');
+        if(contextGrid) contextGrid.innerHTML=CONTEXT_OPTIONS.map(opt=>`<div class="choice-option" role="button" tabindex="0" data-action="select-choice" data-type="context" data-value="${opt}">${opt}</div>`).join('');
+        if(emotionGrid) emotionGrid.innerHTML=state.userEmotions.map(emo=>`<div class="choice-option" role="button" tabindex="0" data-action="select-choice" data-type="emotion" data-value="${emo.id}" style="border-left:4px solid ${emo.color};">${emo.name}</div>`).join('');
+        if (enc) {
+            modalEl.querySelector(`.choice-option[data-type="context"][data-value="${enc.context}"]`)?.classList.add('active');
+            modalEl.querySelector(`.choice-option[data-type="emotion"][data-value="${enc.emotionId}"]`)?.classList.add('active');
+        }
+    };
+    
     init();
 });
 </script>
 </body>
-</html>
+</html>```
