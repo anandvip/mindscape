@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindscape Pattern Observatory</title>
+    <style>
+        /* =================================================================== */
+        /*  MINDSCAPE ENHANCED: DEEPER CONSCIOUSNESS AESTHETICS               */
+        /* =================================================================== */
+        
+        :root {
+            --neural-glow: rgba(138, 43, 226, 0.4);
+            --synapse-blue: #4a90e2;
+            --thought-purple: #8a2be2;
+            --awareness-teal: #20b2aa;
+            --void-dark: #0a0a0f;
+            --consciousness-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            --neural-pulse: cubic-bezier(0.4, 0, 0.2, 1);
+            --observer-gold: #ffd700;
+            --insight-green: #32cd32;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: var(--consciousness-gradient);
+            color: #e8eaf6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Animated neural background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(74, 144, 226, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(32, 178, 170, 0.05) 0%, transparent 50%);
+            animation: neuralPulse 8s ease-in-out infinite alternate;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes neuralPulse {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 0.6; transform: scale(1.05); }
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED LAYOUT & TYPOGRAPHY                                       */
+        /* =================================================================== */
+
+        .observatory {
+            max-width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .consciousness-header {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+            position: relative;
+        }
+
+        .consciousness-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--thought-purple), transparent);
+        }
+
+        .consciousness-branding {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .consciousness-logo {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.4);
+            transition: all 0.3s ease;
+            animation: logoGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes logoGlow {
+            0% { box-shadow: 0 0 20px rgba(138, 43, 226, 0.4); }
+            100% { box-shadow: 0 0 30px rgba(138, 43, 226, 0.6), 0 0 40px rgba(74, 144, 226, 0.3); }
+        }
+
+        .consciousness-header h1 {
+            font-size: 2.2rem;
+            font-weight: 300;
+            background: linear-gradient(135deg, var(--thought-purple) 0%, var(--synapse-blue) 50%, var(--awareness-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.5px;
+        }
+
+        .consciousness-subtitle {
+            font-size: 1rem;
+            opacity: 0.8;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+
+        .neural-time {
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            font-variant-numeric: tabular-nums;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED SECTIONS & CONTAINERS                                     */
+        /* =================================================================== */
+
+        .mind-section {
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .section-consciousness {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, var(--observer-gold) 0%, var(--awareness-teal) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .neural-counter {
+            background: rgba(138, 43, 226, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(138, 43, 226, 0.4);
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED SCROLL OBSERVATORY                                        */
+        /* =================================================================== */
+
+        .thought-observatory {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            padding-bottom: 1rem;
+            scrollbar-width: none;
+            gap: 1rem;
+        }
+
+        .thought-observatory::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED PATTERN CARDS - DEEPER CONSCIOUSNESS                      */
+        /* =================================================================== */
+
+        .pattern-node {
+            flex-shrink: 0;
+            width: calc(100vw - 3rem);
+            max-width: 400px;
+            scroll-snap-align: center;
+            background: rgba(10, 10, 15, 0.8);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            transition: all 0.4s var(--neural-pulse);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pattern-node::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--thought-purple), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .pattern-node.neural-focus {
+            border-color: var(--thought-purple);
+            box-shadow: 
+                0 0 30px rgba(138, 43, 226, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .pattern-node.neural-focus::before {
+            opacity: 1;
+        }
+
+        .pattern-consciousness {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .pattern-thought {
+            font-weight: 500;
+            font-size: 1.1rem;
+            line-height: 1.4;
+            flex: 1;
+        }
+
+        .pattern-frequency {
+            background: linear-gradient(135deg, var(--synapse-blue), var(--thought-purple));
+            padding: 0.3rem 0.7rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 1rem;
+            box-shadow: 0 2px 8px rgba(138, 43, 226, 0.3);
+        }
+
+        .pattern-metadata {
+            opacity: 0.7;
+            font-size: 0.8rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+
+        .pattern-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED ENCOUNTER CARDS WITH JOURNALING                           */
+        /* =================================================================== */
+
+        .encounter-node {
+            flex-shrink: 0;
+            width: calc(100vw - 3rem);
+            max-width: 400px;
+            scroll-snap-align: center;
+            background: rgba(10, 10, 15, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .encounter-node.pattern-connected {
+            border-left: 3px solid var(--thought-purple);
+            background: rgba(138, 43, 226, 0.1);
+            border-color: rgba(138, 43, 226, 0.4);
+        }
+
+        .encounter-node.has-journal {
+            border-right: 3px solid var(--observer-gold);
+        }
+
+        .encounter-node.has-journal::before {
+            content: '📝';
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .encounter-consciousness {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .encounter-pattern {
+            font-weight: 500;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .encounter-timestamp {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .encounter-awareness {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.75rem 0;
+            flex-wrap: wrap;
+        }
+
+        .encounter-reflection {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-top: 0.75rem;
+            font-style: italic;
+            line-height: 1.4;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 2px solid var(--awareness-teal);
+        }
+
+        .encounter-insights {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .insight-prompt {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-text {
+            font-size: 0.85rem;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.5rem;
+            border-radius: 6px;
+            border-left: 2px solid var(--observer-gold);
+        }
+
+        /* NEW: Enhanced Journaling Interface */
+        .journal-interface {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .journal-toggle {
+            width: 100%;
+            background: rgba(138, 43, 226, 0.2);
+            border: 1px solid rgba(138, 43, 226, 0.4);
+            color: #e8eaf6;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .journal-toggle:hover {
+            background: rgba(138, 43, 226, 0.3);
+        }
+
+        .journal-toggle.expanded {
+            background: rgba(138, 43, 226, 0.4);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .journal-content {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(138, 43, 226, 0.4);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 1rem;
+        }
+
+        .journal-content.expanded {
+            display: block;
+            animation: journalSlide 0.3s ease-out;
+        }
+
+        @keyframes journalSlide {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 300px; }
+        }
+
+        .journal-prompts {
+            margin-bottom: 1rem;
+        }
+
+        .journal-prompt {
+            font-size: 0.75rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 6px;
+            border-left: 2px solid var(--observer-gold);
+        }
+
+        .journal-textarea {
+            width: 100%;
+            min-height: 80px;
+            background: rgba(10, 10, 15, 0.8);
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e8eaf6;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .journal-textarea:focus {
+            outline: none;
+            border-color: var(--thought-purple);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+        }
+
+        .journal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .journal-save, .journal-cancel {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .journal-save {
+            background: linear-gradient(135deg, var(--thought-purple), var(--synapse-blue));
+            color: white;
+        }
+
+        .journal-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e8eaf6;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .journal-existing {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .journal-timestamp {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED UI ELEMENTS                                               */
+        /* =================================================================== */
+
+        .neural-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s var(--neural-pulse);
+            letter-spacing: 0.3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .neural-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .neural-btn:hover::before {
+            left: 100%;
+        }
+
+        .neural-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-consciousness {
+            background: linear-gradient(135deg, var(--thought-purple), var(--synapse-blue));
+            color: white;
+            box-shadow: 0 4px 15px rgba(138, 43, 226, 0.3);
+        }
+
+        .btn-awareness {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e8eaf6;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* =================================================================== */
+        /*  CONSCIOUSNESS FORMS & INPUTS                                       */
+        /* =================================================================== */
+
+        .consciousness-form {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .consciousness-form::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--thought-purple), transparent);
+        }
+
+        .neural-input, .consciousness-textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(10, 10, 15, 0.8);
+            color: #e8eaf6;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .consciousness-textarea {
+            resize: vertical;
+            min-height: 100px;
+            line-height: 1.5;
+        }
+
+        .neural-input:focus, .consciousness-textarea:focus {
+            outline: none;
+            border-color: var(--thought-purple);
+            box-shadow: 0 0 0 2px rgba(138, 43, 226, 0.2);
+            background: rgba(10, 10, 15, 0.9);
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED CHOICE GRIDS & TAGS                                       */
+        /* =================================================================== */
+
+        .awareness-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .awareness-choice {
+            padding: 0.75rem 0.5rem;
+            border: 1px solid rgba(138, 43, 226, 0.3);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .awareness-choice:hover {
+            background: rgba(138, 43, 226, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .awareness-choice.activated {
+            border-color: var(--thought-purple);
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.3), rgba(74, 144, 226, 0.3));
+            color: #e8eaf6;
+            box-shadow: 0 0 15px rgba(138, 43, 226, 0.4);
+        }
+
+        .neural-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        .context-tag {
+            background: rgba(74, 144, 226, 0.3);
+            color: #e8eaf6;
+            border: 1px solid rgba(74, 144, 226, 0.5);
+        }
+
+        .emotion-neutral { background: rgba(160, 174, 192, 0.3); color: #e8eaf6; }
+        .emotion-triggered { background: rgba(220, 38, 127, 0.3); color: #fce7f3; }
+        .emotion-curious { background: rgba(34, 197, 94, 0.3); color: #dcfce7; }
+        .emotion-resistant { background: rgba(251, 146, 60, 0.3); color: #fed7aa; }
+        .emotion-observant { background: rgba(255, 215, 0, 0.3); color: #fef3c7; }
+
+        /* =================================================================== */
+        /*  NEURAL NAVIGATION DOTS                                             */
+        /* =================================================================== */
+
+        .neural-navigation {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+
+        .neural-dot {
+            width: 10px;
+            height: 10px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .neural-dot.active {
+            background: linear-gradient(135deg, var(--thought-purple), var(--synapse-blue));
+            box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+            transform: scale(1.2);
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED MODAL - CONSCIOUSNESS GATEWAY                             */
+        /* =================================================================== */
+
+        .consciousness-portal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+        }
+
+        .consciousness-portal.awakened {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .consciousness-chamber {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--consciousness-gradient);
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid rgba(138, 43, 226, 0.5);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .portal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #e8eaf6;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .portal-close:hover {
+            opacity: 1;
+        }
+
+        .consciousness-gateway {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--thought-purple), var(--synapse-blue));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 20px rgba(138, 43, 226, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .consciousness-gateway:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(138, 43, 226, 0.6);
+        }
+
+        /* =================================================================== */
+        /*  RESPONSIVE ENHANCEMENTS                                            */
+        /* =================================================================== */
+
+        @media (max-width: 480px) {
+            .pattern-node, .encounter-node {
+                width: calc(100vw - 2rem);
+            }
+            
+            .consciousness-form {
+                padding: 1.5rem;
+            }
+            
+            .mind-section {
+                padding: 1rem;
+            }
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED REFLECTION SECTION                                        */
+        /* =================================================================== */
+
+        .metacognitive-observatory {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .metacognitive-observatory::before {
+            content: '🧠';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--consciousness-gradient);
+            padding: 0.5rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+        }
+
+        .reflection-prompt {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 1rem;
+            font-style: italic;
+            text-align: center;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 0.75rem;
+            border-radius: 10px;
+            border-left: 3px solid var(--observer-gold);
+        }
+
+        .data-consciousness {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            .data-consciousness {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* =================================================================== */
+        /*  ENHANCED REFLECTION TIMELINE                                       */
+        /* =================================================================== */
+
+        .reflection-timeline {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .timeline-container {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 215, 0, 0.3) transparent;
+        }
+
+        .timeline-container::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .timeline-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .timeline-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 215, 0, 0.3);
+            border-radius: 2px;
+        }
+
+        .reflection-entry {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            position: relative;
+            border-left: 4px solid var(--observer-gold);
+            transition: all 0.3s ease;
+        }
+
+        .reflection-entry:hover {
+            background: rgba(255, 215, 0, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.2);
+        }
+
+        .reflection-entry:last-child {
+            margin-bottom: 0;
+        }
+
+        .reflection-entry::before {
+            content: '💭';
+            position: absolute;
+            top: 1rem;
+            left: -12px;
+            background: var(--consciousness-gradient);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            border: 2px solid var(--observer-gold);
+        }
+
+        .reflection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .reflection-date {
+            font-size: 0.8rem;
+            color: var(--observer-gold);
+            font-weight: 500;
+        }
+
+        .reflection-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+
+        .reflection-content {
+            line-height: 1.6;
+            font-size: 0.9rem;
+            color: #e8eaf6;
+        }
+
+        .reflection-insights {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            font-size: 0.8rem;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .timeline-empty {
+            text-align: center;
+            opacity: 0.6;
+            padding: 2rem;
+            font-style: italic;
+        }
+
+        .timeline-stats {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Enhanced logging section */
+        .encounter-laboratory {
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(138, 43, 226, 0.4);
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .laboratory-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+        }
+
+        .laboratory-pattern {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--observer-gold);
+        }
+
+        .laboratory-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="observatory">
+        <header class="consciousness-header">
+            <div class="consciousness-branding">
+                <img src="https://raw.githubusercontent.com/anandvip/mindscape/refs/heads/main/logo/mindscaping.png" alt="Mindscape Logo" class="consciousness-logo">
+                <h1>Mindscape Pattern Observatory</h1>
+            </div>
+            <p class="consciousness-subtitle">Transform thoughts from invisible forces into observable data points</p>
+        </header>
+
+        <div class="neural-time" id="neural-time"></div>
+
+        <main>
+            <!-- Pattern Initiation Section -->
+            <section class="mind-section">
+                <div class="consciousness-form">
+                    <input type="text" class="neural-input" id="pattern-input" placeholder="What thought pattern would you like to observe?" maxlength="120">
+                    <button class="neural-btn btn-consciousness" id="initiate-pattern-btn">Begin Observation</button>
+                </div>
+            </section>
+
+            <!-- Active Pattern Observatory -->
+            <section class="mind-section">
+                <div class="section-consciousness">
+                    <h2 class="section-title">Pattern Observatory</h2>
+                    <div class="neural-counter" id="pattern-counter">0 active</div>
+                </div>
+                <div class="thought-observatory" id="patterns-observatory"></div>
+                <div class="neural-navigation" id="patterns-navigation"></div>
+            </section>
+
+            <!-- Encounter Laboratory (hidden by default) -->
+            <section class="mind-section" id="encounter-laboratory" style="display: none;">
+                <div class="encounter-laboratory">
+                    <div class="laboratory-header">
+                        <h3>Encounter Laboratory</h3>
+                        <div class="laboratory-pattern" id="laboratory-pattern-text"></div>
+                    </div>
+                    
+                    <label style="display: block; margin: 1rem 0 0.5rem; font-weight: 500; color: var(--awareness-teal);">Context of Encounter:</label>
+                    <div class="awareness-grid" id="context-awareness"></div>
+                    
+                    <label style="display: block; margin: 1.5rem 0 0.5rem; font-weight: 500; color: var(--awareness-teal);">Your Emotional Response:</label>
+                    <div class="awareness-grid" id="emotion-awareness"></div>
+                    
+                    <label style="display: block; margin: 1.5rem 0 0.5rem; font-weight: 500; color: var(--observer-gold);">Immediate Observation Notes:</label>
+                    <textarea class="consciousness-textarea" id="observation-notes" placeholder="What did you notice about this encounter? How did it feel to observe it as data rather than being consumed by it?"></textarea>
+                    
+                    <div class="laboratory-actions">
+                        <button class="neural-btn btn-consciousness" id="record-encounter-btn">Record Observation</button>
+                        <button class="neural-btn btn-awareness" id="cancel-laboratory-btn">Cancel</button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Metacognitive Encounter Observatory -->
+            <section class="mind-section">
+                <div class="section-consciousness">
+                    <h2 class="section-title">Metacognitive Observatory</h2>
+                    <div class="neural-counter" id="encounter-counter">0 observations</div>
+                </div>
+                <div class="thought-observatory" id="encounters-observatory"></div>
+                <div class="neural-navigation" id="encounters-navigation"></div>
+            </section>
+
+            <!-- Enhanced Reflection Observatory -->
+            <section class="mind-section">
+                <div class="metacognitive-observatory">
+                    <h2 class="section-title" style="text-align: center; margin-bottom: 1rem;">Daily Reflection Observatory</h2>
+                    <div class="reflection-prompt">
+                        "The space between stimulus and response is where our freedom and power lie. In that space lies our ability to choose our response." — Viktor Frankl
+                    </div>
+                    <textarea class="consciousness-textarea" id="reflection-consciousness" placeholder="What patterns are emerging? How has observing your thoughts changed your relationship with them? What insights have you gained today?"></textarea>
+                    <div class="data-consciousness">
+                        <button class="neural-btn btn-consciousness" id="archive-reflection-btn">Archive Reflection</button>
+                        <button class="neural-btn btn-consciousness" id="export-consciousness-btn">Export Consciousness Data</button>
+                    </div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <label for="import-consciousness" class="neural-btn btn-awareness" style="cursor: pointer;">Import Consciousness Data</label>
+                        <input type="file" id="import-consciousness" accept=".json" style="display: none;">
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Enhanced Consciousness Portal (Info Modal) -->
+    <div class="consciousness-gateway" id="consciousness-gateway">i</div>
+    <div class="consciousness-portal" id="consciousness-portal">
+        <div class="consciousness-chamber">
+            <button class="portal-close" id="portal-close-btn">×</button>
+            <h2 style="margin-bottom: 1.5rem; text-align: center; color: var(--observer-gold);">🧠 Your Journey to Metacognitive Awareness</h2>
+            <p style="margin-bottom: 1rem; line-height: 1.6;">This observatory helps you develop metacognitive awareness by observing your thoughts without being consumed by them.</p>
+            
+            <h3 style="margin: 1.5rem 0 1rem; color: var(--awareness-teal);">How the Observatory Works</h3>
+            <ul style="margin: 0 0 1.5rem 1.5rem; line-height: 1.6;">
+                <li><strong>Initiate Pattern Observation:</strong> Add any recurring thought, feeling, or trigger you want to study.</li>
+                <li><strong>Record Encounters:</strong> When the pattern appears, log it with context and your emotional response in the laboratory.</li>
+                <li><strong>Navigate Consciousness:</strong> Swipe through your patterns to automatically see their related encounters synchronized below.</li>
+                <li><strong>Reflect & Transcend:</strong> Use the reflection observatory to process your insights and growth.</li>
+            </ul>
+            
+            <div style="background: rgba(255, 215, 0, 0.1); padding: 1.5rem; border-radius: 12px; border-left: 4px solid var(--observer-gold); margin: 1.5rem 0; font-style: italic;">
+                <strong>The Metacognitive Shift:</strong><br><br>
+                • <strong>Before:</strong> The thought is an invisible, powerful force that happens <em>to</em> you.<br><br>
+                • <strong>After (with this observatory):</strong> The thought becomes a data point you can observe from a distance. You are no longer <em>in</em> the thought; you are <em>looking at</em> the thought.<br><br>
+                This is the practice of metacognition. The reflection observatory you see is not just a "nice to have"—<strong>it is arguably the most critical feature for transforming this tool from a simple counter into a genuine instrument for self-awareness.</strong> It's the space where insight happens.
+            </div>
+            
+            <p style="margin-top: 1.5rem; font-size: 0.9rem; opacity: 0.8; text-align: center;">All consciousness data is stored <strong>only on your device</strong> in your browser's local storage. Nothing is ever transmitted to external servers.</p>
+        </div>
+    </div>
+
+<script>
+// =================================================================================
+//  MINDSCAPE PATTERN OBSERVATORY - ENHANCED CONSCIOUSNESS ENGINE
+// =================================================================================
+document.addEventListener('DOMContentLoaded', () => {
+
+    // -----------------------------------------------------------------------------
+    //  1. CONSCIOUSNESS STATE & CONSTANTS
+    // -----------------------------------------------------------------------------
+
+    let consciousness = {
+        patterns: [],
+        encounters: [],
+        reflections: [],
+        awareness: {
+            focusedPatternId: null,
+            laboratoryPatternId: null
+        }
+    };
+
+    const CONTEXT_DIMENSIONS = ['Work', 'Home', 'Transit', 'Social', 'Digital', 'Solitude'];
+    const EMOTIONAL_RESPONSES = {
+        'neutral': 'Neutral Observer',
+        'triggered': 'Triggered',
+        'curious': 'Curious Explorer',
+        'resistant': 'Resistant',
+        'observant': 'Mindful Observer'
+    };
+
+    // Enhanced DOM references
+    const neural = {
+        patternInput: document.getElementById('pattern-input'),
+        initiatePatternBtn: document.getElementById('initiate-pattern-btn'),
+        patternsObservatory: document.getElementById('patterns-observatory'),
+        patternsNavigation: document.getElementById('patterns-navigation'),
+        encountersObservatory: document.getElementById('encounters-observatory'),
+        encountersNavigation: document.getElementById('encounters-navigation'),
+        encounterLaboratory: document.getElementById('encounter-laboratory'),
+        laboratoryPatternText: document.getElementById('laboratory-pattern-text'),
+        contextAwareness: document.getElementById('context-awareness'),
+        emotionAwareness: document.getElementById('emotion-awareness'),
+        observationNotes: document.getElementById('observation-notes'),
+        recordEncounterBtn: document.getElementById('record-encounter-btn'),
+        cancelLaboratoryBtn: document.getElementById('cancel-laboratory-btn'),
+        reflectionConsciousness: document.getElementById('reflection-consciousness'),
+        archiveReflectionBtn: document.getElementById('archive-reflection-btn'),
+        exportConsciousnessBtn: document.getElementById('export-consciousness-btn'),
+        importConsciousness: document.getElementById('import-consciousness'),
+        consciousnessGateway: document.getElementById('consciousness-gateway'),
+        consciousnessPortal: document.getElementById('consciousness-portal'),
+        portalCloseBtn: document.getElementById('portal-close-btn'),
+        neuralTime: document.getElementById('neural-time'),
+        patternCounter: document.getElementById('pattern-counter'),
+        encounterCounter: document.getElementById('encounter-counter')
+    };
+
+    // -----------------------------------------------------------------------------
+    //  2. CONSCIOUSNESS ACTIONS
+    // -----------------------------------------------------------------------------
+
+    const mindActions = {
+        initiatePattern(text) {
+            if (!text || text.trim().length === 0) return;
+            consciousness.patterns.push({
+                id: Date.now(),
+                text: text.trim(),
+                initiatedAt: new Date().toISOString(),
+                active: true
+            });
+            neural.patternInput.value = '';
+            saveConsciousnessAndRender();
+        },
+
+        recordEncounter(context, emotion, notes) {
+            if (!consciousness.awareness.laboratoryPatternId || !context || !emotion) {
+                alert('Please select both context and emotional response to complete the observation.');
+                return;
+            }
+            consciousness.encounters.push({
+                id: Date.now(),
+                patternId: consciousness.awareness.laboratoryPatternId,
+                timestamp: new Date().toISOString(),
+                context, emotion, notes: notes.trim()
+            });
+            mindActions.closeLaboratory();
+            saveConsciousnessAndRender();
+        },
+
+        archivePattern(patternId) {
+            const pattern = consciousness.patterns.find(p => p.id === patternId);
+            if (pattern && confirm(`Archive the pattern observation for "${pattern.text}"?`)) {
+                pattern.active = false;
+                saveConsciousnessAndRender();
+            }
+        },
+
+        archiveReflection(text) {
+            if (!text || text.trim().length === 0) {
+                alert('Please write a reflection before archiving your insights.');
+                return;
+            }
+            consciousness.reflections.push({
+                id: Date.now(),
+                text: text.trim(),
+                date: new Date().toISOString().split('T')[0],
+                timestamp: new Date().toISOString()
+            });
+            neural.reflectionConsciousness.value = '';
+            alert('Reflection archived in your consciousness observatory!');
+            saveConsciousnessAndRender();
+        },
+
+        openLaboratory(patternId) {
+            const pattern = consciousness.patterns.find(p => p.id === patternId);
+            if (!pattern) return;
+            consciousness.awareness.laboratoryPatternId = patternId;
+            neural.laboratoryPatternText.textContent = pattern.text;
+            neural.encounterLaboratory.style.display = 'block';
+            neural.encounterLaboratory.scrollIntoView({ behavior: 'smooth' });
+        },
+
+        closeLaboratory() {
+            consciousness.awareness.laboratoryPatternId = null;
+            neural.encounterLaboratory.style.display = 'none';
+            neural.observationNotes.value = '';
+            document.querySelectorAll('.awareness-choice.activated').forEach(el => el.classList.remove('activated'));
+        },
+
+        setFocusedPattern(patternId) {
+            consciousness.awareness.focusedPatternId = patternId;
+            renderConsciousness();
+        },
+
+        exportConsciousness() {
+            const consciousnessData = JSON.stringify(consciousness, null, 2);
+            const dataBlob = new Blob([consciousnessData], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `mindscape-consciousness-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        },
+
+        importConsciousness(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedConsciousness = JSON.parse(e.target.result);
+                    if (confirm('This will merge with your current consciousness data. Continue?')) {
+                        consciousness.patterns = [...consciousness.patterns, ...(importedConsciousness.patterns || [])];
+                        consciousness.encounters = [...consciousness.encounters, ...(importedConsciousness.encounters || [])];
+                        consciousness.reflections = [...consciousness.reflections, ...(importedConsciousness.reflections || [])];
+                        saveConsciousnessAndRender();
+                        alert('Consciousness data successfully integrated!');
+                    }
+                } catch (error) {
+                    alert('Error importing consciousness data. Please verify the file format.');
+                    console.error('Import Error:', error);
+                }
+            };
+            reader.readAsText(file);
+            neural.importConsciousness.value = '';
+        },
+
+        // NEW: Journal Management Functions
+        toggleJournalInterface(encounterId) {
+            const toggle = document.querySelector(`[data-encounter-id="${encounterId}"].journal-toggle`);
+            const content = document.getElementById(`journal-content-${encounterId}`);
+            const textarea = document.getElementById(`journal-textarea-${encounterId}`);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                toggle.classList.remove('expanded');
+                textarea.value = '';
+            } else {
+                // Close any other open journals first
+                document.querySelectorAll('.journal-content.expanded').forEach(el => {
+                    el.classList.remove('expanded');
+                });
+                document.querySelectorAll('.journal-toggle.expanded').forEach(el => {
+                    el.classList.remove('expanded');
+                });
+                
+                content.classList.add('expanded');
+                toggle.classList.add('expanded');
+                textarea.focus();
+            }
+        },
+
+        saveJournalEntry(encounterId) {
+            const textarea = document.getElementById(`journal-textarea-${encounterId}`);
+            const content = textarea.value.trim();
+            
+            if (!content) {
+                alert('Please write a reflection before saving.');
+                return;
+            }
+
+            const encounter = consciousness.encounters.find(e => e.id === encounterId);
+            if (!encounter) return;
+
+            if (!encounter.journalEntries) {
+                encounter.journalEntries = [];
+            }
+
+            encounter.journalEntries.push({
+                id: Date.now(),
+                content: content,
+                timestamp: new Date().toISOString()
+            });
+
+            mindActions.closeJournalInterface(encounterId);
+            saveConsciousnessAndRender();
+        },
+
+        closeJournalInterface(encounterId) {
+            const toggle = document.querySelector(`[data-encounter-id="${encounterId}"].journal-toggle`);
+            const content = document.getElementById(`journal-content-${encounterId}`);
+            const textarea = document.getElementById(`journal-textarea-${encounterId}`);
+            
+            content.classList.remove('expanded');
+            toggle.classList.remove('expanded');
+            textarea.value = '';
+        }
+    };
+
+    // -----------------------------------------------------------------------------
+    //  3. ENHANCED RENDERING ENGINE
+    // -----------------------------------------------------------------------------
+
+    function renderConsciousness() {
+        renderPatternObservatory();
+        renderEncounterObservatory();
+        renderReflectionTimeline();
+        updateConsciousnessCounters();
+    }
+
+    function renderPatternObservatory() {
+        const activePatterns = consciousness.patterns.filter(p => p.active);
+        neural.patternsObservatory.innerHTML = activePatterns.map(pattern => {
+            const encounterCount = consciousness.encounters.filter(e => e.patternId === pattern.id).length;
+            return `
+                <div class="pattern-node ${consciousness.awareness.focusedPatternId === pattern.id ? 'neural-focus' : ''}" data-pattern-id="${pattern.id}">
+                    <div class="pattern-consciousness">
+                        <div class="pattern-thought">${pattern.text}</div>
+                        <div class="pattern-frequency">${encounterCount}</div>
+                    </div>
+                    <div class="pattern-metadata">Observation initiated: ${new Date(pattern.initiatedAt).toLocaleDateString()}</div>
+                    <div class="pattern-actions">
+                        <button class="neural-btn btn-consciousness btn-small js-record-btn">Record Encounter</button>
+                        <button class="neural-btn btn-awareness btn-small js-archive-btn">Archive</button>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="pattern-node"><p style="text-align: center; opacity: 0.7;">Begin by adding a thought pattern to observe above.</p></div>';
+        renderNavigation(neural.patternsNavigation, neural.patternsObservatory);
+    }
+
+    function renderEncounterObservatory() {
+        let encountersToRender = consciousness.encounters.slice(-50).reverse();
+        
+        // Enhanced sorting: prioritize focused pattern encounters
+        if (consciousness.awareness.focusedPatternId) {
+            encountersToRender.sort((a, b) => {
+                if (a.patternId === consciousness.awareness.focusedPatternId && b.patternId !== consciousness.awareness.focusedPatternId) return -1;
+                if (b.patternId === consciousness.awareness.focusedPatternId && a.patternId !== consciousness.awareness.focusedPatternId) return 1;
+                return new Date(b.timestamp) - new Date(a.timestamp);
+            });
+        }
+
+        neural.encountersObservatory.innerHTML = encountersToRender.map(encounter => {
+            const pattern = consciousness.patterns.find(p => p.id === encounter.patternId);
+            const isConnected = consciousness.awareness.focusedPatternId === encounter.patternId;
+            const hasJournal = encounter.journalEntries && encounter.journalEntries.length > 0;
+            
+            return `
+                <div class="encounter-node ${isConnected ? 'pattern-connected' : ''} ${hasJournal ? 'has-journal' : ''}" data-encounter-id="${encounter.id}">
+                    <div class="encounter-consciousness">
+                        <div class="encounter-pattern">${pattern ? pattern.text : 'Archived Pattern'}</div>
+                        <div class="encounter-timestamp">${new Date(encounter.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                    <div class="encounter-awareness">
+                        <div class="neural-tag context-tag">${encounter.context}</div>
+                        <div class="neural-tag emotion-${encounter.emotion}">${EMOTIONAL_RESPONSES[encounter.emotion]}</div>
+                    </div>
+                    ${encounter.notes ? `
+                        <div class="encounter-reflection">${encounter.notes}</div>
+                    ` : ''}
+                    <div class="encounter-insights">
+                        <div class="insight-prompt">Metacognitive Observation:</div>
+                        <div class="insight-text">You stepped back from this thought and observed it as data. This moment of awareness creates space for choice.</div>
+                    </div>
+                    
+                    <!-- Enhanced Journaling Interface -->
+                    <div class="journal-interface">
+                        ${hasJournal ? `
+                            <div class="journal-existing">
+                                <strong>Latest Reflection:</strong><br>
+                                ${encounter.journalEntries[encounter.journalEntries.length - 1].content}
+                                <div class="journal-timestamp">Reflected on ${new Date(encounter.journalEntries[encounter.journalEntries.length - 1].timestamp).toLocaleDateString()}</div>
+                            </div>
+                        ` : ''}
+                        
+                        <button class="journal-toggle" data-encounter-id="${encounter.id}">
+                            <span class="journal-icon">📝</span>
+                            <span class="journal-text">${hasJournal ? 'Add Another Reflection' : 'Add Reflection'}</span>
+                        </button>
+                        
+                        <div class="journal-content" id="journal-content-${encounter.id}">
+                            <div class="journal-prompts">
+                                <div class="journal-prompt">💭 What patterns do I notice looking back at this encounter?</div>
+                                <div class="journal-prompt">🔍 How has my relationship with this thought evolved?</div>
+                                <div class="journal-prompt">⚡ What insights emerged from observing rather than reacting?</div>
+                            </div>
+                            
+                            <textarea class="journal-textarea" id="journal-textarea-${encounter.id}" placeholder="Reflect on this encounter... What did you learn about yourself? How did stepping back from the thought feel? What would you tell someone else experiencing this?"></textarea>
+                            
+                            <div class="journal-actions">
+                                <button class="journal-save" data-encounter-id="${encounter.id}">Save Reflection</button>
+                                <button class="journal-cancel" data-encounter-id="${encounter.id}">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('') || '<div class="encounter-node"><p style="text-align: center; opacity: 0.7;">No encounters recorded yet. When you observe a pattern, record it in the laboratory.</p></div>';
+        
+        renderNavigation(neural.encountersNavigation, neural.encountersObservatory);
+    }
+
+    function renderReflectionTimeline() {
+        const timelineContainer = document.getElementById('timeline-container');
+        if (!timelineContainer) {
+            console.warn('Timeline container not found');
+            return;
+        }
+        
+        const reflections = consciousness.reflections.slice().reverse(); // Most recent first
+        
+        if (reflections.length === 0) {
+            timelineContainer.innerHTML = `
+                <div class="timeline-empty">
+                    <p>Your reflection journey will appear here...</p>
+                    <p>Each insight becomes a precious moment you can revisit.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const statsHtml = `
+            <div class="timeline-stats">
+                ✨ ${reflections.length} reflection${reflections.length === 1 ? '' : 's'} archived in your consciousness journey
+            </div>
+        `;
+
+        const reflectionsHtml = reflections.map(reflection => {
+            const date = new Date(reflection.timestamp || reflection.date);
+            const isToday = date.toDateString() === new Date().toDateString();
+            const isYesterday = date.toDateString() === new Date(Date.now() - 86400000).toDateString();
+            
+            let dateLabel;
+            if (isToday) {
+                dateLabel = 'Today';
+            } else if (isYesterday) {
+                dateLabel = 'Yesterday';
+            } else {
+                dateLabel = date.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+            }
+
+            return `
+                <div class="reflection-entry">
+                    <div class="reflection-header">
+                        <div class="reflection-date">${dateLabel}</div>
+                        <div class="reflection-time">${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+                    </div>
+                    <div class="reflection-content">${reflection.text}</div>
+                    <div class="reflection-insights">
+                        💡 A moment of consciousness expansion — preserved in time
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        timelineContainer.innerHTML = statsHtml + reflectionsHtml;
+    }
+    
+    function renderNavigation(navContainer, scrollContainer) {
+        const nodeCount = scrollContainer.children.length;
+        navContainer.innerHTML = Array.from({ length: nodeCount }, (_, i) => 
+            `<div class="neural-dot" data-index="${i}"></div>`
+        ).join('');
+        updateActiveNavigation(navContainer, scrollContainer);
+    }
+
+    function renderAwarenessGrids() {
+        neural.contextAwareness.innerHTML = CONTEXT_DIMENSIONS.map(opt => 
+            `<div class="awareness-choice" data-type="context" data-value="${opt}">${opt}</div>`
+        ).join('');
+        
+        neural.emotionAwareness.innerHTML = Object.entries(EMOTIONAL_RESPONSES).map(([key, label]) => 
+            `<div class="awareness-choice" data-type="emotion" data-value="${key}">${label}</div>`
+        ).join('');
+    }
+
+    function updateConsciousnessCounters() {
+        const activePatterns = consciousness.patterns.filter(p => p.active).length;
+        const totalEncounters = consciousness.encounters.length;
+        
+        neural.patternCounter.textContent = `${activePatterns} active`;
+        neural.encounterCounter.textContent = `${totalEncounters} observations`;
+    }
+
+    // -----------------------------------------------------------------------------
+    //  4. ENHANCED EVENT CONSCIOUSNESS
+    // -----------------------------------------------------------------------------
+
+    function setupConsciousnessListeners() {
+        // Primary actions
+        neural.initiatePatternBtn.addEventListener('click', () => mindActions.initiatePattern(neural.patternInput.value));
+        neural.patternInput.addEventListener('keypress', (e) => e.key === 'Enter' && mindActions.initiatePattern(neural.patternInput.value));
+
+        // Pattern interaction
+        document.body.addEventListener('click', (e) => {
+            const patternNode = e.target.closest('.pattern-node');
+            if (!patternNode) return;
+            const patternId = Number(patternNode.dataset.patternId);
+            if (e.target.matches('.js-record-btn')) mindActions.openLaboratory(patternId);
+            if (e.target.matches('.js-archive-btn')) mindActions.archivePattern(patternId);
+        });
+        
+        // Laboratory operations
+        neural.recordEncounterBtn.addEventListener('click', () => {
+            const selectedContext = document.querySelector('.awareness-choice[data-type="context"].activated')?.dataset.value;
+            const selectedEmotion = document.querySelector('.awareness-choice[data-type="emotion"].activated')?.dataset.value;
+            mindActions.recordEncounter(selectedContext, selectedEmotion, neural.observationNotes.value);
+        });
+        neural.cancelLaboratoryBtn.addEventListener('click', mindActions.closeLaboratory);
+        
+        // Awareness choice selection
+        document.body.addEventListener('click', (e) => {
+            if (e.target.matches('.awareness-choice')) {
+                const type = e.target.dataset.type;
+                document.querySelectorAll(`.awareness-choice[data-type="${type}"].activated`).forEach(el => el.classList.remove('activated'));
+                e.target.classList.add('activated');
+            }
+        });
+
+        // NEW: Journal Interface Event Listeners
+        document.body.addEventListener('click', (e) => {
+            if (e.target.matches('.journal-toggle') || e.target.closest('.journal-toggle')) {
+                const toggle = e.target.closest('.journal-toggle') || e.target;
+                const encounterId = Number(toggle.dataset.encounterId);
+                mindActions.toggleJournalInterface(encounterId);
+            }
+            
+            if (e.target.matches('.journal-save')) {
+                const encounterId = Number(e.target.dataset.encounterId);
+                mindActions.saveJournalEntry(encounterId);
+            }
+            
+            if (e.target.matches('.journal-cancel')) {
+                const encounterId = Number(e.target.dataset.encounterId);
+                mindActions.closeJournalInterface(encounterId);
+            }
+        });
+        
+        // Reflection & data operations
+        neural.archiveReflectionBtn.addEventListener('click', () => mindActions.archiveReflection(neural.reflectionConsciousness.value));
+        neural.exportConsciousnessBtn.addEventListener('click', mindActions.exportConsciousness);
+        neural.importConsciousness.addEventListener('change', mindActions.importConsciousness);
+
+        // Consciousness portal
+        neural.consciousnessGateway.addEventListener('click', () => neural.consciousnessPortal.classList.add('awakened'));
+        neural.portalCloseBtn.addEventListener('click', () => neural.consciousnessPortal.classList.remove('awakened'));
+        neural.consciousnessPortal.addEventListener('click', (e) => {
+            if (e.target === neural.consciousnessPortal) neural.consciousnessPortal.classList.remove('awakened');
+        });
+        
+        // Enhanced scroll consciousness
+        setupScrollAwareness(neural.patternsObservatory, (index) => {
+            const node = neural.patternsObservatory.children[index];
+            if (node) {
+                const patternId = Number(node.dataset.patternId);
+                mindActions.setFocusedPattern(patternId);
+            }
+            updateActiveNavigation(neural.patternsNavigation, neural.patternsObservatory);
+        });
+        
+        setupScrollAwareness(neural.encountersObservatory, () => 
+            updateActiveNavigation(neural.encountersNavigation, neural.encountersObservatory)
+        );
+    }
+    
+    function setupScrollAwareness(container, callback) {
+        let scrollTimeout;
+        container.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const centerIndex = getCenterNodeIndex(container);
+                if(callback) callback(centerIndex);
+            }, 150);
+        });
+    }
+    
+    function getCenterNodeIndex(container) {
+        let minDistance = Infinity;
+        let centerIndex = 0;
+        const containerCenter = container.getBoundingClientRect().left + container.offsetWidth / 2;
+        Array.from(container.children).forEach((node, index) => {
+            const nodeCenter = node.getBoundingClientRect().left + node.offsetWidth / 2;
+            const distance = Math.abs(containerCenter - nodeCenter);
+            if (distance < minDistance) {
+                minDistance = distance;
+                centerIndex = index;
+            }
+        });
+        return centerIndex;
+    }
+
+    function updateActiveNavigation(navContainer, scrollContainer) {
+        const centerIndex = getCenterNodeIndex(scrollContainer);
+        navContainer.querySelectorAll('.neural-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === centerIndex);
+        });
+    }
+
+    // -----------------------------------------------------------------------------
+    //  5. CONSCIOUSNESS PERSISTENCE & INITIALIZATION
+    // -----------------------------------------------------------------------------
+    
+    function saveConsciousnessAndRender() {
+        localStorage.setItem('mindscape-consciousness', JSON.stringify(consciousness));
+        renderConsciousness();
+    }
+
+    function initializeConsciousness() {
+        // Load consciousness from storage first
+        const savedConsciousness = localStorage.getItem('mindscape-consciousness');
+        if (savedConsciousness) {
+            consciousness = JSON.parse(savedConsciousness);
+            if (!consciousness.awareness) consciousness.awareness = {};
+            consciousness.awareness.focusedPatternId = null;
+            consciousness.awareness.laboratoryPatternId = null;
+        }
+
+        // Initialize components that are available
+        renderAwarenessGrids();
+        setupConsciousnessListeners();
+        renderConsciousness();
+        
+        // Enhanced time consciousness
+        setInterval(() => {
+            const now = new Date();
+            if (neural.neuralTime) {
+                neural.neuralTime.textContent = now.toLocaleString();
+            }
+        }, 1000);
+    }
+
+    // Awaken the consciousness!
+    initializeConsciousness();
+});
+</script>
+</body>
+</html>
