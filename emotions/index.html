@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotional Color Palette Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .style-controls {
+            margin-top: 2rem;
+        }
+
+        .style-controls label {
+            font-size: 1.1rem;
+            margin-right: 1rem;
+            color: white;
+        }
+
+        .style-controls select {
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            border: none;
+            background: white;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        /* Theme Variations */
+        .theme-modern .emotion-card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        .theme-artistic .emotion-card {
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+        }
+
+        .theme-clinical .emotion-card {
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+        }
+
+        .theme-artistic .emotion-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+        }
+
+        .theme-clinical .emotion-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .emotions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .emotion-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .emotion-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .emotion-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--primary-color);
+        }
+
+        .emotion-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-transform: capitalize;
+        }
+
+        .emotion-meaning {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #555;
+        }
+
+        .color-palette {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .color-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 2px solid #eee;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+            border-color: #999;
+        }
+
+        .color-info {
+            display: none;
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .color-swatch:hover .color-info {
+            display: block;
+        }
+
+        .emotion-category {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .emotions-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .emotion-card {
+                padding: 1.5rem;
+            }
+
+            .color-palette {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            .emotion-title {
+                font-size: 1.5rem;
+            }
+
+            .color-swatch {
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        /* Individual emotion color schemes */
+        .ineffable { --primary-color: #4B0082; }
+        .bliss { --primary-color: #CCCCFF; }
+        .serenity { --primary-color: #87CEEB; }
+        .reverence { --primary-color: #800080; }
+        .understanding { --primary-color: #4682B4; }
+        .forgiveness { --primary-color: #98FB98; }
+        .optimism { --primary-color: #FFD700; }
+        .trust { --primary-color: #4169E1; }
+        .affirmation { --primary-color: #00CED1; }
+        .scorn { --primary-color: #8B4513; }
+        .hate { --primary-color: #8B0000; }
+        .craving { --primary-color: #FF4500; }
+        .anxiety { --primary-color: #FFFF00; }
+        .regret { --primary-color: #696969; }
+        .despair { --primary-color: #2F4F4F; }
+        .blame { --primary-color: #DC143C; }
+        .humiliation { --primary-color: #4A4A4A; }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 3rem;
+            opacity: 0.8;
+        }
+
+        /* Interactive Effects */
+        .emotion-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.6);
+            transform: scale(0);
+            animation: ripple-effect 0.6s linear;
+            pointer-events: none;
+            width: 50px;
+            height: 50px;
+            left: 50%;
+            top: 50%;
+            margin-left: -25px;
+            margin-top: -25px;
+        }
+
+        @keyframes ripple-effect {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        .emotion-card.expanded .emotion-meaning {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .emotion-card.expanded {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Emotional Color Palette Guide</h1>
+            <p>Explore the rich spectrum of human emotions through carefully curated color palettes, each designed to capture the essence and psychology of different emotional states.</p>
+            <div class="style-controls">
+                <label for="styleSelector">Choose Your Visual Style:</label>
+                <select id="styleSelector">
+                    <option value="modern">Modern Minimalist</option>
+                    <option value="artistic">Artistic & Expressive</option>
+                    <option value="clinical">Clinical & Educational</option>
+                </select>
+            </div>
+        </header>
+
+        <div class="emotions-grid" id="emotionsGrid">
+            <!-- Cards will be generated by JavaScript -->
+        </div>
+
+        <footer class="footer">
+            <p>Colors have the power to evoke, heal, and transform our emotional experiences.</p>
+        </footer>
+    </div>
+
+    <script>
+        const emotions = [
+            {
+                name: "ineffable",
+                meaning: "Something too profound, beautiful, or transcendent to be expressed in words. The feeling of encountering the divine or experiencing something beyond human comprehension.",
+                colors: ["#4B0082", "#2E1065", "#6B46C1", "#483D8B"],
+                category: "Transcendent"
+            },
+            {
+                name: "bliss",
+                meaning: "Perfect happiness and serene joy. A state of supreme well-being and spiritual contentment that transcends ordinary pleasure.",
+                colors: ["#CCCCFF", "#E6E6FA", "#DDA0DD", "#B19CD9"],
+                category: "Joy"
+            },
+            {
+                name: "serenity",
+                meaning: "Calm peacefulness and mental tranquility. The absence of stress, worry, or disturbance, creating a state of inner harmony.",
+                colors: ["#87CEEB", "#B0E0E6", "#ADD8E6", "#F0F8FF"],
+                category: "Peace"
+            },
+            {
+                name: "reverence",
+                meaning: "Deep respect mixed with wonder and veneration. The feeling of awe toward something considered sacred, sublime, or supremely worthy.",
+                colors: ["#800080", "#9370DB", "#8A2BE2", "#6A5ACD"],
+                category: "Respect"
+            },
+            {
+                name: "understanding",
+                meaning: "Sympathetic awareness and comprehension of others' feelings, situations, or motivations. The ability to perceive meaning and achieve clarity.",
+                colors: ["#4682B4", "#6495ED", "#5F9EA0", "#87CEFA"],
+                category: "Wisdom"
+            },
+            {
+                name: "forgiveness",
+                meaning: "The conscious choice to release resentment and the desire for retribution. A healing process that frees both the forgiver and the forgiven.",
+                colors: ["#98FB98", "#90EE90", "#8FBC8F", "#20B2AA"],
+                category: "Healing"
+            },
+            {
+                name: "optimism",
+                meaning: "Hopeful confidence about the future and the tendency to expect positive outcomes. The belief that good will ultimately prevail.",
+                colors: ["#FFD700", "#FFA500", "#FFFF00", "#F0E68C"],
+                category: "Hope"
+            },
+            {
+                name: "trust",
+                meaning: "Confident reliance on the integrity, ability, or character of someone or something. The foundation of meaningful relationships and security.",
+                colors: ["#4169E1", "#0000CD", "#1E90FF", "#6495ED"],
+                category: "Security"
+            },
+            {
+                name: "affirmation",
+                meaning: "Positive assertion and validation of worth, truth, or existence. The act of confirming and supporting one's own or others' value and potential.",
+                colors: ["#00CED1", "#40E0D0", "#48D1CC", "#00FFFF"],
+                category: "Validation"
+            },
+            {
+                name: "scorn",
+                meaning: "Contemptuous derision and disdain. The feeling of considering someone or something unworthy of respect or attention.",
+                colors: ["#8B4513", "#A0522D", "#CD853F", "#D2691E"],
+                category: "Contempt"
+            },
+            {
+                name: "hate",
+                meaning: "Intense dislike and aversion that may include anger, hostility, and the desire to avoid or harm. The opposite of love and acceptance.",
+                colors: ["#8B0000", "#DC143C", "#B22222", "#800000"],
+                category: "Hostility"
+            },
+            {
+                name: "craving",
+                meaning: "Intense desire and longing for something, often accompanied by physical or emotional discomfort until satisfied. The urgent need for fulfillment.",
+                colors: ["#FF4500", "#FF6347", "#FF7F50", "#FA8072"],
+                category: "Desire"
+            },
+            {
+                name: "anxiety",
+                meaning: "Excessive worry and apprehension about future events or uncertain outcomes. A state of unease that can manifest both mentally and physically.",
+                colors: ["#FFFF00", "#FFFFE0", "#F0E68C", "#BDB76B"],
+                category: "Fear"
+            },
+            {
+                name: "regret",
+                meaning: "Sorrow and disappointment about something that has happened or been done, especially missed opportunities or poor decisions.",
+                colors: ["#696969", "#708090", "#778899", "#2F4F4F"],
+                category: "Sorrow"
+            },
+            {
+                name: "despair",
+                meaning: "Complete loss of hope and the feeling that nothing will improve. A state of utter dejection and discouragement about the future.",
+                colors: ["#2F4F4F", "#000000", "#36454F", "#1C1C1C"],
+                category: "Hopelessness"
+            },
+            {
+                name: "blame",
+                meaning: "The assignment of responsibility for fault or wrongdoing. The act of holding someone accountable, often accompanied by anger or resentment.",
+                colors: ["#DC143C", "#B22222", "#CD5C5C", "#F08080"],
+                category: "Accusation"
+            },
+            {
+                name: "humiliation",
+                meaning: "Deep embarrassment and shame resulting from damaged pride or dignity. The painful feeling of being diminished in the eyes of others.",
+                colors: ["#4A4A4A", "#696969", "#556B2F", "#2F2F2F"],
+                category: "Shame"
+            }
+        ];
+
+        function createEmotionCard(emotion) {
+            const card = document.createElement('div');
+            card.className = `emotion-card ${emotion.name}`;
+            
+            const colorSwatches = emotion.colors.map((color, index) => 
+                `<div class="color-swatch" style="background-color: ${color}">
+                    <div class="color-info">${color}</div>
+                </div>`
+            ).join('');
+
+            card.innerHTML = `
+                <div class="emotion-title">${emotion.name}</div>
+                <div class="emotion-category">${emotion.category}</div>
+                <div class="emotion-meaning">${emotion.meaning}</div>
+                <div class="color-palette">
+                    ${colorSwatches}
+                </div>
+            `;
+
+            return card;
+        }
+
+        function renderEmotions() {
+            const grid = document.getElementById('emotionsGrid');
+            emotions.forEach(emotion => {
+                const card = createEmotionCard(emotion);
+                grid.appendChild(card);
+            });
+        }
+
+        // Add copy to clipboard functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('color-swatch')) {
+                const colorInfo = e.target.querySelector('.color-info');
+                if (colorInfo) {
+                    navigator.clipboard.writeText(colorInfo.textContent).then(() => {
+                        // Brief visual feedback
+                        e.target.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            e.target.style.transform = '';
+                        }, 200);
+                    });
+                }
+            }
+        });
+
+        // Theme switching functionality
+        function switchTheme(theme) {
+            const body = document.body;
+            body.className = `theme-${theme}`;
+            
+            // Store preference
+            localStorage.setItem('preferredTheme', theme);
+        }
+
+        // Emotion card interaction enhancements
+        function addCardInteractions() {
+            const cards = document.querySelectorAll('.emotion-card');
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Toggle expanded state
+                    this.classList.toggle('expanded');
+                    
+                    // Add ripple effect
+                    const ripple = document.createElement('div');
+                    ripple.className = 'ripple';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            renderEmotions();
+            addCardInteractions();
+            
+            // Set up theme selector
+            const selector = document.getElementById('styleSelector');
+            selector.addEventListener('change', function() {
+                switchTheme(this.value);
+            });
+            
+            // Load saved theme preference
+            const savedTheme = localStorage.getItem('preferredTheme') || 'modern';
+            selector.value = savedTheme;
+            switchTheme(savedTheme);
+        });
+    </script>
+</body>
+</html>
