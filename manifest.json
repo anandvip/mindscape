@@ -2,13 +2,13 @@
   "name": "Mindscape - Metacognitive Awareness Tool",
   "short_name": "Mindscape",
   "description": "Transform awareness into wisdom through mindful observation of your thoughts and emotions. Professional metacognitive tool for self-awareness and performance optimization.",
-  "start_url": "/latest/",
+  "start_url": "https://mindscape.vipulanand.in/latest/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#8a2be2",
   "background_color": "#1a1a2e",
   "lang": "en-US",
-  "scope": "/latest/",
+  "scope": "https://mindscape.vipulanand.in/latest/",
   "categories": ["health", "productivity", "lifestyle", "wellness"],
   "screenshots": [
     {
