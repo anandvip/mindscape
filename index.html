@@ -70,15 +70,22 @@
     <style>
         /*
         ===============================================================================
-        MINDSCAPE v3.0 - COMPLETE REWRITE
+        MINDSCAPE v3.2 - EMOJI ENCODING FIX
         ===============================================================================
         Date Created: November 27, 2025
+        Reviewed: November 27, 2025 (v3.2 patch)
         Tool: Claude Opus 4.5
         
         Prompts used:
         1. "the jittering exists and mobile PWA version looks like this attached 
            screenshot... troubleshoot and tell me the reasons and fix this issue"
         2. "rewrite the application from scratch and suggest what can be improved"
+        3. "your rewrite of index.html has missed out the add emotions color palette.why?"
+        4. "on import i used to get named emotions with assigned color but it is not working"
+        5. "why color palette for emotions is not working why can't user use it? 
+           clicking on it doesn't show color selection palette"
+        6. "fix one and break other? i see characters instead of icon i guess 
+           take look at the screenshot from artifact iframe"
         
         Fixes Applied:
         - Removed min() CSS function causing mobile 2-column grid issue
@@ -87,6 +94,13 @@
         - Explicit mobile-first breakpoints
         - CSS containment for performance
         - Specific transition properties instead of 'all'
+        - Fixed userEmotions key for backward compatibility
+        - Fixed import function to read userEmotions from imported data
+        - Fixed emotion tag styling with background color
+        - v3.1: Fixed color picker not opening - event delegation was calling 
+          e.preventDefault() on all clicks inside modal, blocking native inputs
+        - v3.2: Fixed emoji encoding - corrupted UTF-8 sequences (double-encoded)
+          replaced with HTML entities for cross-platform compatibility
         ===============================================================================
         */
 
@@ -574,7 +588,8 @@
         }
 
         .tag--emotion {
-            border: 1px solid currentColor;
+            background: transparent;
+            color: var(--text-primary);
         }
 
         .tag--context {
@@ -920,21 +935,35 @@
     <script>
         /*
         ===============================================================================
-        MINDSCAPE v3.0 - COMPLETE REWRITE
+        MINDSCAPE v3.2 - EMOJI ENCODING FIX
         ===============================================================================
         Date Created: November 27, 2025
+        Reviewed: November 27, 2025 (v3.2 patch)
         Tool: Claude Opus 4.5
         
         Prompts used:
         1. "the jittering exists and mobile PWA version looks like this attached 
            screenshot... troubleshoot and tell me the reasons and fix this issue"
         2. "rewrite the application from scratch and suggest what can be improved"
+        3. "your rewrite of index.html has missed out the add emotions color palette.why?"
+        4. "on import i used to get named emotions with assigned color but it is not working"
+        5. "why color palette for emotions is not working why can't user use it? 
+           clicking on it doesn't show color selection palette"
+        6. "fix one and break other? i see characters instead of icon i guess 
+           take look at the screenshot from artifact iframe"
         
         Fixes Applied:
         - Debounced IntersectionObserver to prevent rapid-fire re-renders
         - Optimized render function to batch DOM updates
         - Event delegation for better performance
         - RequestAnimationFrame for smooth updates
+        - Fixed userEmotions key for backward compatibility with existing data
+        - Fixed import function to read userEmotions (not emotions) from imported JSON
+        - Fixed emotion tag styling with background color transparency
+        - v3.1: Fixed event delegation calling preventDefault() on native input clicks,
+          which blocked the color picker from opening
+        - v3.2: Fixed emoji encoding - corrupted UTF-8 sequences replaced with HTML
+          entities (&#XXXXX;) for reliable cross-platform rendering
         ===============================================================================
         README.md:
         
@@ -944,14 +973,14 @@
         
         Features:
         - Pattern tracking with encounter logging
-        - Emotion palette customization
+        - Emotion palette customization with color picker
         - Context tagging (Work, Home, Commute, Social, Media, Alone)
         - Journal entries for deeper reflection
         - Flagging system for important encounters
         - Analytics dashboard
         - Pattern archive for retired patterns
         - Daily report with intentions
-        - Data export/import
+        - Data export/import (backward compatible)
         
         Privacy: All data stored locally in browser localStorage.
         ===============================================================================
@@ -964,7 +993,7 @@
             // Configuration
             // ================================================================
             const CONFIG = {
-                STORAGE_KEY: 'mindscape-v3',
+                STORAGE_KEY: 'mindscape-co-creator-v2',  // Keep original key for backward compatibility
                 MAX_ENCOUNTERS: 500,
                 MAX_INPUT_LENGTH: 200,
                 CONTEXTS: ['Work', 'Home', 'Commute', 'Social', 'Media', 'Alone'],
@@ -979,7 +1008,7 @@
             let state = {
                 patterns: [],
                 encounters: [],
-                emotions: [
+                userEmotions: [
                     { id: 'default', name: 'Neutral', color: '#808080' }
                 ],
                 reflections: [],
@@ -1096,7 +1125,7 @@
 
                                 state.patterns = mergeUnique(state.patterns, imported.patterns || []);
                                 state.encounters = mergeUnique(state.encounters, imported.encounters || []);
-                                state.emotions = mergeUnique(state.emotions, imported.emotions || []);
+                                state.userEmotions = mergeUnique(state.userEmotions, imported.userEmotions || []);
                                 state.reflections = mergeUnique(state.reflections, imported.reflections || []);
 
                                 storage.save();
@@ -1332,7 +1361,7 @@
                         return false;
                     }
 
-                    const exists = state.emotions.some(e => 
+                    const exists = state.userEmotions.some(e => 
                         e.name.toLowerCase() === sanitized.toLowerCase()
                     );
 
@@ -1341,7 +1370,7 @@
                         return false;
                     }
 
-                    state.emotions.push({
+                    state.userEmotions.push({
                         id: generateId(),
                         name: sanitized,
                         color: color || '#808080'
@@ -1359,7 +1388,7 @@
                         return false;
                     }
 
-                    const idx = state.emotions.findIndex(e => e.id === id);
+                    const idx = state.userEmotions.findIndex(e => e.id === id);
                     if (idx === -1) return false;
 
                     // Reset encounters using this emotion to default
@@ -1367,7 +1396,7 @@
                         if (enc.emotionId === id) enc.emotionId = 'default';
                     });
 
-                    state.emotions.splice(idx, 1);
+                    state.userEmotions.splice(idx, 1);
                     storage.save();
                     render();
                     toast.warning('Emotion deleted');
@@ -1438,7 +1467,7 @@
                     });
 
                     return Object.entries(counts).map(([id, count]) => ({
-                        emotion: state.emotions.find(e => e.id === id),
+                        emotion: state.userEmotions.find(e => e.id === id),
                         count,
                         percentage: state.encounters.length > 0 
                             ? ((count / state.encounters.length) * 100).toFixed(1) 
@@ -1482,10 +1511,10 @@
                                 <div class="section__header">
                                     <h2 class="section__title">Active Patterns</h2>
                                     <div class="section__actions">
-                                        <button class="btn btn--info btn--sm" data-action="show-help">❓ Help</button>
-                                        <button class="btn btn--secondary btn--sm" data-action="show-analytics">📊 Analytics</button>
-                                        <button class="btn btn--secondary btn--sm" data-action="show-archive">📚 Archive</button>
-                                        <button class="btn btn--secondary btn--sm" data-action="show-palette">🎨 Emotions</button>
+                                        <button class="btn btn--info btn--sm" data-action="show-help">&#10068; Help</button>
+                                        <button class="btn btn--secondary btn--sm" data-action="show-analytics">&#128202; Analytics</button>
+                                        <button class="btn btn--secondary btn--sm" data-action="show-archive">&#128218; Archive</button>
+                                        <button class="btn btn--secondary btn--sm" data-action="show-palette">&#127912; Emotions</button>
                                     </div>
                                 </div>
                                 <div class="carousel" id="patterns-carousel"></div>
@@ -1495,9 +1524,9 @@
                                 <div class="section__header">
                                     <h2 class="section__title">Recent Encounters</h2>
                                     <div class="section__actions">
-                                        <button class="btn btn--secondary btn--sm" data-action="show-report">📝 Daily Report</button>
-                                        <button class="btn btn--info btn--sm" data-action="import-data">📥 Import</button>
-                                        <button class="btn btn--info btn--sm" data-action="export-data">💾 Export</button>
+                                        <button class="btn btn--secondary btn--sm" data-action="show-report">&#128221; Daily Report</button>
+                                        <button class="btn btn--info btn--sm" data-action="import-data">&#128229; Import</button>
+                                        <button class="btn btn--info btn--sm" data-action="export-data">&#128190; Export</button>
                                     </div>
                                 </div>
                                 <div class="carousel" id="encounters-carousel"></div>
@@ -1505,7 +1534,7 @@
                         </main>
 
                         <footer class="footer">
-                            <p>© ${new Date().getFullYear()} Mindscape. Built with ♥ in Kurukshetra by VA Graphics</p>
+                            <p>Â© ${new Date().getFullYear()} Mindscape. Built with &#9733; in Kurukshetra by VA Graphics</p>
                         </footer>
                     `;
                 },
@@ -1526,8 +1555,8 @@
                                 <span>Today: ${recentCount}</span>
                             </div>
                             <div class="card__actions">
-                                <button class="btn btn--primary btn--sm" data-action="log-encounter" data-id="${pattern.id}">📝 Log</button>
-                                <button class="btn btn--secondary btn--sm" data-action="review-pattern" data-id="${pattern.id}">⚙️ Review</button>
+                                <button class="btn btn--primary btn--sm" data-action="log-encounter" data-id="${pattern.id}">&#128221; Log</button>
+                                <button class="btn btn--secondary btn--sm" data-action="review-pattern" data-id="${pattern.id}">&#9881; Review</button>
                             </div>
                         </article>
                     `;
@@ -1535,7 +1564,7 @@
 
                 encounterCard(encounter) {
                     const pattern = state.patterns.find(p => p.id === encounter.patternId);
-                    const emotion = state.emotions.find(e => e.id === encounter.emotionId) || state.emotions[0];
+                    const emotion = state.userEmotions.find(e => e.id === encounter.emotionId) || state.userEmotions[0];
                     const isFocusedPattern = pattern?.id === state.ui.focusedPatternId;
 
                     return `
@@ -1546,21 +1575,21 @@
                                 <time class="encounter__time">${formatDate(encounter.timestamp)}</time>
                             </div>
                             <div class="encounter__meta">
-                                <span class="tag tag--emotion" style="color: ${emotion.color}; border-color: ${emotion.color};">${sanitize(emotion.name)}</span>
-                                <span class="tag tag--context">📍 ${sanitize(encounter.context)}</span>
+                                <span class="tag tag--emotion" style="background-color: ${emotion.color}20; border-left: 3px solid ${emotion.color};">${sanitize(emotion.name)}</span>
+                                <span class="tag tag--context">&#128141; ${sanitize(encounter.context)}</span>
                             </div>
                             ${encounter.journal ? `<p class="encounter__journal">${sanitize(encounter.journal.substring(0, 100))}${encounter.journal.length > 100 ? '...' : ''}</p>` : ''}
                             <div class="card__actions">
-                                <button class="btn btn--secondary btn--sm" data-action="open-journal" data-id="${encounter.id}">✍️ Journal</button>
-                                <button class="btn btn--secondary btn--sm" data-action="toggle-flag" data-id="${encounter.id}">${encounter.flagged ? '⭐ Unflag' : '☆ Flag'}</button>
-                                <button class="btn btn--secondary btn--sm" data-action="edit-encounter" data-id="${encounter.id}">✏️ Edit</button>
-                                <button class="btn btn--danger btn--sm" data-action="delete-encounter" data-id="${encounter.id}">🗑️</button>
+                                <button class="btn btn--secondary btn--sm" data-action="open-journal" data-id="${encounter.id}">&#9999; Journal</button>
+                                <button class="btn btn--secondary btn--sm" data-action="toggle-flag" data-id="${encounter.id}">${encounter.flagged ? '&#128681; Unflag' : '&#9733; Flag'}</button>
+                                <button class="btn btn--secondary btn--sm" data-action="edit-encounter" data-id="${encounter.id}">&#9999; Edit</button>
+                                <button class="btn btn--danger btn--sm" data-action="delete-encounter" data-id="${encounter.id}">&#128465;</button>
                             </div>
                         </article>
                     `;
                 },
 
-                emptyState(message, icon = '🌱') {
+                emptyState(message, icon = '&#127793;') {
                     return `
                         <div class="empty-state">
                             <div class="empty-state__icon">${icon}</div>
@@ -1576,13 +1605,13 @@
             const modalTemplates = {
                 help() {
                     return {
-                        title: '🧭 How to Use Mindscape',
+                        title: '&#129517; How to Use Mindscape',
                         content: `
                             <div class="form-section">
-                                <h4 style="margin-bottom: 12px;">🎯 Purpose</h4>
+                                <h4 style="margin-bottom: 12px;">&#127919; Purpose</h4>
                                 <p style="margin-bottom: 16px; color: var(--text-secondary);">Transform awareness into wisdom through mindful observation of your thoughts and emotions.</p>
                                 
-                                <h4 style="margin-bottom: 12px;">🚀 Getting Started</h4>
+                                <h4 style="margin-bottom: 12px;">&#128640; Getting Started</h4>
                                 <ol style="margin: 0 0 16px 20px; color: var(--text-secondary);">
                                     <li>Add patterns you want to observe</li>
                                     <li>Log encounters when patterns appear</li>
@@ -1591,7 +1620,7 @@
                                     <li>Review analytics for insights</li>
                                 </ol>
                                 
-                                <h4 style="margin-bottom: 12px;">💡 Tips</h4>
+                                <h4 style="margin-bottom: 12px;">&#128161; Tips</h4>
                                 <ul style="margin: 0 0 16px 20px; color: var(--text-secondary);">
                                     <li>Log encounters immediately when they happen</li>
                                     <li>Focus on observing, not judging</li>
@@ -1628,7 +1657,7 @@
                                 
                                 <h4 style="margin-bottom: 12px;">Emotional State</h4>
                                 <div class="choice-grid">
-                                    ${state.emotions.map(emo => `
+                                    ${state.userEmotions.map(emo => `
                                         <div class="choice-option ${existingEncounter?.emotionId === emo.id ? 'is-active' : ''}" 
                                              data-action="select-emotion" 
                                              data-value="${emo.id}"
@@ -1655,7 +1684,7 @@
                                 <textarea id="journal-input" class="input input--textarea" 
                                           placeholder="What did you notice? What insights emerged?">${encounter.journal || ''}</textarea>
                                 <button class="btn btn--primary" style="margin-top: 12px;" 
-                                        data-action="save-journal" data-id="${encounter.id}">💾 Save Journal</button>
+                                        data-action="save-journal" data-id="${encounter.id}">&#128190; Save Journal</button>
                             </div>
                         `
                     };
@@ -1676,7 +1705,7 @@
                             <div class="form-section">
                                 <h4 style="margin-bottom: 12px;">Retire Pattern</h4>
                                 <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.875rem;">Mark as resolved or no longer tracked.</p>
-                                <button class="btn btn--warning" data-action="retire-pattern" data-id="${pattern.id}">🏆 Retire Pattern</button>
+                                <button class="btn btn--warning" data-action="retire-pattern" data-id="${pattern.id}">&#127942; Retire Pattern</button>
                             </div>
                         `
                     };
@@ -1688,7 +1717,7 @@
                     const emotionData = analytics.getEmotionBreakdown();
 
                     return {
-                        title: '📊 Analytics',
+                        title: '&#128202; Analytics',
                         content: `
                             <div class="analytics-grid">
                                 <div class="stat-card">
@@ -1741,26 +1770,26 @@
 
                 palette() {
                     return {
-                        title: '🎨 Emotion Palette',
+                        title: '&#127912; Emotion Palette',
                         content: `
                             <div class="form-section" style="margin-bottom: 16px;">
                                 <h4 style="margin-bottom: 12px;">Add New Emotion</h4>
                                 <div style="display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-bottom: 12px;">
                                     <input type="text" id="emotion-name" class="input" placeholder="Emotion name..." maxlength="30">
-                                    <input type="color" id="emotion-color" value="#808080" style="width: 50px; height: 44px; border: none; border-radius: 8px; cursor: pointer;">
+                                    <input type="color" id="emotion-color" value="#888888" style="width: 50px; height: 46px; border: none; border-radius: 4px; cursor: pointer;">
                                 </div>
                                 <button class="btn btn--primary" data-action="add-emotion">Add Emotion</button>
                             </div>
                             
                             <div class="form-section">
                                 <h4 style="margin-bottom: 12px;">Your Emotions</h4>
-                                ${state.emotions.map(emo => `
+                                ${state.userEmotions.map(emo => `
                                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.2); border-radius: 6px; margin-bottom: 8px;">
                                         <div style="display: flex; align-items: center; gap: 8px;">
                                             <div style="width: 16px; height: 16px; background: ${emo.color}; border-radius: 4px;"></div>
                                             <span>${sanitize(emo.name)}</span>
                                         </div>
-                                        ${emo.id !== 'default' ? `<button class="btn btn--danger btn--sm" data-action="delete-emotion" data-id="${emo.id}">✕</button>` : ''}
+                                        ${emo.id !== 'default' ? `<button class="btn btn--danger btn--sm" data-action="delete-emotion" data-id="${emo.id}">&#10005;</button>` : ''}
                                     </div>
                                 `).join('')}
                             </div>
@@ -1771,7 +1800,7 @@
                 archive() {
                     const retired = state.patterns.filter(p => p.status === 'retired');
                     return {
-                        title: '📚 Pattern Archive',
+                        title: '&#128218; Pattern Archive',
                         content: `
                             <div class="form-section">
                                 <p style="color: var(--text-secondary); margin-bottom: 16px;">Patterns you've resolved. A testament to your growth.</p>
@@ -1784,9 +1813,9 @@
                                         <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px;">
                                             Retired: ${p.retiredAt ? formatDate(p.retiredAt) : 'Unknown'}
                                         </div>
-                                        <button class="btn btn--secondary btn--sm" data-action="reactivate-pattern" data-id="${p.id}">🔄 Reactivate</button>
+                                        <button class="btn btn--secondary btn--sm" data-action="reactivate-pattern" data-id="${p.id}">&#128196; Reactivate</button>
                                     </div>
-                                `).join('') : templates.emptyState('No retired patterns yet.', '🌱')}
+                                `).join('') : templates.emptyState('No retired patterns yet.', '&#127793;')}
                             </div>
                         `
                     };
@@ -1799,7 +1828,7 @@
                     const intentions = state.reflections.filter(r => r.type === 'intention').slice(-5).reverse();
 
                     return {
-                        title: '📝 Daily Report',
+                        title: '&#128221; Daily Report',
                         content: `
                             <div class="analytics-grid" style="margin-bottom: 16px;">
                                 <div class="stat-card">
@@ -1814,7 +1843,7 @@
                             
                             ${flagged.length > 0 ? `
                                 <div class="form-section" style="margin-bottom: 16px;">
-                                    <h4 style="margin-bottom: 12px;">⭐ Flagged for Review</h4>
+                                    <h4 style="margin-bottom: 12px;">&#128681; Flagged for Review</h4>
                                     ${flagged.slice(0, 5).map(enc => {
                                         const pattern = state.patterns.find(p => p.id === enc.patternId);
                                         return `
@@ -1829,7 +1858,7 @@
                             
                             ${intentions.length > 0 ? `
                                 <div class="form-section" style="margin-bottom: 16px;">
-                                    <h4 style="margin-bottom: 12px;">🎯 Recent Intentions</h4>
+                                    <h4 style="margin-bottom: 12px;">&#127919; Recent Intentions</h4>
                                     ${intentions.map(int => `
                                         <div style="padding: 10px; background: rgba(138, 43, 226, 0.1); border-left: 3px solid var(--thought-purple); border-radius: 6px; margin-bottom: 8px;">
                                             <div style="font-size: 0.9rem;">"${sanitize(int.text)}"</div>
@@ -1842,7 +1871,7 @@
                             <div class="form-section">
                                 <h4 style="margin-bottom: 12px;">Set New Intention</h4>
                                 <textarea id="intention-input" class="input input--textarea" placeholder="What would you like to focus on?"></textarea>
-                                <button class="btn btn--primary" style="margin-top: 12px;" data-action="save-intention">💫 Log Intention</button>
+                                <button class="btn btn--primary" style="margin-top: 12px;" data-action="save-intention">&#128171; Log Intention</button>
                             </div>
                         `
                     };
@@ -1850,13 +1879,13 @@
 
                 confirmDelete(type, id, message) {
                     return {
-                        title: `🗑️ Delete ${type}`,
+                        title: `&#128465; Delete ${type}`,
                         content: `
                             <div class="form-section">
                                 <p style="margin-bottom: 16px;">${message}</p>
                                 <div style="display: flex; gap: 12px; justify-content: flex-end;">
                                     <button class="btn btn--secondary" data-action="close-modal">Cancel</button>
-                                    <button class="btn btn--danger" data-action="confirm-delete-${type.toLowerCase()}" data-id="${id}">🗑️ Delete</button>
+                                    <button class="btn btn--danger" data-action="confirm-delete-${type.toLowerCase()}" data-id="${id}">&#128465; Delete</button>
                                 </div>
                             </div>
                         `
@@ -1871,7 +1900,7 @@
                 const active = state.patterns.filter(p => p.status === 'active');
                 
                 if (active.length === 0) {
-                    return templates.emptyState('Add a recurring thought above to begin your journey of self-awareness.', '🧠');
+                    return templates.emptyState('Add a recurring thought above to begin your journey of self-awareness.', '&#129504;');
                 }
 
                 return active.map(p => templates.patternCard(p, p.id === state.ui.focusedPatternId)).join('');
@@ -1890,7 +1919,7 @@
                 }
 
                 if (encounters.length === 0) {
-                    return templates.emptyState('Log an encounter to see it here.', '✨');
+                    return templates.emptyState('Log an encounter to see it here.', '&#10024;');
                 }
 
                 return encounters.slice(0, 50).map(e => templates.encounterCard(e)).join('');
@@ -2067,7 +2096,7 @@
                 },
 
                 'delete-emotion': (e) => {
-                    const emotion = state.emotions.find(emo => emo.id === e.target.dataset.id);
+                    const emotion = state.userEmotions.find(emo => emo.id === e.target.dataset.id);
                     modal.open(modalTemplates.confirmDelete(
                         'Emotion',
                         e.target.dataset.id,
@@ -2108,6 +2137,10 @@
             const setupEventListeners = () => {
                 // Delegated click handler
                 document.body.addEventListener('click', (e) => {
+                    // Don't intercept native form inputs (color picker, file input, etc.)
+                    const clickedInput = e.target.closest('input, select, textarea');
+                    if (clickedInput && !clickedInput.dataset.action) return;
+                    
                     const target = e.target.closest('[data-action]');
                     if (target && handlers[target.dataset.action]) {
                         e.preventDefault();
@@ -2215,7 +2248,7 @@
                     setTimeout(() => toast.info('Welcome to Mindscape! Add a pattern to begin.'), 1000);
                 }
 
-                console.log('🧠 Mindscape v3.0 initialized');
+                console.log('&#129504; Mindscape v3.0 initialized');
             };
 
             // Cleanup on unload
